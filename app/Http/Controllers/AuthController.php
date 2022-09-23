@@ -36,6 +36,7 @@ class AuthController extends Controller
     }
 
     public function login(Request $request){
+        // phpinfo();
 
         $this->validate($request, [
             'password' => 'required|max:20',
@@ -45,7 +46,9 @@ class AuthController extends Controller
         if ($request->isJson()) {
           try{
             
-            $client = Client::select($this->campos)->where('client_id',$request->email)->first();
+             $client = Client::select($this->campos)->where('client_id',$request->email)->first();
+
+             return response()->json(['status'=>true,'client'=> $client],200);
 
             if ($client) {
 
