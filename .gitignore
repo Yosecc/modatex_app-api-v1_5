@@ -4,3 +4,4 @@ Homestead.json
 Homestead.yaml
 .env
 .phpunit.result.cache
+Modatex_App_Api.pem
