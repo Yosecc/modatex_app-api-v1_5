@@ -79,8 +79,10 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
     //
     $router->group(['prefix' => 'ventas'], function () use ($router) {
         $router->get('/','VentasController@index');
-        
     });
     
+    $router->group(['prefix' => 'profile'], function () use ($router) {
+        $router->get('direcciones','AddressController@index');
+    });
 });
 

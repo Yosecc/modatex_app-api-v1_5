@@ -28,7 +28,7 @@ class AuthController extends Controller
     use HelpersTraits;
 
     public $campos;
-    private $url = '';
+    private $url = 'https://www.modatex.com.ar/ntadministrator/router/Router.php/user';
     
 
     public function __construct(){
@@ -59,9 +59,13 @@ class AuthController extends Controller
               ];
 
               $login = $this->sendLoginRosa($payload);
+              // dd($login);
+              if(!$login){
+                return response()->json(['status'=>false,'message'=>'Ha ocurrido un error. Verifique e intente nuevamente'],401);
+              }
 
-              if ($login->status != 200) {
-                return response()->json(['status'=>false,'message'=>'Contraseña incorrecta'],401);
+              if ($login->stat_cd != 1000) {
+                return response()->json(['status'=>false,'message'=>'Usuario inactivo'],401);
               }
 
               $client = Client::select($this->campos)
@@ -91,14 +95,18 @@ class AuthController extends Controller
 
         $jwt = JWT::encode($payload, env('KEY_JWT'), 'HS256');
 
-        $response = Http::asForm()->post($this->url, [
-            'jwt' => $jwt,
+       $response = Http::
+        asForm()
+        ->post($this->url, [
+            'data' => $jwt,
+           'action' => 'login'
+            
         ]);
 
-        $token = $response->collect()->all()['token'];
+        $token = str_replace("\n", "",$response->body());
 
         $decode = JWT::decode($token, new Key(env('KEY_JWT'), 'HS256'));
-
+            
         return $decode;
 
       } catch (\Exception $e) {
