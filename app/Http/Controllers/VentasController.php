@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\BillingInfo;
+use App\Models\ClientLocal;
 use App\Models\ProductsDetail;
 use App\Models\Store;
 use App\Models\Ventas;
@@ -16,6 +17,8 @@ class VentasController extends Controller
 
     public function index()
     {
+
+    
         // ProductsDetail::where('MODA_NUM',1001072796)->get()->dd();
         // DB::table('MODELO_DETALE')->where('MODA_NUM',1001072796)->get()->dd();
         // dd(BillingInfo::where('CLIENT_NUM',1026071)->get());
