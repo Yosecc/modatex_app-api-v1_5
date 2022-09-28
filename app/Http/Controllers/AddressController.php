@@ -23,11 +23,13 @@ class AddressController extends Controller
     public function getData($data)
     {
         return [
-            'direccion'    => $data['CALLE_NAME'].' '.$data['CALLE_NUM'].' '.$data['LOCALIDAD'].' '.$data['STAT_STR'],
-            'zip'          => $data['ADDRESS_ZIP'],
+
+            'direccion'    => $data['CALLE_NAME'].' '.$data['CALLE_NUM'].', '.$data['STAT_STR'],
+            'localidad'    => $data['LOCALIDAD'],
+            'codigo_postal'          => $data['ADDRESS_ZIP'],
             'name'         => $data['ADDRESS_NAME'],
             'id'           => $data['NUM'],
-            'seleccionado' => $data['STAT_CD'] == 2000 ? true:false,
+            'default' => $data['STAT_CD'] == 2000 ? true:false,
             'detalle'      => $data
             // [
             //     'calle' => $data['CALLE_NAME'],
