@@ -42,10 +42,11 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
 
     $router->get('home','HomeController@index');
     $router->get('get_product_category/{category_id}','HomeController@get_product_category');
-
+    
+     $router->get('store/get_categories','StoresController@getCategoriesStore'); 
     $router->get('store/{store}','StoresController@getStore');
     $router->get('stores','StoresController@getStores'); 
-    $router->get('store/get_categories','StoresController@getCategoriesStore'); 
+    
 
 
     $router->get('product/{product}','ProductsController@getProduct');
@@ -82,7 +83,10 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
     });
     
     $router->group(['prefix' => 'profile'], function () use ($router) {
-        $router->get('direcciones','AddressController@index');
+        $router->group(['prefix' => 'direcciones'], function () use ($router) {
+            $router->get('/','AddressController@index');
+            $router->post('update/{adress}','AddressController@update');
+        });
     });
 });
 
