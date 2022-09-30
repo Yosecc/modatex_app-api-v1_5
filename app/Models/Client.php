@@ -13,7 +13,7 @@ class Client extends Model
 
     protected $primaryKey   = 'num';
 
-    protected $hidden       = ['password','client_pwd','code_confirm'];
+    protected $hidden       = ['password','client_pwd','code_confirm','api_token'];
 
     const CREATED_AT        = 'insert_date';
 
