@@ -23,8 +23,10 @@ class AddressController extends Controller
 
     public function update($adress, Request $request)
     {
+        $id = $adress;
         $adress = ClientLocal::find($adress);
 
+        
         if(!$adress){
             return response()->json(['status'=> false, 'message'=> 'Adress not found'], 401);
         }
@@ -40,8 +42,9 @@ class AddressController extends Controller
         //     'COMMENTS'      => '',
         // ]);
 
-        $adress->update($request->all());
-        
+        $adress = ClientLocal::where('NUM', $id)->update($request->all());
+        // $adress = ClientLocal::find($adress);
+        // dd($adress);
         // $adress->COUNTRY_NUM   = $request->COUNTRY_NUM;   
         // $adress->STAT_NUM      = $request->STAT_NUM;      
         // $adress->STAT_STR      = $request->STAT_STR;      
