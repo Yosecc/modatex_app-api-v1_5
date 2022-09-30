@@ -42,8 +42,11 @@ class AddressController extends Controller
         //     'COMMENTS'      => '',
         // ]);
 
+
         $adress = ClientLocal::where('NUM', $id)->update($request->all());
-        // $adress = ClientLocal::find($adress);
+        $adress = ClientLocal::find($id);
+        // dd($adress);
+        // 
         // dd($adress);
         // $adress->COUNTRY_NUM   = $request->COUNTRY_NUM;   
         // $adress->STAT_NUM      = $request->STAT_NUM;      
