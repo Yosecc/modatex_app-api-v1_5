@@ -87,6 +87,9 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
             $router->get('/','AddressController@index');
             $router->post('update/{adress}','AddressController@update');
         });
+        $router->group(['prefix' => 'coupons'], function () use ($router) {
+             $router->get('/','CouponsController@index');
+        });
     });
 });
 
