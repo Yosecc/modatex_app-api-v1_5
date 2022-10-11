@@ -94,31 +94,31 @@ class AuthController extends Controller
       try {
 
         $jwt = JWT::encode($payload, env('KEY_JWT'), 'HS256');
-
-       $response = Http::
-        asForm()
-        ->post($this->url, [
-            'data' => $jwt,
-           'action' => 'login'
-            
-        ]);
+        \Log::info('===========PETICION============');
+        $response = Http::asForm()
+            ->post($this->url, [
+                'data' => $jwt,
+                'action' => 'login'
+            ]);
 
         $token = str_replace("\n", "",$response->body());
-        \Log::info('===========TOKEN SICILITUD============');
+        \Log::info('===========TOKEN============');
         \Log::info($token);
+        $decode = false;
         try {
-          $decode = JWT::decode($token, new Key(env('KEY_JWT'), 'HS256'));  
-           return $decode;
+            $decode = JWT::decode($token, new Key(env('KEY_JWT'), 'HS256'));  
         } catch (\Exception $e) {
             \Log::info($e->getMessage());
-            return false;
+            $decode = false;
         }
-        \Log::info('===========FIN TOKEN============');
-       
-
+        return $decode;
+        \Log::info('===========/TOKEN============');
       } catch (\Exception $e) {
           \Log::info($e->getMessage());
+          return false;
       }
+
+      \Log::info('===========/PETICION============');
     }
 
     public function register(Request $request){
