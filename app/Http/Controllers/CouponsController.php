@@ -4,13 +4,14 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Coupons;
+use Auth;
 
 class CouponsController extends Controller
 {
     public function index()
     {
         $cupones = Coupons::where(function($query) {
-          $query->where('CLIENT_NUM',1026071)
+          $query->where('CLIENT_NUM',Auth::user()->num)
                 ->whereIn('STAT_CD',[1000,2000]);
         })
         // ->where('COUPON_STR' != 'PROMOEMOTV916')
