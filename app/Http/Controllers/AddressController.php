@@ -4,12 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Models\ClientLocal;
 use Illuminate\Http\Request;
+use Auth;
 
 class AddressController extends Controller
 {
     public function index(Request $request)
     {
-        $d =  ClientLocal::where('CLIENT_NUM', 1026071)->whereIn('STAT_CD',[1000,2000])->get();
+        $d =  ClientLocal::where('CLIENT_NUM', Auth::user()->num)->whereIn('STAT_CD',[1000,2000])->get();
 
         $arreglo = function($data){
             return $this->getData($data);

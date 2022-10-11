@@ -48,7 +48,7 @@ class AuthController extends Controller
             
              $client = Client::select($this->campos)->where('client_id',$request->email)->first();
 
-             return response()->json(['status'=>true,'client'=> $client],200);
+             //return response()->json(['status'=>true,'client'=> $client],200);
 
             if ($client) {
 
@@ -94,24 +94,31 @@ class AuthController extends Controller
       try {
 
         $jwt = JWT::encode($payload, env('KEY_JWT'), 'HS256');
-
-       $response = Http::
-        asForm()
-        ->post($this->url, [
-            'data' => $jwt,
-           'action' => 'login'
-            
-        ]);
+        \Log::info('===========PETICION============');
+        $response = Http::asForm()
+            ->post($this->url, [
+                'data' => $jwt,
+                'action' => 'login'
+            ]);
 
         $token = str_replace("\n", "",$response->body());
-
-        $decode = JWT::decode($token, new Key(env('KEY_JWT'), 'HS256'));
-            
+        \Log::info('===========TOKEN============');
+        \Log::info($token);
+        $decode = false;
+        try {
+            $decode = JWT::decode($token, new Key(env('KEY_JWT'), 'HS256'));  
+        } catch (\Exception $e) {
+            \Log::info($e->getMessage());
+            $decode = false;
+        }
         return $decode;
-
+        \Log::info('===========/TOKEN============');
       } catch (\Exception $e) {
           \Log::info($e->getMessage());
+          return false;
       }
+
+      \Log::info('===========/PETICION============');
     }
 
     public function register(Request $request){

@@ -10,6 +10,7 @@ use App\Models\Ventas;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
+use Auth;
 class VentasController extends Controller
 {
 
@@ -18,11 +19,26 @@ class VentasController extends Controller
     public function index()
     {
 
-    
+      // $f = Http::withHeaders([
+      //   'x-api-key' => 'LcaAWMG94LZgcRM6k8VfsHQxBSPcP5PmbrYGRhv7',
+      //   'Cookie' => 'PHPSESSID=9scr813epdsm392jk9k535m9p7'
+      // ])
+      // ->acceptJson()
+      // ->get('https://www.modatex.com.ar/document/calification_ajax.php?ajax=true&page_hidden=1&jsonReturn=1&filter=');
+      // dd($f->json());
+      // dd($f->cookies());
+      // $g = Http::withHeaders([
+      //   'x-api-key' => 'LcaAWMG94LZgcRM6k8VfsHQxBSPcP5PmbrYGRhv7',
+      //   'Cookie' => $f->headers()['Set-Cookie'][0]
+      // ])
+      // ->acceptJson()
+      // ->get('https://www.modatex.com.ar/document/calification_ajax.php?ajax=true&page_hidden=1&jsonReturn=1&filter=');
+
+      // dd($g->json());
         // ProductsDetail::where('MODA_NUM',1001072796)->get()->dd();
         // DB::table('MODELO_DETALE')->where('MODA_NUM',1001072796)->get()->dd();
         // dd(BillingInfo::where('CLIENT_NUM',1026071)->get());
-        $ventas = Ventas::where('CLIENT_NUM',1026071)->latest()->get();
+        $ventas = Ventas::where('CLIENT_NUM',Auth::user()->num)->latest()->get();
 
         $arreglo = function($venta){
 
