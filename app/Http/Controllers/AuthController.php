@@ -48,7 +48,7 @@ class AuthController extends Controller
             
              $client = Client::select($this->campos)->where('client_id',$request->email)->first();
 
-             return response()->json(['status'=>true,'client'=> $client],200);
+             //return response()->json(['status'=>true,'client'=> $client],200);
 
             if ($client) {
 
@@ -104,10 +104,17 @@ class AuthController extends Controller
         ]);
 
         $token = str_replace("\n", "",$response->body());
-
-        $decode = JWT::decode($token, new Key(env('KEY_JWT'), 'HS256'));
-            
-        return $decode;
+        \Log::info('===========TOKEN SICILITUD============');
+        \Log::info($token);
+        try {
+          $decode = JWT::decode($token, new Key(env('KEY_JWT'), 'HS256'));  
+           return $decode;
+        } catch (\Exception $e) {
+            \Log::info($e->getMessage());
+            return false;
+        }
+        \Log::info('===========FIN TOKEN============');
+       
 
       } catch (\Exception $e) {
           \Log::info($e->getMessage());
