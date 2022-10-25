@@ -4,13 +4,20 @@ namespace App\Http\Controllers;
 
 use App\Models\ClientLocal;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 use Auth;
 
 class AddressController extends Controller
 {
+
+    private $url = 'https://www.modatex.com.ar?c=Checkout::';
+
+    private $token;
+
     public function index(Request $request)
     {
         $d =  ClientLocal::where('CLIENT_NUM', Auth::user()->num)->whereIn('STAT_CD',[1000,2000])->get();
+        $this->token = Auth::user()->api_token;
 
         $arreglo = function($data){
             return $this->getData($data);
@@ -97,17 +104,36 @@ class AddressController extends Controller
             'name'         => $data['ADDRESS_NAME'],
             'id'           => $data['NUM'],
             'default' => $data['STAT_CD'] == 2000 ? true:false,
-            'detalle'      => $data
-            // [
-            //     'calle' => $data['CALLE_NAME'],
-            //     'altura' =>  $data['CALLE_NUM'],
-            //     'localidad' => $data['LOCALIDAD'],
-            //     'piso' => $data['CALLE_PISO'],
-            //     'zip' =>  $data['ADDRESS_ZIP']
-            //     'name' =>  $data['ADDRESS_NAME']
-            //     'id' => $data['NUM']
-            //     'stat_cd' => $data['STAT_CD']
-            // ]
+            'detalle'      => $data,
+            'provincias' => $this->getProvincias(),
+            'locaciones' => $this->getLocacionesBGA()
+
         ];
+    }
+
+    public function getProvincias()
+    {
+        $response = Http::withHeaders([
+            'x-api-key' => $this->token,
+            'Content-Type' => 'application/json'
+        ])
+        ->get($this->url.'states');
+
+        $data = $response->json();
+
+        return $data['data'];
+    }
+
+    public function getLocacionesBGA()
+    {
+        $response = Http::withHeaders([
+            'x-api-key' => $this->token,
+            'Content-Type' => 'application/json'
+        ])
+        ->get($this->url.'locations_gba');
+
+        $data = $response->json();
+
+        return $data['data'];
     }
 }
