@@ -58,7 +58,8 @@ class AuthController extends Controller
                 'action' => 'login'
               ];
 
-              $login = $this->sendLoginRosa($payload);
+              // $login = $this->sendLoginRosa($payload);
+              $login = $this->ApiRosa($payload, 'login');
               // dd($login);
               if(!$login){
                 return response()->json(['status'=>false,'message'=>'Ha ocurrido un error. Verifique e intente nuevamente'],401);
@@ -89,37 +90,41 @@ class AuthController extends Controller
         return response()->json(['message'=>'Unauthorized'],401);
     }
 
-    public function sendLoginRosa($payload)
+
+    private function ApiRosa($payload, $action, $isdecode = true)
     {
-      try {
-
-        $jwt = JWT::encode($payload, env('KEY_JWT'), 'HS256');
-        \Log::info('===========PETICION============');
-        $response = Http::asForm()
-            ->post($this->url, [
-                'data' => $jwt,
-                'action' => 'login'
-            ]);
-
-        $token = str_replace("\n", "",$response->body());
-        \Log::info('===========TOKEN============');
-        \Log::info($token);
-        $decode = false;
         try {
-            $decode = JWT::decode($token, new Key(env('KEY_JWT'), 'HS256'));  
+
+            $jwt = JWT::encode($payload, env('KEY_JWT'), 'HS256');
+            
+            $response = Http::asForm()
+                ->post($this->url, [
+                    'data' => $jwt,
+                    'action' => $action
+                ]);
+            $token = str_replace("\n", "",$response->body());
+            $decode = false;
+            
+            try {
+              if($isdecode){
+                $decode = JWT::decode($token, new Key(env('KEY_JWT'), 'HS256'));
+                // dd($decode);  
+              }else{
+                $decode = $token;
+              }
+            } catch (\Exception $e) {
+                \Log::info($e->getMessage());
+                $decode = false;
+            }
+
+            return $decode;
+
         } catch (\Exception $e) {
             \Log::info($e->getMessage());
-            $decode = false;
+            return false;
         }
-        return $decode;
-        \Log::info('===========/TOKEN============');
-      } catch (\Exception $e) {
-          \Log::info($e->getMessage());
-          return false;
-      }
-
-      \Log::info('===========/PETICION============');
     }
+
 
     public function register(Request $request){
 
@@ -133,32 +138,19 @@ class AuthController extends Controller
             'password'   => 'required|max:20'
         ]);
 
-        if ($request->isJson()) {
+        $payload = [
+            "name"     => $request->first_name,
+            "lastname" => $request->last_name,
+            "email"    => $request->email,
+            "password" => $request->password,
+            "codarea"  => $request->cod_area,
+            "mobile"   => $request->phone
+        ];
 
-            $code = $this->generateCode();
 
-            $client               = new Client();
-            $client->client_id    = $request->email;
-            $client->email        = $request->email;
-            $client->client_pwd   = password_hash($request->password, PASSWORD_DEFAULT,['cost'=> 11]);;
-            $client->member_type  = 'E' ;
-            $client->sex          = null;
-            $client->first_name   = $request->last_name;
-            $client->last_name    = $request->first_name;
-            $client->mobile       = $request->phone;
-            $client->mobile_area  = $request->cod_area;
-            $client->code_confirm = $code;
-            $client->verification = md5($request->email.time());
-            $client->verification_status = 0;
-            $client->save();
+        $register = $this->ApiRosa($payload, 'newuser', false);
 
-            if ($client) {
-                Mail::to($client->email)->send(new CodeConfirmation($client));
-                return response()->json(['status'=>true, 'client'=>$client],201);
-            }
-        }
-        
-        return response()->json(['status'=>false, 'message'=>'Ha ocurrido un errror'],422);
+        return response()->json(['status'=>true, 'message'=>'Registro realizado.'],422);
     }
 
     public function code_validation(Request $request){
@@ -167,19 +159,10 @@ class AuthController extends Controller
             'email'  => 'required|email',
         ]);
         $client = Client::where('client_id',$request->email)->first();
-        if ($client->code_confirm == $request->code) {
+        if ($client && $client->code_confirm == $request->code) {
             $client->verification_status = 1;
-            $client->api_token           = Str::random(40);
             $client->save();
-
-            $cupons_defintion = [
-                'count' => 2,
-                'monto' => 250
-            ];
-            
-            $coupons = $this->createCoupon($client, $cupons_defintion);
-
-            return response()->json(['status'=> true,'token'=> $client->api_token, 'coupons' => $coupons]);
+            return response()->json(['status'=> true,'token'=> $client->api_token]);
         }else{
             return response()->json(['status'=> false,'message'=>'C&oacutedigo incorrecto, intente nuevamente'],422);
         }
@@ -202,15 +185,54 @@ class AuthController extends Controller
         }
     }
 
-    public function recover_password($email){
-        if (!$email) {
-            return response()->json(['email'=>['Email is required']],422);
-        }
-        if ($this->isEmail($email)) {
-            $client = Client::where('client_id', $email)->first();
+    public function recover_password(Request $request){
 
-            Mail::to($client->email)->send(new RecoverPassword($client));
-            return response()->json(['status'=> true, 'message'=>'Se ha enviado su contrasena a su cuenta de email, porfavor verifique su bandeja de entrada']);
+      $this->validate($request, [
+            'newpass'   => 'required',
+            'email'  => 'required|email',
+        ]);
+
+        if ($this->isEmail($request->email)) {
+            $client = Client::where('client_id', $request->email)->first();
+
+            if($client){
+              $response = $this->ApiRosa(['client_num' => $client->num, 'newpass'=> $request->newpass ], 'recoverypass');
+
+              if($response->status == 200){
+                return response()->json(['status'=> true,'message'=> 'Contrasena cambiada con exito']);
+              }
+            }else{
+              return response()->json(['status'=>false,'message'=>'Email no se encuentra registrado'],422);  
+            }
+
+        }else{
+            return response()->json(['status'=>false,'message'=>'Email no se encuentra registrado'],422);
+        }
+    }
+
+    public function change_password(Request $request)
+    {
+        $this->validate($request, [
+            'oldpass'   => 'required',
+            'newpass'   => 'required',
+            'email'  => 'required|email',
+        ]);
+
+        if ($this->isEmail($request->email)) {
+            $client = Client::where('client_id', $request->email)->first();
+
+            if($client){
+              $response = $this->ApiRosa([
+                'client_num' => $client->num, 
+                'newpass'=> $request->newpass,
+                'oldpass'=> $request->oldpass ], 'changepass');
+
+              if($response->status == 200){
+                return response()->json(['status'=> true,'message'=> 'Contrasena cambiada con exito']);
+              }
+            }else{
+              return response()->json(['status'=>false,'message'=>'Email no se encuentra registrado'],422);  
+            }
 
         }else{
             return response()->json(['status'=>false,'message'=>'Email no se encuentra registrado'],422);

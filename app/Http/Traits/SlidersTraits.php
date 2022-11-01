@@ -12,6 +12,7 @@ trait SlidersTraits {
 
   public function sliderCollection($slider)
   {
+    // dd($slider);
     return collect([
       'url' => $slider['url'],
       'img' => $this->image($slider['img_path']),
