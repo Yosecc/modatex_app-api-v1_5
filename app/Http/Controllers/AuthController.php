@@ -150,7 +150,12 @@ class AuthController extends Controller
 
         $register = $this->ApiRosa($payload, 'newuser', false);
 
-        return response()->json(['status'=>true, 'message'=>'Registro realizado.']);
+        if(json_decode($register)->status == 200){
+          $client = Client::where('client_id',$request->email)->first();
+          return response()->json(['status'=>true, 'message'=>'Registro realizado.','client'=>$client]);
+        }
+
+        return response()->json(['message'=>'Error'],422);
     }
 
     public function code_validation(Request $request){
