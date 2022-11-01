@@ -29,7 +29,7 @@ class HomeController extends Controller
   public function index(Request $request){
 
     //dd(Cart::where('CLIENT_NUM',Auth::user()->num)->where('STAT_CD',1000)->orderBy('INSERT_DATE','desc')->get());
-//1026071
+    //1026071
     $params = collect($request->all()); 
 
     $stores_favorites     = $this->stores_favorites($params);
