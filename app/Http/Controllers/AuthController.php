@@ -169,7 +169,7 @@ class AuthController extends Controller
             $client->save();
             return response()->json(['status'=> true,'token'=> $client->api_token]);
         }else{
-            return response()->json(['message'=>'C&oacutedigo incorrecto, intente nuevamente'],422);
+            return response()->json(['message'=>'Código incorrecto, intente nuevamente'],422);
         }
     }
 
