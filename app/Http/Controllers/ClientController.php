@@ -12,7 +12,7 @@ class ClientController extends Controller
     public function index(Request $request){
         // dd();
       $client = Client::find(Auth::user()->num);
-      $client = Client::find(1026071);
+      // $client = Client::find(1026071);
       
 
       return response()->json($client);
