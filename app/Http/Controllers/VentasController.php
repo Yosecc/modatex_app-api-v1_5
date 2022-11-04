@@ -39,9 +39,9 @@ class VentasController extends Controller
         // DB::table('MODELO_DETALE')->where('MODA_NUM',1001072796)->get()->dd();
         // dd(BillingInfo::where('CLIENT_NUM',1026071)->get());
         $ventas = Ventas::where('CLIENT_NUM',Auth::user()->num)->latest()->paginate(6);
-//dd($ventas);
+        //dd($ventas);
         $arreglo = function($venta){
-// dd($venta);
+        //dd($venta);
             $venta['delivery_price'] = $this->getDeliveryPrice($venta);
             $venta['store'] = Store::GetStoreCD(['group_cd'=>$venta['group_cd'], 'local_cd' => $venta['local_cd']]);
 
@@ -76,9 +76,9 @@ class VentasController extends Controller
 
             return $venta;
         };
-// dd(collect($ventas)->all());
+        //dd(collect($ventas)->all());
         $ventas = array_map($arreglo, collect($ventas)->all()['data']);
-// dd($ventas);
+        //dd($ventas);
         return response()->json($ventas);
     }
 
