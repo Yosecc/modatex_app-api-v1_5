@@ -16,7 +16,7 @@ class AddressController extends Controller
 
     public function index(Request $request)
     {
-        $d =  ClientLocal::where('CLIENT_NUM', Auth::user()->num)->whereIn('STAT_CD',[1000,2000])->get();
+        $d =  ClientLocal::where('CLIENT_NUM', Auth::user()->num)->whereIn('STAT_CD',[1000,2000])->orderBy('NUM', 'desc')->get();
         $this->token = Auth::user()->api_token;
 
         $arreglo = function($data){
@@ -63,6 +63,16 @@ class AddressController extends Controller
         $adress->save();
 
         return response()->json($this->getData($adress));
+    }
+
+    public function changePrincipalAddress(Request $request)
+    {
+        ClientLocal::where('CLIENT_NUM', Auth::user()->num)->whereIn('STAT_CD',[2000])->update(['STAT_CD' => 1000]);
+
+        ClientLocal::where('CLIENT_NUM', Auth::user()->num)->where('NUM',$reques->id)->update(['STAT_CD' => 2000]);
+
+        return response()->json(['message'=>'Direccion actualizada']);
+
     }
 
     public function getData($data)
