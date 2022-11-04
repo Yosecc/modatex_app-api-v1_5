@@ -69,7 +69,7 @@ class AddressController extends Controller
     {
         ClientLocal::where('CLIENT_NUM', Auth::user()->num)->whereIn('STAT_CD',[2000])->update(['STAT_CD' => 1000]);
 
-        ClientLocal::where('CLIENT_NUM', Auth::user()->num)->where('NUM',$reques->id)->update(['STAT_CD' => 2000]);
+        ClientLocal::where('CLIENT_NUM', Auth::user()->num)->where('NUM',$request->id)->update(['STAT_CD' => 2000]);
 
         return response()->json(['message'=>'Direccion actualizada']);
 
