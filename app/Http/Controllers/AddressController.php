@@ -34,41 +34,12 @@ class AddressController extends Controller
         $id = $adress;
         $adress = ClientLocal::find($adress);
 
-        
         if(!$adress){
             return response()->json(['status'=> false, 'message'=> 'Adress not found'], 401);
         }
 
-        // $this->validate($request, [
-        //     'CALLE_NAME'    => '',
-        //     'CALLE_NUM'     => '',
-        //     'CALLE_PISO'    => '',
-        //     'CALLE_DTO'     => '',
-        //     'provincia'     => '',
-        //     'ADDRESS_ZIP'   => '',
-        //     'DELIVERY_HOUR' => '',
-        //     'COMMENTS'      => '',
-        // ]);
-
-
         $adress = ClientLocal::where('NUM', $id)->update($request->all());
         $adress = ClientLocal::find($id);
-        // dd($adress);
-        // 
-        // dd($adress);
-        // $adress->COUNTRY_NUM   = $request->COUNTRY_NUM;   
-        // $adress->STAT_NUM      = $request->STAT_NUM;      
-        // $adress->STAT_STR      = $request->STAT_STR;      
-        // $adress->LOCALIDAD     = $request->LOCALIDAD;     
-        // $adress->CALLE_NAME    = $request->CALLE_NAME;    
-        // $adress->CALLE_NUM     = $request->CALLE_NUM;     
-        // $adress->CALLE_DTO     = $request->CALLE_DTO;     
-        // $adress->CALLE_PISO    = $request->CALLE_PISO;    
-        // $adress->ADDRESS_ZIP   = $request->ADDRESS_ZIP;   
-        // $adress->AREA_CODE     = $request->AREA_CODE;     
-        // $adress->ADDRESS_NAME  = $request->ADDRESS_NAME;  
-        // $adress->COMMENTS      = $request->COMMENTS;      
-        // $adress->save();
 
         return response()->json($this->getData($adress));
     }
@@ -97,7 +68,6 @@ class AddressController extends Controller
     public function getData($data)
     {
         return [
-
             'direccion'    => $data['CALLE_NAME'].' '.$data['CALLE_NUM'].', '.$data['STAT_STR'],
             'localidad'    => $data['LOCALIDAD'],
             'codigo_postal'          => $data['ADDRESS_ZIP'],
@@ -107,7 +77,6 @@ class AddressController extends Controller
             'detalle'      => $data,
             'provincias' => $this->getProvincias(),
             'locaciones' => $this->getLocacionesBGA()
-
         ];
     }
 
@@ -123,7 +92,7 @@ class AddressController extends Controller
 
         // dd($data);
 
-        if(!$data){
+        if(!$data || (isset($data['status']) && $data['status'] == 'error')){
             return null;
         }
 
@@ -140,7 +109,7 @@ class AddressController extends Controller
 
         $data = $response->json();
 
-        if(!$data){
+        if(!$data || (isset($data['status']) && $data['status'] == 'error')){
             return null;
         }
 
