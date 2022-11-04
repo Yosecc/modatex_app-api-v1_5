@@ -121,6 +121,12 @@ class AddressController extends Controller
 
         $data = $response->json();
 
+        // dd($data);
+
+        if(!$data){
+            return null;
+        }
+
         return $data['data'];
     }
 
@@ -133,6 +139,10 @@ class AddressController extends Controller
         ->get($this->url.'locations_gba');
 
         $data = $response->json();
+
+        if(!$data){
+            return null;
+        }
 
         return $data['data'];
     }
