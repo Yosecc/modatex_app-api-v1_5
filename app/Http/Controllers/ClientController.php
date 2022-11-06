@@ -6,9 +6,14 @@ use Illuminate\Http\Request;
 use App\Models\Client;
 use App\Models\Stores;
 use Auth;
+use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
+use Illuminate\Support\Facades\Http;
 
 class ClientController extends Controller
 {
+    private $url = 'https://www.modatex.com.ar/ntadministrator/router/Router.php/user';
+
     public function index(Request $request){
         // dd();
       $client = Client::find(Auth::user()->num);
@@ -21,7 +26,7 @@ class ClientController extends Controller
     private function ApiRosa($payload, $action, $isdecode = true)
     {
         try {
-
+// dd($payload);
             $jwt = JWT::encode($payload, env('KEY_JWT'), 'HS256');
             
             $response = Http::asForm()
@@ -29,6 +34,7 @@ class ClientController extends Controller
                     'data' => $jwt,
                     'action' => $action
                 ]);
+                // dd($response->body());
             $token = str_replace("\n", "",$response->body());
             $decode = false;
             
@@ -60,24 +66,16 @@ class ClientController extends Controller
             // 'email'  => 'required|email',
         ]);
 
-        // if (Auth::user()->email) {
-            // $client = Client::where('client_id', Auth::user()->email)->first();
+        $response = $this->ApiRosa([
+            'client_num' =>  Auth::user()->num, 
+            'newpass'=> $request->newpass,
+            'oldpass'=> $request->oldpass ], 'changepass');
 
-            // if($client){
-              $response = $this->ApiRosa([
-                'client_num' =>  Auth::user()->num, 
-                'newpass'=> $request->newpass,
-                'oldpass'=> $request->oldpass ], 'changepass');
+        if($response->status == 200){
+            return response()->json(['message'=> 'Contrasena cambiada con exito'], 200);
+        }elseif($response->status == 500){
+            return response()->json(['message'=> 'Ocurrió un error intente más tarde'], 422);
+        }
 
-              if($response->status == 200){
-                return response()->json(['status'=> true,'message'=> 'Contrasena cambiada con exito']);
-              }
-            // }else{
-            //   return response()->json(['status'=>false,'message'=>'Email no se encuentra registrado'],422);  
-            // }
-
-        // }else{
-        //     return response()->json(['status'=>false,'message'=>'Email no se encuentra registrado'],422);
-        // }
     }
 }
