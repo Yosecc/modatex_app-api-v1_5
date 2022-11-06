@@ -7,10 +7,14 @@ use App\Models\Store;
 use Auth;
 use Illuminate\Http\Request;
 use App\Http\Traits\StoreTraits;
+use Illuminate\Support\Facades\Http;
 
 class CouponsController extends Controller
 {
   use StoreTraits;
+  private $token;
+  private $url = 'https://www.modatex.com.ar/main/home_db.php';
+
     public function index()
     {
         $cupones = Coupons::where(function($query) {
@@ -41,5 +45,26 @@ class CouponsController extends Controller
       $stores = Store::whereIn('LOCAL_CD',$local_cds)->get();
 
       return $this->dataArrayArrangement($stores);
+    }
+
+    public function redeemCoupon(Request $request)
+    {
+
+      $this->token = Auth::user()->api_token;
+
+      $this->validate($request, [
+          'cp_num' => 'required',
+      ]);
+
+       $response = Http::withHeaders([
+            'x-api-key' => $this->token,
+        ])->asForm()->post($this->url, [
+          'menu' => 'register_coupon',
+          'venta_num' => $request->cp_num,
+      ]);
+
+        dd($response->body());
+
+      return $response->collect()->all();
     }
 }

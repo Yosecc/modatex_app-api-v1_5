@@ -215,34 +215,7 @@ class AuthController extends Controller
         }
     }
 
-    public function change_password(Request $request)
-    {
-        $this->validate($request, [
-            'oldpass'   => 'required',
-            'newpass'   => 'required',
-            'email'  => 'required|email',
-        ]);
-
-        if ($this->isEmail($request->email)) {
-            $client = Client::where('client_id', $request->email)->first();
-
-            if($client){
-              $response = $this->ApiRosa([
-                'client_num' => $client->num, 
-                'newpass'=> $request->newpass,
-                'oldpass'=> $request->oldpass ], 'changepass');
-
-              if($response->status == 200){
-                return response()->json(['status'=> true,'message'=> 'Contrasena cambiada con exito']);
-              }
-            }else{
-              return response()->json(['status'=>false,'message'=>'Email no se encuentra registrado'],422);  
-            }
-
-        }else{
-            return response()->json(['status'=>false,'message'=>'Email no se encuentra registrado'],422);
-        }
-    }
+    
 
     public function createCoupon($client, $definitions)
     {

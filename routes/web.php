@@ -23,7 +23,7 @@ $router->group(['prefix' => 'auth'], function () use ($router) {
     $router->post('code_validation','AuthController@code_validation');
     $router->get('resend_code/{email}','AuthController@resend_code');
     $router->post('recover_password','AuthController@recover_password');
-    $router->post('change_password','AuthController@change_password');
+    
     
 });
 
@@ -94,10 +94,14 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
         });
         $router->group(['prefix' => 'coupons'], function () use ($router) {
             $router->get('/','CouponsController@index');
+            $router->get('redeem_coupon','CouponsController@redeemCoupon');
+
+
         });
 
         $router->group(['prefix' => 'client'], function () use ($router) {
             $router->get('/','ClientController@index');
+            $router->post('change_password','ClientController@change_password');
         });
     });
 });

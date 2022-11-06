@@ -84,12 +84,12 @@ class VentasController extends Controller
 
     private function getDeliveryPrice($venta)
     {
-// dd($venta);
-        $response = Http::asForm()->post($this->url, [
-            'menu' => 'prev_venta_new',
-            'venta_num' => $venta['num'],
-        ]);
+        
+      $response = Http::asForm()->post($this->url, [
+          'menu' => 'prev_venta_new',
+          'venta_num' => $venta['num'],
+      ]);
 
-        return $response->collect()->all();
-    }
+      return $response->collect()->all();
+  }
 }
