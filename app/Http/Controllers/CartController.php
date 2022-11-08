@@ -259,8 +259,8 @@ class CartController extends Controller
       $this->validate($request, [
         'local_cd' => 'required',
       ]);
-
-      $this->url = $this->url.'?c=Cart::send_to_checkout&store_id='.$request->local_cd;
+      
+      $url = $this->url.'?c=Cart::send_to_checkout&store_id='.$request->local_cd;
 
       $this->token = Auth::user()->api_token; 
 
@@ -268,9 +268,20 @@ class CartController extends Controller
           'x-api-key' => $this->token,
           'Content-Type' => 'application/json'
       ])
-      ->post($this->url);
+      ->post($url);
 
-      return response()->json($response->json());
+      $datos = [ 'cart' => $response->json() ];
+
+
+      $response = Http::withHeaders([
+          'x-api-key' => $this->token,
+          'Content-Type' => 'application/json'
+      ])
+      ->post($this->url.'?c=User::is_missing_data');
+
+      $datos['is_missing_data'] = $response->json();
+
+      return response()->json($datos);
 
     }
 }
