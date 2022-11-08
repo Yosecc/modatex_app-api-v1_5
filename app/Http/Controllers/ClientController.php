@@ -26,7 +26,7 @@ class ClientController extends Controller
     private function ApiRosa($payload, $action, $isdecode = true)
     {
         try {
-// dd($payload);
+            // dd($payload);
             $jwt = JWT::encode($payload, env('KEY_JWT'), 'HS256');
             
             $response = Http::asForm()
@@ -41,7 +41,7 @@ class ClientController extends Controller
             try {
               if($isdecode){
                 $decode = JWT::decode($token, new Key(env('KEY_JWT'), 'HS256'));
-                // dd($decode);  
+               
               }else{
                 $decode = $token;
               }
