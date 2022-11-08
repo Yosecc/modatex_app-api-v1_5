@@ -65,6 +65,10 @@ class AuthController extends Controller
                 return response()->json(['status'=>false,'message'=>'Ha ocurrido un error. Verifique e intente nuevamente'],401);
               }
 
+              if($login->status != 200){
+                return response()->json(['message'=> $login->response], 422);
+              }
+
               if ($login->stat_cd != 1000) {
                 return response()->json(['status'=>false,'message'=>'Usuario inactivo'],401);
               }
