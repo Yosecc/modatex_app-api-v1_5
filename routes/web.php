@@ -69,6 +69,8 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
         $router->get('getCar', 'CartController@getCar');
         $router->post('deleteModelo','CartController@deleteModelo');
         $router->post('deleteProduct','CartController@deleteProduct');
+        $router->post('process_cart','CartController@processCart');
+
     });
 
     //ROSA

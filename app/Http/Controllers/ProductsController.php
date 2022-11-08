@@ -98,7 +98,14 @@ class ProductsController extends Controller
 
     public function generateModels($product)
     {
-      $models = Code::select('CODE_NAME as size','NUM as size_id')->where('STAT_CD',1000)->whereIn('CODE_NAME',$product['sizes'])->get();
+
+      if(!isset($product['price'])){
+        return [];
+      }
+
+      $models = Code::select('CODE_NAME as size','NUM as size_id')
+                ->where('STAT_CD',1000)
+                ->whereIn('CODE_NAME',$product['sizes'])->get();
 
       $detalle = ProductsDetail::select('NUM as id','PARENT_NUM as product_id','SIZE_NUM as size_id','COLOR_NUM as color_id','QUANTITY as quantity')
                               ->where('PARENT_NUM',$product['id'])
@@ -113,7 +120,7 @@ class ProductsController extends Controller
           return $value['size_id'] == $code['size_id'];
         });
         [$keys, $values] = Arr::divide(collect($filtered)->all());
-        $code['price'] = $product['price'];
+        $code['price'] = isset($product['price']) ? $product['price'] : $product['id'];
         $code['properties'] = $values;
       }
 
@@ -130,6 +137,7 @@ class ProductsController extends Controller
       {
         $store = Store::LOCAL_CD($product['store'])->first();
 
+        // dd($product);
         return [
           "id"          => $product['id'],
           "moda_id"     => $product['moda_id'],
@@ -139,8 +147,8 @@ class ProductsController extends Controller
           "name"        => $product['name'],
           "category"    => isset($product['category']) ? $product['category']:null,
           "category_id" => $product['category_id'],
-          "price"       => $product['price'],
-          "prev_price"  => $product['prev_price'],
+          "price"       => isset($product['price']) ? $product['price'] : null,
+          "prev_price"  => isset($product['prev_price']) ? $product['prev_price']:null,
           "images"      => array_map($arregloImages, $product['images']),
           "sizes"       => $product['sizes'],
           "colors"      => isset($product['colors']) ? $product['colors']: null,
@@ -233,9 +241,11 @@ class ProductsController extends Controller
     {
       $request = [];
       $request['product_id'] = $product_id;
+      // dd(Arr::query($request));
       $url = $this->url.Arr::query($request);
       $response = Http::acceptJson()->get($url);
       $data = $response->collect()->all();
+      // dd($data);
       $data = $this->arregloProduct($data);
       return $data;
     }

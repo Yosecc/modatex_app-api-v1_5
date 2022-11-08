@@ -12,9 +12,14 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Http;
+
 
 class CartController extends Controller
 {
+
+    private $url = 'https://www.modatex.com.ar/modatexrosa3/';
+    private $token;
 
     public function getCarts($client_id, Request $request){
         $carts = new Cart($request->all());
@@ -87,15 +92,20 @@ class CartController extends Controller
     }
 
     public function getCar(){
-      try {
-
-        $carts = Cart::where('CLIENT_NUM',Auth::user()->num)
-              ->where('STAT_CD',1000)
-              ->orderBy('INSERT_DATE','desc')
-              ->get();
-
+      // try {
+        // dd(Auth::user()->num);
+        $carts = Cart::
+                  select('CART.*','LOCAL.*', 'LOCAL.STAT_CD as store_status')
+                  ->where('CART.CLIENT_NUM',Auth::user()->num)
+                  ->where('CART.STAT_CD',1000)
+                  ->orderBy('CART.INSERT_DATE','desc')
+                  ->join('LOCAL', 'LOCAL.LOCAL_CD', '=', 'CART.LOCAL_CD')
+                  ->where('LOCAL.STAT_CD', 1000)
+                  ->get();
+            // return response()->json($carts);
+                //dd(Store::where('LOCAL_CD', 2312)->first());
         $stores_ids = array_unique(Arr::pluck(collect($carts)->all(), ['LOCAL_CD']));
-
+        // dd($stores_ids );
         $arregloStores = function($store){
           return [
             "id"          => $store['LOCAL_CD'],
@@ -106,28 +116,27 @@ class CartController extends Controller
           ];
         };
 
-        $stores = array_map($arregloStores, collect(Store::whereIn('LOCAL_CD',$stores_ids)->get())->all());
+        $stores = array_map($arregloStores, collect(Store::whereIn('LOCAL_CD',$stores_ids)->where('STAT_CD', 1000)->get())->all());
 
         $productos = [];
         $products_id = [];
 
         foreach ($carts as $key => $value) {
-
+        // dd($value);
           if(!in_array($value['MODELO_NUM'], $products_id)){
             $products_id[] = $value['MODELO_NUM'];
 
-            // if($value['MODELO_NUM'] == '1502240'){
+            // if($value['MODELO_NUM'] == '1499365'){
+              // dd($value);
               $p = new ProductsController();
               $product = $p->oneProduct($value['MODELO_NUM']);
-              // dd($product);
               if(count($product)){
-                
                 $productos[] = $product[0];
               }
             // }
           }
         }
-        
+        // dd($products_id);
         $arregloProduct = function($product) use ($carts){
 
           $combinaciones = [];
@@ -135,34 +144,39 @@ class CartController extends Controller
           foreach ($carts as $key => $cart) {
 
             if($cart['MODELO_NUM'] == $product['id']){
+              if(count($product['models'])){
+                $filteredSize = Arr::where(collect($product['models'])->all(), function ($value, $key) use ($cart) {
+                  return $value['size_id'] == $cart['SIZE_NUM'];
+                });
 
-              $filteredSize = Arr::where(collect($product['models'])->all(), function ($value, $key) use ($cart) {
-                return $value['size_id'] == $cart['SIZE_NUM'];
-              });
+                [$keysSize, $valuesSize] = Arr::divide(collect($filteredSize)->all());
+                
+                $filteredColor = Arr::where($product['colors'], function ($value, $key) use ($cart) {
+                  return $value['id'] == $cart['COLOR_NUM'];
+                });
 
-              [$keysSize, $valuesSize] = Arr::divide(collect($filteredSize)->all());
-              
-              $filteredColor = Arr::where($product['colors'], function ($value, $key) use ($cart) {
-                return $value['id'] == $cart['COLOR_NUM'];
-              });
+                [$keysColor, $valuesColor] = Arr::divide(collect($filteredColor)->all());
+                // if(empty($valuesColor[0])){
+                //   dd($valuesColor);
+                // }
+                
 
-              [$keysColor, $valuesColor] = Arr::divide(collect($filteredColor)->all());
-
-              $combinaciones[] = [
-                "sizes"           => $product['sizes'],
-                "colors"          => $product['colors'],
-                "colorActive"     => $valuesColor[0]['code'],
-                "talleActive"     => $valuesSize[0]['size'],
-                "product_id"      => $product['id'],
-                "cantidad"        => $cart['CANTIDAD'],
-                "combinacion_key" => $key,
-                "descripcion"     => $product['name'],
-                "cart_id"         => $cart['NUM']
-              ];
+                $combinaciones[] = [
+                  "sizes"           => $product['sizes'],
+                  "colors"          => $product['colors'],
+                  "colorActive"     => count($valuesColor) ? $valuesColor[0]['code']:null,
+                  "talleActive"     => count($valuesSize) ? $valuesSize[0]['size']:null,
+                  "product_id"      => $product['id'],
+                  "cantidad"        => $cart['CANTIDAD'],
+                  "combinacion_key" => $key,
+                  "descripcion"     => $product['name'],
+                  "cart_id"         => $cart['NUM']
+                ];
+              }
             }
           }
 
-
+          // dd($product);
           return [
             "images"        => $product['images'],
             "precio"        => $product['price'],
@@ -186,9 +200,9 @@ class CartController extends Controller
 
         $productos = array_map($arregloProduct, $productos);
 
-      } catch (\Exception $e) {
-        return response()->json(['status'=> false, 'message' => $e->getMessage() ], 422); 
-      }
+      // } catch (\Exception $e) {
+      //   return response()->json(['status'=> false, 'message' => $e->getMessage() ], 422); 
+      // }
 
       return response()->json(['stores' => $stores, 'products' => $productos]);
     }
@@ -237,5 +251,26 @@ class CartController extends Controller
       } catch (\Exception $e) {
         return response()->json(['status'=> false, 'message' => $e->getMessage() ], 422); 
       }
+    }
+
+    public function processCart(Request $request)
+    {
+
+      $this->validate($request, [
+        'local_cd' => 'required',
+      ]);
+
+      $this->url = $this->url.'?c=Cart::send_to_checkout&store_id='.$request->local_cd;
+
+      $this->token = Auth::user()->api_token; 
+
+      $response = Http::withHeaders([
+          'x-api-key' => $this->token,
+          'Content-Type' => 'application/json'
+      ])
+      ->post($this->url);
+
+      return response()->json($response->json());
+
     }
 }
