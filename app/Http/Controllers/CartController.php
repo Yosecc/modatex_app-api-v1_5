@@ -91,32 +91,45 @@ class CartController extends Controller
       
     }
 
-    public function getCar(){
+
+    public $selectCar = ['CART.NUM','CART.CLIENT_NUM','CART.GROUP_CD','CART.LOCAL_CD','CART.MODELO_NUM','CART.MODELO_DETALE_NUM','CART.SIZE_NUM','CART.COLOR_NUM','CART.PRICE','CART.CANTIDAD','CART.TOTAL_PRICE','LOCAL.LOCAL_NAME','LOCAL.LIMIT_PRICE'];
+
+    // TRAE TODOS LOS STORE
+    // 
+    public function getCar(Request $request){ 
 
         $carts = Cart::
-                  select('CART.*','LOCAL.*', 'LOCAL.STAT_CD as store_status')
+                  select($this->selectCar)
                   ->where('CART.CLIENT_NUM',Auth::user()->num)
                   ->where('CART.STAT_CD',1000)
+                  // ->where('CART.LOCAL_CD', $request->store_id)
                   ->orderBy('CART.INSERT_DATE','desc')
                   ->join('LOCAL', 'LOCAL.LOCAL_CD', '=', 'CART.LOCAL_CD')
                   ->where('LOCAL.STAT_CD', 1000)
                   ->get();
 
-        $stores_ids = array_unique(Arr::pluck(collect($carts)->all(), ['LOCAL_CD']));
+        $stores_ids = array_unique(Arr::pluck($carts->all(), ['LOCAL_CD']));
 
-        $arregloStores = function($store){
+        $arregloStores = function($store) use ($carts){
+          $products = $carts->where('LOCAL_CD',$store['LOCAL_CD']);
+          $suma = 0;
+          foreach ($products->all() as $key => $value) {
+            $suma += (floatval($value['PRICE']) * $value['CANTIDAD']);
+          }
           return [
             "id"          => $store['LOCAL_CD'],
             "company"     => $store['GROUP_CD'],
             "name"        => $store['LOCAL_NAME'],
-            "limit_price" => $store['LIMIT_PRICE'],
+            "limit_price" => floatval($store['LIMIT_PRICE']),
             "logo"        => env('URL_IMAGE').'/modatexrosa2/img/modatexrosa2/'. Str::lower(Str::slug($store['LOCAL_NAME'], '')).'.gif',
+            "products_count" => $products->count(), 
+            "total" => $suma, 
+            "is_limit" =>  $suma >= floatval($store['LIMIT_PRICE'])
           ];
         };
 
         $stores = array_map($arregloStores, collect(Store::whereIn('LOCAL_CD',$stores_ids)->where('STAT_CD', 1000)->get())->all());
 
-        
 
       return response()->json(['stores' => $stores, 'products' => '$productos']);
     }
@@ -125,6 +138,7 @@ class CartController extends Controller
     {
       $carts = Cart::
                 where('CART.CLIENT_NUM',Auth::user()->num)
+                // select($this->selectCar)
                 ->where('CART.STAT_CD',1000)
                 ->where('CART.LOCAL_CD', $store_id)
                 ->orderBy('CART.INSERT_DATE','desc')
@@ -138,13 +152,11 @@ class CartController extends Controller
       foreach ($carts as $key => $value) {
         if(!in_array($value['MODELO_NUM'], $products_id)){
           $products_id[] = $value['MODELO_NUM'];
-          $p = new ProductsController();
-          $product = $p->oneProduct($value['MODELO_NUM']);
-          if(count($product)){
-            $productos[] = $product[0];
-          }
         }
       }
+      $p = new ProductsController();
+      $productos = $p->whereInProducts($products_id);
+      
       $arregloProduct = function($product) use ($carts){
 
         $combinaciones = [];
