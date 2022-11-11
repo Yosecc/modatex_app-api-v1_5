@@ -92,8 +92,7 @@ class CartController extends Controller
     }
 
     public function getCar(){
-      // try {
-        // dd(Auth::user()->num);
+
         $carts = Cart::
                   select('CART.*','LOCAL.*', 'LOCAL.STAT_CD as store_status')
                   ->where('CART.CLIENT_NUM',Auth::user()->num)
@@ -102,10 +101,9 @@ class CartController extends Controller
                   ->join('LOCAL', 'LOCAL.LOCAL_CD', '=', 'CART.LOCAL_CD')
                   ->where('LOCAL.STAT_CD', 1000)
                   ->get();
-            // return response()->json($carts);
-                //dd(Store::where('LOCAL_CD', 2312)->first());
+
         $stores_ids = array_unique(Arr::pluck(collect($carts)->all(), ['LOCAL_CD']));
-        // dd($stores_ids );
+
         $arregloStores = function($store){
           return [
             "id"          => $store['LOCAL_CD'],
@@ -118,93 +116,96 @@ class CartController extends Controller
 
         $stores = array_map($arregloStores, collect(Store::whereIn('LOCAL_CD',$stores_ids)->where('STAT_CD', 1000)->get())->all());
 
-        $productos = [];
-        $products_id = [];
+        
 
-        foreach ($carts as $key => $value) {
-        // dd($value);
-          if(!in_array($value['MODELO_NUM'], $products_id)){
-            $products_id[] = $value['MODELO_NUM'];
+      return response()->json(['stores' => $stores, 'products' => '$productos']);
+    }
 
-            // if($value['MODELO_NUM'] == '1499365'){
-              // dd($value);
-              $p = new ProductsController();
-              $product = $p->oneProduct($value['MODELO_NUM']);
-              if(count($product)){
-                $productos[] = $product[0];
-              }
-            // }
+    public function getProductsCart($store_id)
+    {
+      $carts = Cart::
+                where('CART.CLIENT_NUM',Auth::user()->num)
+                ->where('CART.STAT_CD',1000)
+                ->where('CART.LOCAL_CD', $store_id)
+                ->orderBy('CART.INSERT_DATE','desc')
+                ->join('LOCAL', 'LOCAL.LOCAL_CD', '=', 'CART.LOCAL_CD')
+                ->where('LOCAL.STAT_CD', 1000)
+                ->get();
+
+      $productos = [];
+      $products_id = [];
+
+      foreach ($carts as $key => $value) {
+        if(!in_array($value['MODELO_NUM'], $products_id)){
+          $products_id[] = $value['MODELO_NUM'];
+          $p = new ProductsController();
+          $product = $p->oneProduct($value['MODELO_NUM']);
+          if(count($product)){
+            $productos[] = $product[0];
           }
         }
-        // dd($products_id);
-        $arregloProduct = function($product) use ($carts){
+      }
+      $arregloProduct = function($product) use ($carts){
 
-          $combinaciones = [];
+        $combinaciones = [];
 
-          foreach ($carts as $key => $cart) {
+        foreach ($carts as $key => $cart) {
 
-            if($cart['MODELO_NUM'] == $product['id']){
-              if(count($product['models'])){
-                $filteredSize = Arr::where(collect($product['models'])->all(), function ($value, $key) use ($cart) {
-                  return $value['size_id'] == $cart['SIZE_NUM'];
-                });
+          if($cart['MODELO_NUM'] == $product['id']){
+            if(count($product['models'])){
+              $filteredSize = Arr::where(collect($product['models'])->all(), function ($value, $key) use ($cart) {
+                return $value['size_id'] == $cart['SIZE_NUM'];
+              });
 
-                [$keysSize, $valuesSize] = Arr::divide(collect($filteredSize)->all());
-                
-                $filteredColor = Arr::where($product['colors'], function ($value, $key) use ($cart) {
-                  return $value['id'] == $cart['COLOR_NUM'];
-                });
+              [$keysSize, $valuesSize] = Arr::divide(collect($filteredSize)->all());
+              
+              $filteredColor = Arr::where($product['colors'], function ($value, $key) use ($cart) {
+                return $value['id'] == $cart['COLOR_NUM'];
+              });
 
-                [$keysColor, $valuesColor] = Arr::divide(collect($filteredColor)->all());
-                // if(empty($valuesColor[0])){
-                //   dd($valuesColor);
-                // }
-                
+              [$keysColor, $valuesColor] = Arr::divide(collect($filteredColor)->all());
 
-                $combinaciones[] = [
-                  "sizes"           => $product['sizes'],
-                  "colors"          => $product['colors'],
-                  "colorActive"     => count($valuesColor) ? $valuesColor[0]['code']:null,
-                  "talleActive"     => count($valuesSize) ? $valuesSize[0]['size']:null,
-                  "product_id"      => $product['id'],
-                  "cantidad"        => $cart['CANTIDAD'],
-                  "combinacion_key" => $key,
-                  "descripcion"     => $product['name'],
-                  "cart_id"         => $cart['NUM']
-                ];
-              }
+              $combinaciones[] = [
+                "sizes"           => $product['sizes'],
+                "colors"          => $product['colors'],
+                "colorActive"     => count($valuesColor) ? $valuesColor[0]['code']:null,
+                "talleActive"     => count($valuesSize) ? $valuesSize[0]['size']:null,
+                "product_id"      => $product['id'],
+                "cantidad"        => $cart['CANTIDAD'],
+                "combinacion_key" => $key,
+                "descripcion"     => $product['name'],
+                "cart_id"         => $cart['NUM']
+              ];
             }
           }
+        }
 
-          // dd($product);
-          return [
-            "images"        => $product['images'],
-            "precio"        => $product['price'],
-            "id"            => $product['id'],
-            "descripcion"   => $product['name'],
-            "store"         => [
-              "id"          => $product['store_data']['id'],
-              "company"     => $product['store_data']['company'],
-              "name"        => $product['store_data']['name'],
-              "limit_price" => $product['store_data']['min'],
-              "logo"        => $product['store_data']['logo'],
-            ],
-            "sizes"         => $product['sizes'],
-            "colors"        => $product['colors'],
-            "combinacion"   => $combinaciones,
-            "models"        => $product['models']
-          ];
-        
-        };
+        // dd($product);
+        return [
+          "images"        => $product['images'],
+          "precio"        => $product['price'],
+          "id"            => $product['id'],
+          "descripcion"   => $product['name'],
+          "store"         => [
+            "id"          => $product['store_data']['id'],
+            "company"     => $product['store_data']['company'],
+            "name"        => $product['store_data']['name'],
+            "limit_price" => $product['store_data']['min'],
+            "logo"        => $product['store_data']['logo'],
+          ],
+          "sizes"         => $product['sizes'],
+          "colors"        => $product['colors'],
+          "combinacion"   => $combinaciones,
+          "models"        => $product['models']
+        ];
+      
+      };
 
 
-        $productos = array_map($arregloProduct, $productos);
+      $productos = array_map($arregloProduct, $productos);
 
-      // } catch (\Exception $e) {
-      //   return response()->json(['status'=> false, 'message' => $e->getMessage() ], 422); 
-      // }
-
-      return response()->json(['stores' => $stores, 'products' => $productos]);
+      return response()->json(['products' => $productos]);
+   
     }
 
     public function deleteModelo(Request $request)
