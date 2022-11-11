@@ -12,6 +12,7 @@ use Auth;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Http\Client\Pool;
 use Illuminate\Support\Str;
 class ProductsController extends Controller
 {
@@ -248,5 +249,35 @@ class ProductsController extends Controller
       // dd($data);
       $data = $this->arregloProduct($data);
       return $data;
+    }
+
+    public function whereInProducts($products_ids)
+    {
+      if(count($products_ids) == 0){
+
+        return [];
+      }
+      $urls;
+      foreach ($products_ids as $key => $id) {
+        $request = [];
+        $request['product_id'] = $id;
+        $urls[] = $this->url.Arr::query($request);
+      }
+      
+      $collection = collect($urls);
+
+      $consultas = Http::pool(fn (Pool $pool) => 
+        $collection->map(fn ($url) => 
+          $pool->acceptJson()->get($url)
+        )
+      );
+      $products = [];
+      for ($i=0; $i < count($urls) ; $i++) {
+        $data = $consultas[$i]->collect()->all();
+        if(count($consultas[$i]->collect()->all())){
+          $products[] = $this->arregloProduct($consultas[$i]->collect()->all())[0];
+        }
+      }
+      return collect($products)->all();
     }
 }
