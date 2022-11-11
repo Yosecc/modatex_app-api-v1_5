@@ -67,6 +67,7 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
         $router->post('addCar', 'CartController@addCar');
         $router->post('updatedCar', 'CartController@updatedCar');
         $router->get('getCar', 'CartController@getCar');
+        $router->get('getProductsCart/{store_id}','CartController@getProductsCart');
         $router->post('deleteModelo','CartController@deleteModelo');
         $router->post('deleteProduct','CartController@deleteProduct');
         $router->post('process_cart','CartController@processCart');
@@ -97,8 +98,6 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
         $router->group(['prefix' => 'coupons'], function () use ($router) {
             $router->get('/','CouponsController@index');
             $router->get('redeem_coupon','CouponsController@redeemCoupon');
-
-
         });
 
         $router->group(['prefix' => 'client'], function () use ($router) {
