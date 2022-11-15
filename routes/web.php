@@ -34,7 +34,6 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
     $router->get('productsVisitados','HomeController@productsVisitados');
     $router->get('sliders','HomeController@sliders');
 
-    $router->get('getProductsCar','CartController@getProductsCar');
 
     $router->post('preferences','PreferencesController@store');
     $router->get('preferences','PreferencesController@getPreferences');
@@ -59,14 +58,18 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
 
     $router->get('subcategories','CategoriesController@getSubCategories');
 
-    $router->get('cart/{client_id}','CartController@getCarts'); 
+    // $router->get('cart/{client_id}','CartController@getCarts'); 
+    // $router->get('getProductsCar','CartController@getProductsCar');
 
     $router->get('client','ClientController@index');
 
     $router->group(['prefix' => 'car'], function() use ($router){
         $router->post('addCar', 'CartController@addCar');
         $router->post('updatedCar', 'CartController@updatedCar');
-        $router->get('getCar', 'CartController@getCar');
+        $router->get('getCar', 'CartController@getCarts');
+
+        $router->get('getCart/{store_id}', 'CartController@getCart');
+
         $router->get('getProductsCart/{store_id}','CartController@getProductsCart');
         $router->post('deleteModelo','CartController@deleteModelo');
         $router->post('deleteProduct','CartController@deleteProduct');
