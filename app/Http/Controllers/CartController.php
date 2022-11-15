@@ -167,7 +167,7 @@ class CartController extends Controller
         "company"        => $store['GROUP_CD'],
         "name"           => $store['LOCAL_NAME'],
         "limit_price"    => floatval($store['LIMIT_PRICE']),
-        "logo"           => env('URL_IMAGE').'/common/img/logo/'.Str::lower(Str::slug($store['LOCAL_NAME'], '')).'.webp',
+        "logo"           => env('URL_IMAGE').'/common/img/logo/'.$store['LOGO_FILE_NAME'],
         "products_count" => $products->count(), 
         "total"          => $suma, 
         "is_limit"       => $suma >= floatval($store['LIMIT_PRICE']),
