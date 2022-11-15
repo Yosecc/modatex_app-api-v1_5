@@ -267,12 +267,13 @@ class CartController extends Controller
    
     }
 
-    // BORRA UN PRODUCTO DEL CARRITO SEGUN ID DEL CART
+    // BORRA UN PRODUCTO DEL CARRITO SEGUN ID porducto y el id modelo
     public function deleteModelo(Request $request)
     {
       try {
         $cart = Cart::where('CLIENT_NUM',Auth::user()->num)
-              ->where('NUM',$request->cart_id)
+              ->where('MODELO_NUM',$request->product_id)
+              ->where('MODELO_DETALE_NUM', $request->modelo)
               ->where('STAT_CD',1000)
               ->first();
 
@@ -285,7 +286,7 @@ class CartController extends Controller
           throw new \Exception("Modelo no encontrado");
         }
       } catch (\Exception $e) {
-        return response()->json(['status'=> false, 'message' => $e->getMessage() ], 422); 
+        return response()->json(['message' => $e->getMessage() ], 422); 
       }
     }
 
