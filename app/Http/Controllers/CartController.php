@@ -250,7 +250,7 @@ class CartController extends Controller
         $carts = Cart::where('CLIENT_NUM',Auth::user()->num)
               ->whereIn('NUM',$request->cart_ids)
               ->where('STAT_CD',1000)
-              ->first();
+              ->get();
 
         if($carts){
           foreach ($carts->all() as $key => $cart) {
