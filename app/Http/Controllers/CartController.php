@@ -151,7 +151,7 @@ class CartController extends Controller
       return response()->json(['message' => 'No se encontraron carros abiertos para esta marca' ], 422);
       
     }
-
+// https://netivooregon.s3.amazonaws.com/common/img/logo/yabaires_1661971342.webp
     private function arregloCart($store, $carts)
     {
       $products = $carts->where('LOCAL_CD',$store['LOCAL_CD']);
@@ -167,7 +167,7 @@ class CartController extends Controller
         "company"        => $store['GROUP_CD'],
         "name"           => $store['LOCAL_NAME'],
         "limit_price"    => floatval($store['LIMIT_PRICE']),
-        "logo"           => env('URL_IMAGE').'/modatexrosa2/img/modatexrosa2/'.Str::lower(Str::slug($store['LOCAL_NAME'], '')).'.webp',
+        "logo"           => env('URL_IMAGE').'/common/img/logo/'.Str::lower(Str::slug($store['LOCAL_NAME'], '')).'.webp',
         "products_count" => $products->count(), 
         "total"          => $suma, 
         "is_limit"       => $suma >= floatval($store['LIMIT_PRICE']),
