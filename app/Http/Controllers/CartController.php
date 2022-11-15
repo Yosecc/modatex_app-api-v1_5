@@ -248,7 +248,7 @@ class CartController extends Controller
     {
       try {
         $carts = Cart::where('CLIENT_NUM',Auth::user()->num)
-              ->whereIn('NUM',[$request->cart_ids])
+              ->whereIn('NUM',$request->cart_ids)
               ->where('STAT_CD',1000)
               ->first();
 
