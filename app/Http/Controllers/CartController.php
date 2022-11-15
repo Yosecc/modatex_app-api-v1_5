@@ -113,8 +113,10 @@ class CartController extends Controller
         $arregloStores = function($store) use ($carts){
           $products = $carts->where('LOCAL_CD',$store['LOCAL_CD']);
           $suma = 0;
+          $cart_ids = [];
           foreach ($products->all() as $key => $value) {
             $suma += (floatval($value['PRICE']) * $value['CANTIDAD']);
+            $cart_ids[] = $value['NUM'];
           }
           return [
             "id"          => $store['LOCAL_CD'],
@@ -124,7 +126,8 @@ class CartController extends Controller
             "logo"        => env('URL_IMAGE').'/modatexrosa2/img/modatexrosa2/'. Str::lower(Str::slug($store['LOCAL_NAME'], '')).'.gif',
             "products_count" => $products->count(), 
             "total" => $suma, 
-            "is_limit" =>  $suma >= floatval($store['LIMIT_PRICE'])
+            "is_limit" =>  $suma >= floatval($store['LIMIT_PRICE']),
+            'cart_ids' => $cart_ids
           ];
         };
 
