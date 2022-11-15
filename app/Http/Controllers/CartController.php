@@ -222,6 +222,7 @@ class CartController extends Controller
 
               [$keysColor, $valuesColor] = Arr::divide(collect($filteredColor)->all());
 
+              // dd($cart);
               $combinaciones[] = [
                 "sizes"           => $product['sizes'],
                 "colors"          => $product['colors'],
@@ -231,7 +232,8 @@ class CartController extends Controller
                 "cantidad"        => $cart['CANTIDAD'],
                 "combinacion_key" => $key,
                 "descripcion"     => $product['name'],
-                "cart_id"         => $cart['NUM']
+                "cart_id"         => $cart['NUM'],
+                "modelo" => $cart['MODELO_DETALE_NUM']
               ];
             }
           }
