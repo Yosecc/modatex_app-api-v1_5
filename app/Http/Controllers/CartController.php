@@ -244,6 +244,29 @@ class CartController extends Controller
       }
     }
 
+    public function deleteCarts(Request $request)
+    {
+      try {
+        $carts = Cart::where('CLIENT_NUM',Auth::user()->num)
+              ->whereIn('NUM',[$request->cart_ids])
+              ->where('STAT_CD',1000)
+              ->first();
+
+        if($carts){
+          foreach ($carts->all() as $key => $cart) {
+            $cart->STAT_CD = 5000;
+            $cart->save();
+          }
+
+          return response()->json(['status'=> true]);
+        }else{
+          throw new \Exception("Modelos no encontrados");
+        }
+      } catch (\Exception $e) {
+        return response()->json(['status'=> false, 'message' => $e->getMessage() ], 422); 
+      }
+    }
+
     public function deleteProduct(Request $request)
     {
        try {
