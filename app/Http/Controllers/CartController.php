@@ -21,21 +21,21 @@ class CartController extends Controller
     private $url = 'https://www.modatex.com.ar/modatexrosa3/';
     private $token;
 
-    public function getCarts($client_id, Request $request){
-        $carts = new Cart($request->all());
-        $carts = $carts->Client($client_id)->getCarts();
+    // public function getCarts($client_id, Request $request){
+    //     $carts = new Cart($request->all());
+    //     $carts = $carts->Client($client_id)->getCarts();
 
-        return response()->json(['status'=> true,'carts'=> $carts],200);
-    }
+    //     return response()->json(['status'=> true,'carts'=> $carts],200);
+    // }
 
-    public function getProductsCar(Request $request){
-        $params['is_store'] = true;
-        $products = new Products($params);
-        $products = $products->getInProducts(explode(",", $request->id));
+    // public function getProductsCar(Request $request){
+    //     $params['is_store'] = true;
+    //     $products = new Products($params);
+    //     $products = $products->getInProducts(explode(",", $request->id));
 
-        return response()->json(['status'=> true, 'products' => $products]);
+    //     return response()->json(['status'=> true, 'products' => $products]);
 
-    }
+    // }
 
     public function addCar(Request $request){
         //dd(Auth::user());
@@ -94,15 +94,13 @@ class CartController extends Controller
 
     public $selectCar = ['CART.NUM','CART.CLIENT_NUM','CART.GROUP_CD','CART.LOCAL_CD','CART.MODELO_NUM','CART.MODELO_DETALE_NUM','CART.SIZE_NUM','CART.COLOR_NUM','CART.PRICE','CART.CANTIDAD','CART.TOTAL_PRICE','LOCAL.LOCAL_NAME','LOCAL.LIMIT_PRICE'];
 
-    // TRAE TODOS LOS STORE
-    // 
-    public function getCar(Request $request){ 
+    // TRAE TODOS LOS STORE/CARRITOS
+    public function getCarts(Request $request){ 
 
         $carts = Cart::
                   select($this->selectCar)
                   ->where('CART.CLIENT_NUM',Auth::user()->num)
                   ->where('CART.STAT_CD',1000)
-                  // ->where('CART.LOCAL_CD', $request->store_id)
                   ->orderBy('CART.INSERT_DATE','desc')
                   ->join('LOCAL', 'LOCAL.LOCAL_CD', '=', 'CART.LOCAL_CD')
                   ->where('LOCAL.STAT_CD', 1000)
@@ -110,33 +108,75 @@ class CartController extends Controller
 
         $stores_ids = array_unique(Arr::pluck($carts->all(), ['LOCAL_CD']));
 
-        $arregloStores = function($store) use ($carts){
-          $products = $carts->where('LOCAL_CD',$store['LOCAL_CD']);
-          $suma = 0;
-          $cart_ids = [];
-          foreach ($products->all() as $key => $value) {
-            $suma += (floatval($value['PRICE']) * $value['CANTIDAD']);
-            $cart_ids[] = $value['NUM'];
-          }
-          return [
-            "id"          => $store['LOCAL_CD'],
-            "company"     => $store['GROUP_CD'],
-            "name"        => $store['LOCAL_NAME'],
-            "limit_price" => floatval($store['LIMIT_PRICE']),
-            "logo"        => env('URL_IMAGE').'/modatexrosa2/img/modatexrosa2/'. Str::lower(Str::slug($store['LOCAL_NAME'], '')).'.gif',
-            "products_count" => $products->count(), 
-            "total" => $suma, 
-            "is_limit" =>  $suma >= floatval($store['LIMIT_PRICE']),
-            'cart_ids' => $cart_ids
-          ];
-        };
+        $stores = Store::whereIn('LOCAL_CD',$stores_ids)->where('STAT_CD', 1000)->get();
 
-        $stores = array_map($arregloStores, collect(Store::whereIn('LOCAL_CD',$stores_ids)->where('STAT_CD', 1000)->get())->all());
+        if($stores){
 
+          $stores = $stores->map(fn ($store)=>
+             $this->arregloCart($store,$carts)
+          );
+          
+          return response()->json(['stores' => $stores]);
+        }
 
-      return response()->json(['stores' => $stores, 'products' => '$productos']);
+        return response()->json(['message' => 'No se encontraron carros abiertos' ], 422);
     }
 
+    public function getCart($store_id)
+    {
+      $carts = Cart::select($this->selectCar)
+                  ->where('CART.CLIENT_NUM',Auth::user()->num)
+                  ->where('CART.STAT_CD',1000)
+                  ->where('CART.LOCAL_CD', $store_id)
+                  ->orderBy('CART.INSERT_DATE','desc')
+                  ->join('LOCAL', 'LOCAL.LOCAL_CD', '=', 'CART.LOCAL_CD')
+                  ->where('LOCAL.STAT_CD', 1000)
+                  ->get();
+
+      $stores_ids = array_unique(Arr::pluck($carts->all(), ['LOCAL_CD']));
+
+      $stores = Store::whereIn('LOCAL_CD',$stores_ids)->where('STAT_CD', 1000)->get();
+      if($stores){
+
+        $stores = $stores->map(fn ($store)=>
+          $this->arregloCart($store,$carts)
+        );
+
+        $stores = Arr::collapse($stores);
+
+        return response()->json($stores);
+
+      }
+
+      return response()->json(['message' => 'No se encontraron carros abiertos para esta marca' ], 422);
+      
+    }
+
+    private function arregloCart($store, $carts)
+    {
+      $products = $carts->where('LOCAL_CD',$store['LOCAL_CD']);
+      $suma = 0;
+      $cart_ids = [];
+      foreach ($products->all() as $key => $value) {
+        $suma += (floatval($value['PRICE']) * $value['CANTIDAD']);
+        $cart_ids[] = $value['NUM'];
+      }
+
+      return [
+        "id"             => $store['LOCAL_CD'],
+        "company"        => $store['GROUP_CD'],
+        "name"           => $store['LOCAL_NAME'],
+        "limit_price"    => floatval($store['LIMIT_PRICE']),
+        "logo"           => env('URL_IMAGE').'/modatexrosa2/img/modatexrosa2/'.Str::lower(Str::slug($store['LOCAL_NAME'], '')).'.webp',
+        "products_count" => $products->count(), 
+        "total"          => $suma, 
+        "is_limit"       => $suma >= floatval($store['LIMIT_PRICE']),
+        'cart_ids'       => $cart_ids
+      ];
+
+    }
+
+    // TRAE LOS PRODUCTOS DE UN CARRITO
     public function getProductsCart($store_id)
     {
       $carts = Cart::
@@ -223,6 +263,7 @@ class CartController extends Controller
    
     }
 
+    // BORRA UN PRODUCTO DEL CARRITO SEGUN ID DEL CART
     public function deleteModelo(Request $request)
     {
       try {
@@ -244,6 +285,7 @@ class CartController extends Controller
       }
     }
 
+    //BORRA VARIOS PRODUCTOS DEL CARRITO SEGUN ID DEL CART
     public function deleteCarts(Request $request)
     {
       try {
@@ -267,6 +309,7 @@ class CartController extends Controller
       }
     }
 
+    //BORRA UN PRODUCTO SEGUN EL ID DEL MODELO
     public function deleteProduct(Request $request)
     {
        try {
@@ -292,6 +335,9 @@ class CartController extends Controller
       }
     }
 
+    //PROCESA EL CARRITO
+    //VALIDA SI POSEE TODOS LOS DATOS
+    //RETORNA EL GROUP ID
     public function processCart(Request $request)
     {
 
