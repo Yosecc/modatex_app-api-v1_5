@@ -104,6 +104,8 @@ class CartController extends Controller
                   ->orderBy('CART.INSERT_DATE','desc')
                   ->join('LOCAL', 'LOCAL.LOCAL_CD', '=', 'CART.LOCAL_CD')
                   ->where('LOCAL.STAT_CD', 1000)
+                  ->where('LOCAL.LOGO_FILE_NAME','!=','')
+                  ->where('LOCAL.LOGO_FILE_NAME','!=',NULL)
                   ->get();
 
         $stores_ids = array_unique(Arr::pluck($carts->all(), ['LOCAL_CD']));
@@ -151,7 +153,7 @@ class CartController extends Controller
       return response()->json(['message' => 'No se encontraron carros abiertos para esta marca' ], 422);
       
     }
-// https://netivooregon.s3.amazonaws.com/common/img/logo/yabaires_1661971342.webp
+    
     private function arregloCart($store, $carts)
     {
       $products = $carts->where('LOCAL_CD',$store['LOCAL_CD']);
