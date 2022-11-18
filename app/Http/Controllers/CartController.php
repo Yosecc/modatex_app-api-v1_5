@@ -37,55 +37,54 @@ class CartController extends Controller
 
     // }
 
-    public function addCar(Request $request){
-        //dd(Auth::user());
-        try {
-            foreach ($request->all() as $key => $value) {
+    public function addCar(Request $request)
+    {
+      // dd($request->all());
+      try {
+        foreach ($request->all() as $key => $value) {
 
-                $cart = Cart::where('CLIENT_NUM',Auth::user()->num)
-                    ->where('GROUP_CD', $value['group_cd'])
-                    ->where('LOCAL_CD', $value['local_cd'])
-                    ->where('MODELO_NUM', $value['product_id'])
-                    ->where('MODELO_DETALE_NUM', $value['models_id'])
-                    ->where('SIZE_NUM', $value['size_id'])
-                    ->where('COLOR_NUM', $value['color_id'])
-                    ->first();
+            $cart = Cart::where('CLIENT_NUM',Auth::user()->num)
+                ->where('GROUP_CD', $value['group_cd'])
+                ->where('LOCAL_CD', $value['local_cd'])
+                ->where('MODELO_NUM', $value['product_id'])
+                ->where('MODELO_DETALE_NUM', $value['models_id'])
+                ->where('SIZE_NUM', $value['size_id'])
+                ->where('COLOR_NUM', $value['color_id'])
+                ->where('STAT_CD',1000)
+                ->first();
 
-                if(!$cart){
-                  $cart = new Cart();
-                  $cart->DISCOUNT_NUM      = 0;
-                  $cart->DISCOUNT_DESC     = '';
-                  $cart->DISCOUNT_PRICE    = 0;
-                  $cart->DISC_CNT_NUM      = 0;
-                  $cart->DISC_CNT_DESC     = '';
-                  $cart->DISC_CNT_PRICE    = 0;
-                  $cart->WORK_NUM          = Auth::user()->num;
-                  $cart->CLIENT_NUM        = Auth::user()->num;
-                  $cart->GROUP_CD          = $value['group_cd'];
-                  $cart->LOCAL_CD          = $value['local_cd'];
-                  $cart->MODELO_NUM        = $value['product_id'];
-                  $cart->MODELO_DETALE_NUM = $value['models_id'];
-                  $cart->SIZE_NUM          = $value['size_id'];
-                  $cart->COLOR_NUM         = $value['color_id'];
-                  $cart->PRICE             = $value['price'];
-                }
-
-                
-                $cart->CANTIDAD          = $value['cantidad'];
-                $cart->TOTAL_PRICE       = $value['total_price'];
-                
-                $cart->save();
-
-
-                \Log::info($cart);
+            if(!$cart){
+              $cart = new Cart();
+              $cart->DISCOUNT_NUM      = 0;
+              $cart->DISCOUNT_DESC     = '';
+              $cart->DISCOUNT_PRICE    = 0;
+              $cart->DISC_CNT_NUM      = 0;
+              $cart->DISC_CNT_DESC     = '';
+              $cart->DISC_CNT_PRICE    = 0;
+              $cart->WORK_NUM          = Auth::user()->num;
+              $cart->CLIENT_NUM        = Auth::user()->num;
+              $cart->GROUP_CD          = $value['group_cd'];
+              $cart->LOCAL_CD          = $value['local_cd'];
+              $cart->MODELO_NUM        = $value['product_id'];
+              $cart->MODELO_DETALE_NUM = $value['models_id'];
+              $cart->SIZE_NUM          = $value['size_id'];
+              $cart->COLOR_NUM         = $value['color_id'];
+              $cart->PRICE             = $value['price'];
             }
 
-        } catch (\Exception $e) {
-            return response()->json(['status'=> false,'message'=> $e->getMessage()], 422);  
+            
+            $cart->CANTIDAD          = $value['cantidad'];
+            $cart->TOTAL_PRICE       = $value['total_price'];
+            
+            $cart->save();
+
+
+            \Log::info($cart);
         }
-
-        return response()->json(['status'=> true]);
-
+      } catch (\Exception $e) {
+          return response()->json(['status'=> false,'message'=> $e->getMessage()], 422);  
+      }
+      return response()->json(['status'=> true]);
     }
     public function updatedCar(Request $request){
       
@@ -124,6 +123,7 @@ class CartController extends Controller
         return response()->json(['message' => 'No se encontraron carros abiertos' ], 422);
     }
 
+    //TRAE UN SOLO CARRO SEGUN LA MARCA
     public function getCart($store_id)
     {
       $carts = Cart::select($this->selectCar)
