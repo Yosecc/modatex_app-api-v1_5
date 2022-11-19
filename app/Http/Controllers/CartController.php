@@ -86,8 +86,29 @@ class CartController extends Controller
       }
       return response()->json(['status'=> true]);
     }
+    //ACTUALIZAR UN PRODUCTO DEL CARRO
     public function updatedCar(Request $request){
-      
+      try {
+// dd($request->all());
+        $cart = Cart::where('CLIENT_NUM',Auth::user()->num)
+                ->where('GROUP_CD', $request->group_cd)
+                ->where('LOCAL_CD', $request->local_cd)
+                ->where('MODELO_NUM', $request->product_id)
+                ->where('MODELO_DETALE_NUM', $request->modelo_actual)
+                ->where('STAT_CD',1000)
+                ->update([
+                  'MODELO_DETALE_NUM' => $request->models_id,
+                  'SIZE_NUM'          => $request->size_id,
+                  'COLOR_NUM'         => $request->color_id,
+                  'TOTAL_PRICE'       => $request->total_price,
+                  'PRICE'             => $request->price,
+                  'CANTIDAD'          => $request->cantidad
+                ]);
+
+      } catch (\Exception $e) {
+        return response()->json(['status'=> false,'message'=> $e->getMessage()], 422); 
+      }
+      return response()->json(['status'=> true]);
     }
 
 
