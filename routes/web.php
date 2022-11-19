@@ -65,7 +65,7 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
 
     $router->group(['prefix' => 'car'], function() use ($router){
         $router->post('addCar', 'CartController@addCar');
-        $router->post('updatedCar', 'CartController@updatedCar');
+        $router->post('updateCar', 'CartController@updatedCar');
         $router->get('getCar', 'CartController@getCarts');
 
         $router->get('getCart/{store_id}', 'CartController@getCart');
