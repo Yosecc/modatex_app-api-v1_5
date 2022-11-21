@@ -15,13 +15,15 @@ class Client extends Model
 
     protected $hidden       = ['password','client_pwd','code_confirm'];
 
+
+ 
     const CREATED_AT        = 'insert_date';
 
     const UPDATED_AT        = 'update_date';
 
     public $sequence        = 'S_SHOP_CLIENT_NUM';
 
-    public const CAMPOS = ['num','client_id as user','email','client_pwd as password','cuit_dni as dni','company_name','first_name as last_name','last_name as first_name','mobile_area','mobile','code_confirm','api_token','verification_status'];
+    public const CAMPOS = ['num','client_id as user','email','client_pwd as password','cuit_dni as dni','company_name','first_name','last_name','mobile_area','mobile','code_confirm','api_token','verification_status'];
 
     public function scopeActive($query){
         return $query->where('member_type','E')->where('level_cd','1000')->where('stat_cd','1000')->where('verification_status',1)->select(self::CAMPOS);
