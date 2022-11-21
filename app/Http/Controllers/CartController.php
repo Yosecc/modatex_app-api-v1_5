@@ -52,6 +52,7 @@ class CartController extends Controller
                 ->where('COLOR_NUM', $value['color_id'])
                 ->where('STAT_CD',1000)
                 ->first();
+                // dd($cart);
 
             if(!$cart){
               $cart = new Cart();
@@ -89,7 +90,7 @@ class CartController extends Controller
     //ACTUALIZAR UN PRODUCTO DEL CARRO
     public function updatedCar(Request $request){
       try {
-// dd($request->all());
+        // dd($request->all());
         $cart = Cart::where('CLIENT_NUM',Auth::user()->num)
                 ->where('GROUP_CD', $request->group_cd)
                 ->where('LOCAL_CD', $request->local_cd)

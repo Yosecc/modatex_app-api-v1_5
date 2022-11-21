@@ -8,6 +8,7 @@ use App\Models\ProductFavorite;
 use App\Models\Products;
 use App\Models\ProductsDetail;
 use App\Models\Store;
+use App\Models\Cart;
 use Auth;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
@@ -156,6 +157,7 @@ class ProductsController extends Controller
           "models"      => $this->generateModels($product),
           "discount"    => $product['discount'],
           "has_stock"   => $product['has_stock'],
+          "isCart"      => $this->isProduct($product['id']),
           "store_data" => [
             'logo' => env('URL_IMAGE').'/modatexrosa2/img/modatexrosa2/'. Str::lower(Str::slug($store['LOCAL_NAME'], '')).'.gif',
             'name' => $store['LOCAL_NAME'],
@@ -167,6 +169,11 @@ class ProductsController extends Controller
       };
 
       return array_map($arreglo, $data);
+    }
+
+    public function isProduct($product_id)
+    {
+      return Cart::where('CLIENT_NUM',Auth::user()->num)->where('MODELO_NUM', $product_id)->where('STAT_CD',1000)->count();
     }
 
     public function getSearch(Request $request)
@@ -221,6 +228,7 @@ class ProductsController extends Controller
           "colors"      => $colores,
           "is_desc"     => $product['is_desc'],
           "models"      => $this->generateModels($product),
+          "isCart"      => $this->isProduct($product['num']),
           // "disc/ount"    => $product['discount'],
           "has_stock"   => $product['con_stock'] == "" ? true:$product['con_stock'],
           "store_data" => [
