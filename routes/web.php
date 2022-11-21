@@ -108,5 +108,9 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
             $router->post('change_password','ClientController@change_password');
         });
     });
+
+    $router->group(['prefix' => 'checkout'], function() use ($router){
+        $router->post('editClient','CheckoutController@editClient');
+    });
 });
 
