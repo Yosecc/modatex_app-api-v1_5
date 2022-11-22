@@ -89,6 +89,45 @@ class CheckoutController extends Controller
         }
     }
 
+    public function envioDetail(Request $request)
+    {
+        $this->validate($request, [
+            'group_id' => 'required',
+            'zipcode'  => 'required',
+            // 'id'         => 'required',
+            'method'     => 'required',
+            'branch_id'  => 'required',
+            'provider'   => 'required',
+            'first_name' => 'required',
+            'last_name'  => 'required',
+            'dni'        => 'required',
+        ]);
+
+        $this->token = Auth::user()->api_token;
+
+        try {
+            $response = Http::withHeaders([
+              'x-api-key' => $this->token,
+            ])
+            ->asForm()
+            ->post($this->generateUrl(['controller' => 'Checkout','method' => 'shipping_edit']), 
+                $request->all());
+
+            $response = $response->json();
+
+            if($response['status'] != 'success'){
+                throw new \Exception("No se encontraron resultados");
+            }
+
+              return response()->json($response['data']);
+            
+        } catch (\Exception $e) {
+            return response()->json(['message'=>$e->getMessage()],422);
+        }
+    }
+
+    
+
     private function generateUrl($data)
     {
         return $this->url.$data['controller'].'::'.$data['method'];
