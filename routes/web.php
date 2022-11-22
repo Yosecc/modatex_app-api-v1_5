@@ -113,8 +113,9 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
         $router->post('editClient','CheckoutController@editClient');
         $router->post('selectMethodEnvio','CheckoutController@selectMethodEnvio');
         $router->post('searchSucursales','CheckoutController@searchSucursales');
+        $router->post('datosEnvio','CheckoutController@datosEnvio');
         $router->post('envioDetail','CheckoutController@envioDetail');
-        
+
     });
 });
 
