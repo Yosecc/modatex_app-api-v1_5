@@ -112,6 +112,7 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
     $router->group(['prefix' => 'checkout'], function() use ($router){
         $router->post('editClient','CheckoutController@editClient');
         $router->post('selectMethodEnvio','CheckoutController@selectMethodEnvio');
+        $router->post('searchSucursales','CheckoutController@searchSucursales');
         
     });
 });
