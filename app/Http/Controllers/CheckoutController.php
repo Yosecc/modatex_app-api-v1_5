@@ -22,12 +22,41 @@ class CheckoutController extends Controller
 
         $this->token = Auth::user()->api_token; 
 
+        try {
+            
         Client::where('num',Auth::user()->num)->update([
                             'first_name'   => $request->first_name,
                             'last_name'    => $request->last_name,
                             'cuit_dni'     => $request->cuit_dni]);
+         return response()->json('OK');
+       
+        } catch (\Exception $e) {
+            return response()->json($e->getMessage(),422);
+        }
 
-        return response()->json('OK');
+    }
+
+    public function selectMethodEnvio(Request $request)
+    {
+        $this->validate($request, [
+            'group_id' => 'required',
+            'method'  => 'required',
+        ]);
+
+        $this->token = Auth::user()->api_token; 
+
+        try {
+            $response = Http::withHeaders([
+              'x-api-key' => $this->token,
+            ])
+            ->asForm()
+            ->post($this->generateUrl(['controller' => 'Checkout','method' => 'shipping_select_method']), $request->all());
+            
+              return response()->json($response->json());
+            
+        } catch (\Exception $e) {
+            return response()->json($e->getMessage(),422);
+        }
     }
 
     private function generateUrl($data)
