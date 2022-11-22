@@ -51,11 +51,41 @@ class CheckoutController extends Controller
             ])
             ->asForm()
             ->post($this->generateUrl(['controller' => 'Checkout','method' => 'shipping_select_method']), $request->all());
-            
+
               return response()->json($response->json());
             
         } catch (\Exception $e) {
             return response()->json($e->getMessage(),422);
+        }
+    }
+
+    public function searchSucursales(Request $request)
+    {
+        $this->validate($request, [
+            'group_id' => 'required',
+            'zipcode'  => 'required',
+        ]);
+
+        $this->token = Auth::user()->api_token;
+
+        try {
+            $response = Http::withHeaders([
+              'x-api-key' => $this->token,
+            ])
+            ->asForm()
+            ->post($this->generateUrl(['controller' => 'Checkout','method' => 'shipping_branches']), 
+                $request->all());
+
+            $response = $response->json();
+
+            if($response['status'] != 'success'){
+                throw new \Exception("No se encontraron resultados");
+            }
+
+              return response()->json($response['data']);
+            
+        } catch (\Exception $e) {
+            return response()->json(['message'=>$e->getMessage()],422);
         }
     }
 
