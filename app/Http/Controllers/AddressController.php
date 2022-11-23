@@ -90,17 +90,18 @@ class AddressController extends Controller
         ];
     }
 
-    public function getProvincias()
+    public function getProvincias(Request $request)
     {
+         $this->token = Auth::user()->api_token;
+         // dd($this->token);
         $response = Http::withHeaders([
             'x-api-key' => $this->token,
-            'Content-Type' => 'application/json'
+            // 'Content-Type' => 'application/json'
         ])
-        ->get($this->url.'states');
+        ->asForm()
+        ->post($this->url.'states', ['group_id' => $request->group_id ]);
 
         $data = $response->json();
-
-        // dd($data);
 
         if(!$data || (isset($data['status']) && $data['status'] == 'error')){
             return null;
