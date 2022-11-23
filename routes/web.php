@@ -90,7 +90,7 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
         $router->get('/','VentasController@index');
     });
 
-    $router->get('/getProvincias','AddressController@getProvincias');
+    $router->get('/getComboDirecciones','AddressController@getComboDirecciones');
     
     $router->group(['prefix' => 'profile'], function () use ($router) {
         $router->group(['prefix' => 'direcciones'], function () use ($router) {
