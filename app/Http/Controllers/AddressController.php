@@ -115,6 +115,15 @@ class AddressController extends Controller
         ->asForm()
         ->post($this->url.'locations_caba', ['group_id' => $request->group_id ]);
 
+        $arreglo = function($item){
+            return [
+                'id' => $item,
+                'name' => $item
+            ];
+        };
+
+        $caba = array_map($arreglo, $responseCABA->json()['data']);
+
 
         $data = $response->json();
 
@@ -122,7 +131,7 @@ class AddressController extends Controller
             return null;
         }
 
-        return ['states'=>$data['data'],'gba'=>$responseGBA->json()['data'],'caba'=> $responseCABA->json()['data']];
+        return ['states'=>$data['data'],'gba'=>$responseGBA->json()['data'],'caba'=> $caba];
     }
 
     public function getLocacionesBGA()
