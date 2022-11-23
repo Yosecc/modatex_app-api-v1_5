@@ -85,7 +85,6 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
         $router->get('search','ProductsController@getSearch');
     });
     //
-    //
     $router->group(['prefix' => 'ventas'], function () use ($router) {
         $router->get('/','VentasController@index');
     });

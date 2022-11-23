@@ -124,14 +124,14 @@ class CheckoutController extends Controller
     {
         $this->validate($request, [
             'group_id' => 'required',
-            'zipcode'  => 'required',
+            // 'zipcode'  => 'required',
             // 'id'         => 'required',
             'method'     => 'required',
-            'branch_id'  => 'required',
-            'provider'   => 'required',
-            'first_name' => 'required',
-            'last_name'  => 'required',
-            'dni'        => 'required',
+            // 'branch_id'  => 'required',
+            // 'provider'   => 'required',
+            // 'first_name' => 'required',
+            // 'last_name'  => 'required',
+            // 'dni'        => 'required',
         ]);
 
         $this->token = Auth::user()->api_token;
