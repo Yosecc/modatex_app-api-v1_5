@@ -124,7 +124,8 @@ class AddressController extends Controller
 
         $caba = array_map($arreglo, $responseCABA->json()['data']);
 
-        array_unshift($caba,['id'=> 0, 'name'=>'Otro que no aparece en la lista']);
+        $gba = $responseGBA->json()['data'];
+        array_unshift($gba,['id'=> 0, 'name'=>'Otro que no aparece en la lista']);
 
         $data = $response->json();
 
@@ -132,7 +133,7 @@ class AddressController extends Controller
             return null;
         }
 
-        return ['states'=>$data['data'],'gba'=>$responseGBA->json()['data'],'caba'=> $caba];
+        return ['states'=>$data['data'],'gba'=>$gba,'caba'=> $caba];
     }
 
     public function getLocacionesBGA()
