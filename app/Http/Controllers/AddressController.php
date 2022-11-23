@@ -85,8 +85,8 @@ class AddressController extends Controller
             'id'           => $data['NUM'],
             'default' => $data['STAT_CD'] == 2000 ? true:false,
             'detalle'      => $data,
-            'provincias' => $this->getProvincias(),
-            'locaciones' => $this->getLocacionesBGA()
+            // 'provincias' => $this->getProvincias(),
+            // 'locaciones' => $this->getLocacionesBGA()
         ];
     }
 
@@ -101,13 +101,28 @@ class AddressController extends Controller
         ->asForm()
         ->post($this->url.'states', ['group_id' => $request->group_id ]);
 
+        $responseGBA = Http::withHeaders([
+            'x-api-key' => $this->token,
+            // 'Content-Type' => 'application/json'
+        ])
+        ->asForm()
+        ->post($this->url.'locations_gba', ['group_id' => $request->group_id ]);
+
+        $responseCABA = Http::withHeaders([
+            'x-api-key' => $this->token,
+            // 'Content-Type' => 'application/json'
+        ])
+        ->asForm()
+        ->post($this->url.'locations_caba', ['group_id' => $request->group_id ]);
+
+
         $data = $response->json();
 
         if(!$data || (isset($data['status']) && $data['status'] == 'error')){
             return null;
         }
 
-        return $data['data'];
+        return ['states'=>$data['data'],'gba'=>$responseGBA->json()['data'],'caba'=> $responseCABA->json()['data']];
     }
 
     public function getLocacionesBGA()
