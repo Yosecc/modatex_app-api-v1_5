@@ -147,6 +147,7 @@ class CheckoutController extends Controller
 
             if($response['status'] != 'success'){
                 throw new \Exception("No se encontraron resultados");
+                throw new \Exception($response->json());
             }
 
               return response()->json($response['data']);
