@@ -90,7 +90,7 @@ class AddressController extends Controller
         ];
     }
 
-    public function getProvincias(Request $request)
+    public function getComboDirecciones(Request $request)
     {
          $this->token = Auth::user()->api_token;
          // dd($this->token);
