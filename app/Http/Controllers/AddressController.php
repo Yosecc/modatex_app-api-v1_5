@@ -124,7 +124,8 @@ class AddressController extends Controller
 
         $caba = array_map($arreglo, $responseCABA->json()['data']);
 
-
+        $caba = array_unshift($caba,['id'=> 0, 'name'=>'Otro que no aparece en la lista']);
+        dd($caba);
         $data = $response->json();
 
         if(!$data || (isset($data['status']) && $data['status'] == 'error')){
