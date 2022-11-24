@@ -185,13 +185,15 @@ class CheckoutController extends Controller
 
     public function homeDeliveryProviders(Request $request)
     {
-        try {
+        try {   
+            $this->token = Auth::user()->api_token;
              $response = Http::withHeaders([
               'x-api-key' => $this->token,
             ])
             ->asForm()
-            ->get($this->generateUrl(['controller' => 'Checkout','method' => 'home_delivery_providers']), 
+            ->post($this->generateUrl(['controller' => 'Checkout','method' => 'home_delivery_providers']), 
                 $request->all());
+
 
             if($response->json()['status'] != 'success'){
                 throw new \Exception("No se encontraron resultados");
