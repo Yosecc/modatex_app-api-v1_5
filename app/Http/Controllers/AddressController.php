@@ -102,7 +102,15 @@ class AddressController extends Controller
 
         $integral = $this->locationesIntegral($request->group_id);
 
-        return ['states'=>$states,'gba'=>$gba,'caba'=> $caba,'integral'=>$integral];
+        $transportes = $this->getTransportes($request->group_id);
+
+        return [
+            'states'      => $states,
+            'gba'         => $gba,
+            'caba'        => $caba,
+            'integral'    => $integral ,
+            'transportes' => $transportes
+        ];
     }
 
     public function locationesStates($group_id)
@@ -201,6 +209,26 @@ class AddressController extends Controller
             $integral['states'] = array_map($arreglostatesIntegral, $integral['states']);
 
             return $integral;
+
+        } catch (\Exception $e) {
+            return null;
+        }
+    }
+
+    public function getTransportes($group_id)
+    {
+        try {
+            $response = Http::withHeaders([ 'x-api-key' => $this->token ])->asForm()
+                            ->post($this->url.'transports', ['group_id' => $group_id ]);
+
+                            
+            if($response->json()['status'] != 'success'){
+                throw new \Exception("No se encontraron resultados");
+            }
+            
+            $data = $response->json()['data'];
+
+            return $data;
 
         } catch (\Exception $e) {
             return null;
