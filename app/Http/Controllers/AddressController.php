@@ -92,64 +92,120 @@ class AddressController extends Controller
 
     public function getComboDirecciones(Request $request)
     {
-         $this->token = Auth::user()->api_token;
-         // dd($this->token);
-        $response = Http::withHeaders([
-            'x-api-key' => $this->token,
-            // 'Content-Type' => 'application/json'
-        ])
-        ->asForm()
-        ->post($this->url.'states', ['group_id' => $request->group_id ]);
+        $this->token = Auth::user()->api_token;
 
-        $responseGBA = Http::withHeaders([
-            'x-api-key' => $this->token,
-            // 'Content-Type' => 'application/json'
-        ])
-        ->asForm()
-        ->post($this->url.'locations_gba', ['group_id' => $request->group_id ]);
+        $states   = $this->locationesStates($request->group_id);
 
-        $responseCABA = Http::withHeaders([
-            'x-api-key' => $this->token,
-            // 'Content-Type' => 'application/json'
-        ])
-        ->asForm()
-        ->post($this->url.'locations_caba', ['group_id' => $request->group_id ]);
+        $gba      = $this->locationesGBA($request->group_id);
 
-        $arreglo = function($item){
-            return [
-                'id' => $item,
-                'name' => $item
-            ];
-        };
+        $caba     = $this->locationesCABA($request->group_id);
 
-        $caba = array_map($arreglo, $responseCABA->json()['data']);
+        $integral = $this->locationesIntegral($request->group_id);
 
-        $gba = $responseGBA->json()['data'];
-        array_unshift($gba,['id'=> 0, 'name'=>'Otro que no aparece en la lista']);
-
-        $data = $response->json();
-
-        if(!$data || (isset($data['status']) && $data['status'] == 'error')){
-            return null;
-        }
-
-        return ['states'=>$data['data'],'gba'=>$gba,'caba'=> $caba];
+        return ['states'=>$states,'gba'=>$gba,'caba'=> $caba,'integral'=>$integral];
     }
 
-    public function getLocacionesBGA()
+    public function locationesStates($group_id)
     {
-        $response = Http::withHeaders([
-            'x-api-key' => $this->token,
-            'Content-Type' => 'application/json'
-        ])
-        ->get($this->url.'locations_gba');
+        try {
+            $response = Http::withHeaders([ 'x-api-key' => $this->token ])->asForm()
+                            ->post($this->url.'states', ['group_id' => $group_id ]);
 
-        $data = $response->json();
+            if($response->json()['status'] != 'success'){
+                throw new \Exception("No se encontraron resultados");
+            }
 
-        if(!$data || (isset($data['status']) && $data['status'] == 'error')){
+            $data = $response->json()['data'];
+
+            return $data;
+
+        } catch (\Exception $e) {
             return null;
         }
-
-        return $data['data'];
     }
+
+    public function locationesGBA($group_id)
+    {
+        try {
+            $response = Http::withHeaders([ 'x-api-key' => $this->token ])->asForm()
+                            ->post($this->url.'locations_gba', ['group_id' => $group_id ]);
+
+            if($response->json()['status'] != 'success'){
+                throw new \Exception("No se encontraron resultados");
+            }
+
+            $data = $response->json()['data'];
+
+            array_unshift($data,['id'=> 0, 'name'=>'Otro que no aparece en la lista']);
+
+            return $data;
+
+        } catch (\Exception $e) {
+            return null;
+        }
+    }
+
+    public function locationesCABA($group_id)
+    {
+        try {
+            $response = Http::withHeaders([ 'x-api-key' => $this->token ])->asForm()
+                            ->post($this->url.'locations_caba', ['group_id' => $group_id ]);
+
+            $arreglo = function($item){
+                return [
+                    'id' => $item,
+                    'name' => $item
+                ];
+            };
+
+            if($response->json()['status'] != 'success'){
+                throw new \Exception("No se encontraron resultados");
+            }
+            
+            $data = array_map($arreglo, $response->json()['data']);
+
+            return $data;
+
+        } catch (\Exception $e) {
+            return null;
+        }
+    }
+
+    public function locationesIntegral($group_id)
+    {
+        try {
+            $response = Http::withHeaders([ 'x-api-key' => $this->token ])->asForm()
+                            ->post($this->url.'integral_data', ['group_id' => $group_id ]);
+
+            if($response->json()['status'] != 'success'){
+                throw new \Exception("No se encontraron resultados");
+            }
+
+
+            $integral = $response->json()['data'];
+
+            $arregloIntegral = function($integral){
+                return [
+                    'id'           => $integral['CodigoAgencia'],
+                    'name'         => ucwords(strtolower($integral['NombreLocalidad'])).' / '.$integral['Direccion'],
+                    'provincia_id' => intval($integral['CodigoProvincia'])
+                ];
+            };
+
+            $arreglostatesIntegral = function($integral){
+                $integral['name'] = ucwords(strtolower($integral['name']));
+                return $integral;
+            };
+
+            $integral['branches'] = array_map($arregloIntegral, $integral['branches']);
+            $integral['states'] = array_map($arreglostatesIntegral, $integral['states']);
+
+            return $integral;
+
+        } catch (\Exception $e) {
+            return null;
+        }
+    }
+
+
 }
