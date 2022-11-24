@@ -158,7 +158,7 @@ class CheckoutController extends Controller
         }
     }
 
-    public function deleteSucursal(Request $request)
+    public function deleteShipping(Request $request)
     {
         $this->validate($request, [
             'group_id' => 'required',
