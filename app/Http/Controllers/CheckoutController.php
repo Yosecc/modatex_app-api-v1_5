@@ -182,6 +182,29 @@ class CheckoutController extends Controller
             return response()->json(['message'=>$e->getMessage()],422);
         }
     }
+
+    public function homeDeliveryProviders(Request $request)
+    {
+        try {
+             $response = Http::withHeaders([
+              'x-api-key' => $this->token,
+            ])
+            ->asForm()
+            ->get($this->generateUrl(['controller' => 'Checkout','method' => 'home_delivery_providers']), 
+                $request->all());
+
+            if($response->json()['status'] != 'success'){
+                throw new \Exception("No se encontraron resultados");
+            }
+            if(isset($response->json()['data'])){
+              return response()->json($response->json()['data']);
+            }
+            return response()->json($response->json()['data']);
+
+        } catch (\Exception $e) {
+                return response()->json(['message'=>$e->getMessage()],422);
+        }
+    }
     
 
     private function generateUrl($data)

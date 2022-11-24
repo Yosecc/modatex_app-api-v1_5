@@ -115,7 +115,8 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
         $router->post('datosEnvio','CheckoutController@datosEnvio');
         $router->post('envioDetail','CheckoutController@envioDetail');
         $router->post('deleteShipping','CheckoutController@deleteShipping');
-        
+        $router->post('homeDeliveryProviders','CheckoutController@homeDeliveryProviders');
+            
     });
 });
 
