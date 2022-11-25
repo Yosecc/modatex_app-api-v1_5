@@ -269,14 +269,11 @@ class CheckoutController extends Controller
             ->post($this->generateUrl(['controller' => 'Checkout','method' => 'payment_select']), 
                 $request->all());
 
-
             if($response->json()['status'] != 'success'){
                 throw new \Exception("No se encontraron resultados");
             }
-            if(isset($response->json()['data'])){
-              return response()->json($response->json()['data']);
-            }
-            return response()->json($response->json()['data']);
+
+            return response()->json($response->json());
 
         } catch (\Exception $e) {
                 return response()->json(['message'=>$e->getMessage()],422);
