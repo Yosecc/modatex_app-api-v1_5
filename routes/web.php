@@ -120,6 +120,7 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
         $router->post('datosFacturacion','CheckoutController@datosFacturacion');
         $router->post('selectMethodPayment','CheckoutController@selectMethodPayment');
         $router->post('getResumen','CheckoutController@getResumen');
+        $router->post('confirmarCompra','CheckoutController@confirmarCompra');
             
     });
 });
