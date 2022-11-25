@@ -233,8 +233,30 @@ class CheckoutController extends Controller
         }
     }
 
-    
-    
+    public function datosFacturacion(Request $request)
+    {
+        try {   
+            $this->token = Auth::user()->api_token;
+             $response = Http::withHeaders([
+              'x-api-key' => $this->token,
+            ])
+            ->asForm()
+            ->post($this->generateUrl(['controller' => 'Checkout','method' => 'billing_edit']), 
+                $request->all());
+
+
+            if($response->json()['status'] != 'success'){
+                throw new \Exception("No se encontraron resultados");
+            }
+            if(isset($response->json()['data'])){
+              return response()->json($response->json()['data']);
+            }
+            return response()->json($response->json()['data']);
+
+        } catch (\Exception $e) {
+                return response()->json(['message'=>$e->getMessage()],422);
+        }
+    }
 
     private function generateUrl($data)
     {
