@@ -90,6 +90,7 @@ class StoresController extends Controller
         foreach ($consultas as $c => $consulta) {
           $storesAll[] = $consulta->collect()->all()['stores'];
         }
+        
 
         $storesAll = collect(Arr::collapse($storesAll));
         
@@ -99,6 +100,7 @@ class StoresController extends Controller
       $stores = [];
 
       foreach($data as $key => $store){
+
         $stores[] = [
             "logo" => env('URL_IMAGE').'/'. $store['profile']['logo'],
             "name" => $store['cover']['title'],

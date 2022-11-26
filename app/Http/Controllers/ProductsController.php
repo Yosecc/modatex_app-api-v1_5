@@ -232,7 +232,7 @@ class ProductsController extends Controller
           // "disc/ount"    => $product['discount'],
           "has_stock"   => $product['con_stock'] == "" ? true:$product['con_stock'],
           "store_data" => [
-            'logo' => env('URL_IMAGE').'/modatexrosa2/img/modatexrosa2/'. Str::lower(Str::slug($store['LOCAL_NAME'], '')).'.gif',
+            'logo' => env('URL_IMAGE').'/common/img/logo/'.$store['LOGO_FILE_NAME'],
             'name' => $store['LOCAL_NAME'],
             'min'  => $store['LIMIT_PRICE'],
             "id"   => $store['LOCAL_CD'],
