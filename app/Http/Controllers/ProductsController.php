@@ -159,7 +159,7 @@ class ProductsController extends Controller
           "has_stock"   => $product['has_stock'],
           "isCart"      => $this->isProduct($product['id']),
           "store_data" => [
-            'logo' => env('URL_IMAGE').'/modatexrosa2/img/modatexrosa2/'. Str::lower(Str::slug($store['LOCAL_NAME'], '')).'.gif',
+            'logo' => env('URL_IMAGE').'/common/img/logo/'.$store['LOGO_FILE_NAME'],
             'name' => $store['LOCAL_NAME'],
             'min'  => $store['LIMIT_PRICE'],
             "id"   => $store['LOCAL_CD'],
