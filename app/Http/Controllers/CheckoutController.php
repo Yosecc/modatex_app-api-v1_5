@@ -233,7 +233,7 @@ class CheckoutController extends Controller
         }
     }
 
-    public function isDatosFacturacion()
+    public function isDatosFacturacion(Request $request)
     {
         try {   
             $this->token = Auth::user()->api_token;
@@ -242,7 +242,7 @@ class CheckoutController extends Controller
               'x-api-key' => $this->token,
             ])
             ->asForm()
-            ->post($this->generateUrl(['controller' => 'Checkout','method' => 'billing_data']));
+            ->post($this->generateUrl(['controller' => 'Checkout','method' => 'billing_data']), $request->all());
 
 
             if($response->json()['status'] != 'success'){
