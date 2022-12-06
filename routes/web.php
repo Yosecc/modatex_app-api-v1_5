@@ -118,6 +118,7 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
         $router->post('homeDeliveryProviders','CheckoutController@homeDeliveryProviders');
         $router->post('editServiceProvider','CheckoutController@editServiceProvider');
         $router->post('datosFacturacion','CheckoutController@datosFacturacion');
+        $router->post('isDatosFacturacion','CheckoutController@isDatosFacturacion');
         $router->post('selectMethodPayment','CheckoutController@selectMethodPayment');
         $router->post('getResumen','CheckoutController@getResumen');
         $router->post('confirmarCompra','CheckoutController@confirmarCompra');
