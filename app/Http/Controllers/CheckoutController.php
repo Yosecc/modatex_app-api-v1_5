@@ -242,7 +242,7 @@ class CheckoutController extends Controller
               'x-api-key' => $this->token,
             ])
             ->asForm()
-            ->post($this->generateUrl(['controller' => 'Billing','method' => 'get']));
+            ->post($this->generateUrl(['controller' => 'Checkout','method' => 'billing_data']));
 
 
             if($response->json()['status'] != 'success'){
