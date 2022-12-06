@@ -58,6 +58,9 @@ class AuthController extends Controller
                 'action' => 'login'
               ];
 
+              // social_method: 'Facebook|Google'
+              // social_id: 'XXXXX'
+
               // $login = $this->sendLoginRosa($payload);
               $login = $this->ApiRosa($payload, 'login');
               // dd($login);
