@@ -261,18 +261,17 @@ class CartController extends Controller
           }
         }
 
-        // dd($product);
         return [
           "images"        => $product['images'],
           "precio"        => $product['price'],
           "id"            => $product['id'],
           "descripcion"   => $product['name'],
           "store"         => [
-            "id"          => $product['store_data']['id'],
-            "company"     => $product['store_data']['company'],
-            "name"        => $product['store_data']['name'],
-            "limit_price" => $product['store_data']['min'],
-            "logo"        => $product['store_data']['logo'],
+            "id"          => $product['store']['id'],
+            "company"     => $product['store']['company'],
+            "name"        => $product['store']['name'],
+            "limit_price" => $product['store']['min'],
+            "logo"        => $product['store']['logo'],
           ],
           "sizes"         => $product['sizes'],
           "colors"        => $product['colors'],
