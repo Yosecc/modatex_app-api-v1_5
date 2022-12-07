@@ -81,7 +81,7 @@ class ProductsController extends Controller
       $url = $this->url.Arr::query($rr);
       $response = Http::acceptJson()->get($url);
 
-      $data = $response->collect()->all()['data'];
+      $data = $response->json()['data'];
 
       $data = $this->arregloProduct($data);
 
@@ -96,10 +96,6 @@ class ProductsController extends Controller
       }
 
       return response()->json($data);
-    }
-
-    public function getModelos($product_id){
-
     }
 
     private function generateModels($product)
@@ -135,33 +131,41 @@ class ProductsController extends Controller
 
     public function arregloProduct($data)
     {
-      $arregloImages = function($images){
-        return $this->urlImage.$images['lg'];
-      };
 
-    	$arreglo = function($product) use ($arregloImages)
-      {
-        $store = Store::LOCAL_CD($product['store'])->first();
+      $productos = collect($data);
 
-        // dd($product);
+      $idsProductos = $productos->pluck('id');
+      $localCds     = $productos->pluck('store');
+      
+      $stores = Store::whereIn('LOCAL_CD', $localCds->all())->select('GROUP_CD','LOGO_FILE_NAME','LOCAL_NAME','LIMIT_PRICE','LOCAL_CD','GROUP_CD')->get();
+
+      $products_carro = $this->isProductCarro($idsProductos->all(), ['whereIn'=>true]);
+
+      $products_carro = $products_carro->pluck('MODELO_NUM')->countBy();
+
+      $productos = $productos->map( function($product) use ($stores, $products_carro) {
+
+        $arregloImages = function($images){
+          return $this->urlImage.$images['lg'];
+        };
+
+        $store = $stores->where('LOCAL_CD',$product['store'])->first(); 
+
         return [
           "id"          => $product['id'],
-          "moda_id"     => $product['moda_id'],
-          "store"       => $product['store'],
-          "company"     => $product['company'],
-          "code"        => $product['code'],
+          "local_cd"    => $product['store'],
+          "company"     => $store['GROUP_CD'],
           "name"        => $product['name'],
           "category"    => isset($product['category']) ? $product['category']:null,
           "category_id" => $product['category_id'],
-          "price"       => isset($product['price']) ? $product['price'] : null,
+          "price"       => isset($product['price']) ? $product['price']:'',
           "prev_price"  => isset($product['prev_price']) ? $product['prev_price']:null,
           "images"      => array_map($arregloImages, $product['images']),
           "sizes"       => $product['sizes'],
           "colors"      => isset($product['colors']) ? $product['colors']: null,
-          "models"      => $this->generateModels($product),
-          "discount"    => $product['discount'],
+          "is_desc"     => $product['discount'],
+          "isCart"      => Arr::exists($products_carro->all(), $product['id']),
           "has_stock"   => $product['has_stock'],
-          "isCart"      => $this->isProductCarro($product['id']),
           "store" => [
             'logo' => env('URL_IMAGE').'/common/img/logo/'.$store['LOGO_FILE_NAME'],
             'name' => $store['LOCAL_NAME'],
@@ -170,9 +174,9 @@ class ProductsController extends Controller
             "company"     => $store['GROUP_CD'],
           ]
         ];
-      };
+      });
 
-      return array_map($arreglo, $data);
+      return $productos->all();
     }
 
     public function isProductCarro($product_id, $config = [])
@@ -194,6 +198,7 @@ class ProductsController extends Controller
       $response = Http::acceptJson()->get($url);
 
       $data = $response->collect()->all();
+
 
       $productos = collect($data['modelos']);
 
@@ -231,7 +236,7 @@ class ProductsController extends Controller
 
         return [
           "id"          => $product['num'],
-          "store"       => $product['local_cd'],
+          "local_cd"       => $product['local_cd'],
           "company"     => $store['GROUP_CD'],
           "name"        => $product['descripcion'],
           "category"    => isset($product['category_name']) ? $product['category_name']:null,
