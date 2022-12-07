@@ -50,9 +50,10 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
     
 
 
-    $router->get('product/{product}','ProductsController@getProduct');
+    $router->get('product/{product_id}','ProductsController@oneProduct');
     $router->get('products','ProductsController@getProducts');
     $router->get('product_favorite','ProductsController@product_favorite');
+    // $router->get('product/{product_id}', 'ProductsController@getModelos');
 
     $router->get('categories','CategoriesController@getCategories');
 
