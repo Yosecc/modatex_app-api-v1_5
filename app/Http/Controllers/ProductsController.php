@@ -157,7 +157,7 @@ class ProductsController extends Controller
           "models"      => $this->generateModels($product),
           "discount"    => $product['discount'],
           "has_stock"   => $product['has_stock'],
-          "isCart"      => $this->isProduct($product['id']),
+          "isCart"      => $this->isProductCarro($product['id']),
           "store_data" => [
             'logo' => env('URL_IMAGE').'/common/img/logo/'.$store['LOGO_FILE_NAME'],
             'name' => $store['LOCAL_NAME'],
@@ -171,30 +171,45 @@ class ProductsController extends Controller
       return array_map($arreglo, $data);
     }
 
-    public function isProduct($product_id)
+    public function isProductCarro($product_id, $config = [])
     {
+
+      $cart = Cart::where('CLIENT_NUM',Auth::user()->num);
+
+      if(isset($config['whereIn']) && $config['whereIn']){
+        return Cart::select('MODELO_NUM')->where('CLIENT_NUM',Auth::user()->num)->whereIn('MODELO_NUM', $product_id)->where('STAT_CD',1000)->get();
+      }
+
       return Cart::where('CLIENT_NUM',Auth::user()->num)->where('MODELO_NUM', $product_id)->where('STAT_CD',1000)->count();
     }
 
     public function getSearch(Request $request)
     {
+
+      // dd('ajd');
       $url = $this->urlSearch.Arr::query($request->all());
       $response = Http::acceptJson()->get($url);
 
       $data = $response->collect()->all();
 
-      $arregloImages = function($images){
-        return Arr::flatten($images)[0];
-      };
+      // dd($data);
 
-      $i = 0;
-      $arreglo = function($product) use ($arregloImages, $i)
-      {
-        // dd(Arr::crossJoin($product['colores'],$product['colores_reference']));
-        if($i == 1){
-          // dd($product);
-        }
-        
+      $productos = collect($data['modelos']);
+
+      $idsProductos = $productos->pluck('num');
+      $localCds     = $productos->pluck('local_cd');
+
+      $stores = Store::whereIn('LOCAL_CD', $localCds->all())->select('GROUP_CD','LOGO_FILE_NAME','LOCAL_NAME','LIMIT_PRICE','LOCAL_CD','GROUP_CD')->get();
+
+      $talles = $productos->pluck('talles','num');
+
+      $products_carro = $this->isProductCarro($idsProductos->all(), ['whereIn'=>true]);
+
+      $products_carro = $products_carro->pluck('MODELO_NUM')->countBy();
+
+      // dd($detalles);
+
+      $arr = $productos->map(function ($product, $key) use ($stores, $products_carro) {
         $colores = [];
         foreach ($product['colores_reference'] as $key => $value) {
           $colores[] = [
@@ -205,19 +220,20 @@ class ProductsController extends Controller
           ];
         }
 
-        $store = Store::LOCAL_CD($product['local_cd'])->first();
-        
+        $store = $stores->where('LOCAL_CD',$product['local_cd'])->first(); 
+
         $product['id'] = $product['num'];
         $product['sizes'] = $product['talles'];
         $product['price'] = isset($product['price_curr']) ? $product['price_curr']:$product['precio'];
 
-        
+        $arregloImages = function($images){
+          return Arr::flatten($images)[0];
+        };
+
         return [
           "id"          => $product['num'],
-          // "moda_id"     => $product['local_cd'],
           "store"       => $product['local_cd'],
           "company"     => $store['GROUP_CD'],
-          // "code"        => $product['code'],
           "name"        => $product['descripcion'],
           "category"    => isset($product['category_name']) ? $product['category_name']:null,
           "category_id" => $product['category'],
@@ -227,11 +243,10 @@ class ProductsController extends Controller
           "sizes"       => $product['talles'],
           "colors"      => $colores,
           "is_desc"     => $product['is_desc'],
-          "models"      => $this->generateModels($product),
-          "isCart"      => $this->isProduct($product['num']),
-          // "disc/ount"    => $product['discount'],
+          // "models"      => $this->generateModels($product),
+          "isCart"      => Arr::exists($products_carro->all(), $product['num']),
           "has_stock"   => $product['con_stock'] == "" ? true:$product['con_stock'],
-          "store_data" => [
+          "store" => [
             'logo' => env('URL_IMAGE').'/common/img/logo/'.$store['LOGO_FILE_NAME'],
             'name' => $store['LOCAL_NAME'],
             'min'  => $store['LIMIT_PRICE'],
@@ -239,12 +254,54 @@ class ProductsController extends Controller
             "company"     => $store['GROUP_CD'],
           ]
         ];
-      };
+      });
 
-      $data = array_map($arreglo, $data['modelos']);
+      
 
-              return response()->json($data);
+      // $arreglo = function($product) use ($arregloImages, $i)
+      // {
+       
+        
+      //   $product['id'] = $product['num'];
+      //   $product['sizes'] = $product['talles'];
+      //   $product['price'] = isset($product['price_curr']) ? $product['price_curr']:$product['precio'];
+
+      //   dd($product);
+      //   return [
+      //     "id"          => $product['num'],
+      //     // "moda_id"     => $product['local_cd'],
+      //     "store"       => $product['local_cd'],
+      //     "company"     => $store['GROUP_CD'],
+      //     // "code"        => $product['code'],
+      //     "name"        => $product['descripcion'],
+      //     "category"    => isset($product['category_name']) ? $product['category_name']:null,
+      //     "category_id" => $product['category'],
+      //     "price"       => isset($product['price_curr']) ? $product['price_curr']:$product['precio'],
+      //     "prev_price"  => isset($product['price_prev']) ? $product['price_prev']:null,
+      //     "images"      => array_map($arregloImages, $product['images']),
+      //     "sizes"       => $product['talles'],
+      //     "colors"      => $colores,
+      //     "is_desc"     => $product['is_desc'],
+      //     "models"      => $this->generateModels($product),
+      //     "isCart"      => $this->isProductCarro($product['num']),
+      //     // "disc/ount"    => $product['discount'],
+      //     "has_stock"   => $product['con_stock'] == "" ? true:$product['con_stock'],
+      //     "store_data" => [
+      //       'logo' => env('URL_IMAGE').'/common/img/logo/'.$store['LOGO_FILE_NAME'],
+      //       'name' => $store['LOCAL_NAME'],
+      //       'min'  => $store['LIMIT_PRICE'],
+      //       "id"   => $store['LOCAL_CD'],
+      //       "company"     => $store['GROUP_CD'],
+      //     ]
+      //   ];
+      // };
+
+      // $data = array_map($arreglo, $data['modelos']);
+
+              return response()->json($arr->all());
     }
+
+
 
     public function oneProduct($product_id)
     {
