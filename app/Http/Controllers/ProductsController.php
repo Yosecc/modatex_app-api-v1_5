@@ -351,7 +351,7 @@ class ProductsController extends Controller
       for ($i=0; $i < count($urls) ; $i++) {
         $data = $consultas[$i]->collect()->all();
         if(count($consultas[$i]->collect()->all())){
-          $products[] = $this->arregloProduct($consultas[$i]->collect()->all())[0];
+          $products[] = $this->arregloProduct($consultas[$i]->collect()->all(),['isModels'=> true])[0];
         }
       }
       return collect($products)->all();
