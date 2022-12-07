@@ -129,9 +129,8 @@ class ProductsController extends Controller
       return $models;
     }
 
-    public function arregloProduct($data)
+    public function arregloProduct($data, $config = ['isModels' => false])
     {
-
       $productos = collect($data);
 
       $idsProductos = $productos->pluck('id');
@@ -143,13 +142,21 @@ class ProductsController extends Controller
 
       $products_carro = $products_carro->pluck('MODELO_NUM')->countBy();
 
-      $productos = $productos->map( function($product) use ($stores, $products_carro) {
+      $productos = $productos->map( function($product) use ($stores, $products_carro, $config) {
+
 
         $arregloImages = function($images){
           return $this->urlImage.$images['lg'];
         };
 
         $store = $stores->where('LOCAL_CD',$product['store'])->first(); 
+        $models = null;
+
+        
+        if(isset($config['isModels']) && $config['isModels']){
+          $models = $this->generateModels($product);
+        }
+
 
         return [
           "id"          => $product['id'],
@@ -166,6 +173,7 @@ class ProductsController extends Controller
           "is_desc"     => $product['discount'],
           "isCart"      => Arr::exists($products_carro->all(), $product['id']),
           "has_stock"   => $product['has_stock'],
+          "models"      => $models,
           "store" => [
             'logo' => env('URL_IMAGE').'/common/img/logo/'.$store['LOGO_FILE_NAME'],
             'name' => $store['LOCAL_NAME'],
@@ -315,7 +323,7 @@ class ProductsController extends Controller
       $response = Http::acceptJson()->get($url);
       $data = $response->collect()->all();
       // dd($data);
-      $data = $this->arregloProduct($data);
+      $data = $this->arregloProduct($data,['isModels' => true]);
       return $data;
     }
 
