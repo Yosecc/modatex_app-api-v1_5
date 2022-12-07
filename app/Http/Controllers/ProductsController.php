@@ -98,7 +98,11 @@ class ProductsController extends Controller
       return response()->json($data);
     }
 
-    public function generateModels($product)
+    public function getModelos($product_id){
+
+    }
+
+    private function generateModels($product)
     {
 
       if(!isset($product['price'])){
@@ -158,7 +162,7 @@ class ProductsController extends Controller
           "discount"    => $product['discount'],
           "has_stock"   => $product['has_stock'],
           "isCart"      => $this->isProductCarro($product['id']),
-          "store_data" => [
+          "store" => [
             'logo' => env('URL_IMAGE').'/common/img/logo/'.$store['LOGO_FILE_NAME'],
             'name' => $store['LOCAL_NAME'],
             'min'  => $store['LIMIT_PRICE'],
@@ -186,13 +190,10 @@ class ProductsController extends Controller
     public function getSearch(Request $request)
     {
 
-      // dd('ajd');
       $url = $this->urlSearch.Arr::query($request->all());
       $response = Http::acceptJson()->get($url);
 
       $data = $response->collect()->all();
-
-      // dd($data);
 
       $productos = collect($data['modelos']);
 
@@ -206,8 +207,6 @@ class ProductsController extends Controller
       $products_carro = $this->isProductCarro($idsProductos->all(), ['whereIn'=>true]);
 
       $products_carro = $products_carro->pluck('MODELO_NUM')->countBy();
-
-      // dd($detalles);
 
       $arr = $productos->map(function ($product, $key) use ($stores, $products_carro) {
         $colores = [];
@@ -307,7 +306,6 @@ class ProductsController extends Controller
     {
       $request = [];
       $request['product_id'] = $product_id;
-      // dd(Arr::query($request));
       $url = $this->url.Arr::query($request);
       $response = Http::acceptJson()->get($url);
       $data = $response->collect()->all();
