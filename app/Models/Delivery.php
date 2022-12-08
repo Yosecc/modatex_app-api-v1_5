@@ -8,7 +8,7 @@ class Delivery extends Model
 {
     protected $connection   = 'oracle';
 
-    public const TABLE_NAME = 'DELIVERY';
+    public const TABLE_NAME = 'T_SHOP_DELIVERY';
 
     protected $table        = self::TABLE_NAME;
 

@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Coupons extends Model
 {
     protected $connection   = 'oracle';
-    protected $table        = 'COUPON';
+    protected $table        = 'T_SHOP_COUPON';
 
     public $sequence        = 'S_SHOP_COUPON_NUM';
 

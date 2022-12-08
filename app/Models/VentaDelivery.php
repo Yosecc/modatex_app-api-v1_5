@@ -8,7 +8,7 @@ class VentaDelivery extends Model
 {
     protected $connection   = 'oracle';
 
-    public const TABLE_NAME = 'VENTA_DELIVERY';
+    public const TABLE_NAME = 'T_SHOP_VENTA_DELIVERY';
 
     protected $table        = self::TABLE_NAME;
 

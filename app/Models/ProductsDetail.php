@@ -8,7 +8,7 @@ class ProductsDetail extends Model
 {
     protected $table = 'MODELO_DETALE';
 
-    protected $with = ['Size','Color','Price'];
+    protected $with = ['Size','Color'];
 
     public function Active($query){
         $query->where('STAT_CD','1000');

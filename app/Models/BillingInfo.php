@@ -8,7 +8,7 @@ class BillingInfo extends Model
 {
     protected $connection   = 'oracle';
 
-    public const TABLE_NAME = 'VENTA_BILLING_INFO';
+    public const TABLE_NAME = 'T_SHOP_VENTA_BILLING_INFO';
 
     protected $table        = self::TABLE_NAME;
 

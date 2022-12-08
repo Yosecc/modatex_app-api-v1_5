@@ -8,7 +8,7 @@ class Client extends Model
 {
     protected $connection   = 'oracle';
 
-    public const TABLE_NAME = 'CLIENT';
+    public const TABLE_NAME = 'T_SHOP_CLIENT';
     protected $table        = self::TABLE_NAME;
 
     protected $primaryKey   = 'num';

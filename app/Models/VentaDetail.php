@@ -8,7 +8,7 @@ class VentaDetail extends Model
 {
     protected $connection   = 'oracle';
 
-    public const TABLE_NAME = 'VENTA_DETAIL';
+    public const TABLE_NAME = 'T_SHOP_VENTA_DETAIL';
 
     protected $table        = self::TABLE_NAME;
 
