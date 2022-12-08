@@ -3,17 +3,18 @@
 namespace App\Http\Controllers;
 
 use App\Http\Traits\ProductsTraits;
+use App\Models\Cart;
 use App\Models\Code;
+use App\Models\Prices;
 use App\Models\ProductFavorite;
 use App\Models\Products;
 use App\Models\ProductsDetail;
 use App\Models\Store;
-use App\Models\Cart;
 use Auth;
+use Illuminate\Http\Client\Pool;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Http\Client\Pool;
 use Illuminate\Support\Str;
 class ProductsController extends Controller
 {
@@ -105,23 +106,39 @@ class ProductsController extends Controller
         return [];
       }
 
-      $models = Code::select('CODE_NAME as size','NUM as size_id')
+      // Prices::limit(5)->get()
+
+      $models = Code::
+                select('CODE_NAME as size','NUM as size_id')
                 ->where('STAT_CD',1000)
                 ->whereIn('CODE_NAME',$product['sizes'])->get();
 
-      $detalle = ProductsDetail::select('NUM as id','PARENT_NUM as product_id','SIZE_NUM as size_id','COLOR_NUM as color_id','QUANTITY as quantity')
+                // dd($models);
+
+      $detalle = ProductsDetail::
+      select('NUM as id','PARENT_NUM as product_id','SIZE_NUM as size_id','COLOR_NUM as color_id','QUANTITY as quantity','MODA_NUM')
                               ->where('PARENT_NUM',$product['id'])
                               ->where('STAT_CD',1000)
                               ->get();
+                              
 
       $detalle = collect($detalle)->all();
 
       foreach ($models as $key => $code) {
-
+        // dd($code);
         $filtered = Arr::where($detalle, function ($value, $key) use ($code) {
           return $value['size_id'] == $code['size_id'];
         });
+
         [$keys, $values] = Arr::divide(collect($filtered)->all());
+
+        // dd($values);
+
+        foreach ($values as $key => $val) {
+          $price = Prices::select('venta_precio','PARENT_NUM')->where('STAT_CD',1000)->where('PARENT_NUM', $val['MODA_NUM'])->first();
+          $val['price'] = $price->venta_precio;
+        }
+
         $code['price'] = isset($product['price']) ? $product['price'] : $product['id'];
         $code['properties'] = $values;
       }
@@ -133,6 +150,8 @@ class ProductsController extends Controller
     {
       $productos = collect($data);
 
+
+      // dd(Prices::limit(5)->get());
       $idsProductos = $productos->pluck('id');
       $localCds     = $productos->pluck('store');
       
@@ -322,7 +341,7 @@ class ProductsController extends Controller
       $url = $this->url.Arr::query($request);
       $response = Http::acceptJson()->get($url);
       $data = $response->collect()->all();
-      // dd($data);
+      
       $data = $this->arregloProduct($data,['isModels' => true]);
       return $data;
     }
