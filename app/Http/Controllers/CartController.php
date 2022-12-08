@@ -229,7 +229,6 @@ class CartController extends Controller
         $combinaciones = [];
 
         foreach ($carts as $key => $cart) {
-
           if($cart['MODELO_NUM'] == $product['id']){
             if(count($product['models'])){
               $filteredSize = Arr::where(collect($product['models'])->all(), function ($value, $key) use ($cart) {
