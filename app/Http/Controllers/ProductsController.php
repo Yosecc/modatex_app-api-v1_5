@@ -165,7 +165,7 @@ class ProductsController extends Controller
           "name"        => $product['name'],
           "category"    => isset($product['category']) ? $product['category']:null,
           "category_id" => $product['category_id'],
-          "price"       => isset($product['price']) ? $product['price']:'',
+          "price"       => isset($product['price']) ? $product['price']:null,
           "prev_price"  => isset($product['prev_price']) ? $product['prev_price']:null,
           "images"      => array_map($arregloImages, $product['images']),
           "sizes"       => $product['sizes'],
