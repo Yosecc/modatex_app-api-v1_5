@@ -106,8 +106,6 @@ class ProductsController extends Controller
         return [];
       }
 
-      // Prices::limit(5)->get()
-
       $models = Code::
                 select('CODE_NAME as size','NUM as size_id')
                 ->where('STAT_CD',1000)

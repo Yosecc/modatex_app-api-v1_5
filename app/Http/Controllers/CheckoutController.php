@@ -464,6 +464,11 @@ class CheckoutController extends Controller
             ->post($this->generateUrl(['controller' => 'Checkout','method' => 'summary']), 
                 $request->all());
 
+            // dd($response->json());
+
+             if($response->json()['status'] == 'error'){
+                throw new \Exception($response->json()['message']);
+            }
 
             if($response->json()['status'] != 'success'){
                 throw new \Exception("No se encontraron resultados");
