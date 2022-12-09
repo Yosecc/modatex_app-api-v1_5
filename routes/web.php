@@ -78,6 +78,8 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
         $router->post('delete_carts','CartController@deleteCarts');
     });
 
+    $router->get('getCategorieSearch/{categorie_id}','HomeController@getCategorieSearch');
+
     //ROSA
     $router->group(['prefix' => 'rosa'], function () use ($router) {
         $router->get('stores','StoresController@getStoresRosa');

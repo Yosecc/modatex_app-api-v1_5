@@ -15,6 +15,8 @@ use App\Models\TipoModeloUno as Category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Http\Client\Pool;
 
 class HomeController extends Controller
 {
@@ -103,37 +105,37 @@ class HomeController extends Controller
     $slider = array_map($funcion, $slider);
     return response()->json($slider,200);
   } 
- public  function proper_parse_str($str) {
-  # result array
-  $arr = array();
+  public  function proper_parse_str($str) {
+    # result array
+    $arr = array();
 
-  # split on outer delimiter
-  $pairs = explode('&', $str);
+    # split on outer delimiter
+    $pairs = explode('&', $str);
 
-  # loop through each pair
-  foreach ($pairs as $i) {
-    # split into name and value
-    list($name,$value) = explode('=', $i, 2);
+    # loop through each pair
+    foreach ($pairs as $i) {
+      # split into name and value
+      list($name,$value) = explode('=', $i, 2);
 
-    # if name already exists
-    if( isset($arr[$name]) ) {
-      # stick multiple values into an array
-      if( is_array($arr[$name]) ) {
-        $arr[$name][] = $value;
+      # if name already exists
+      if( isset($arr[$name]) ) {
+        # stick multiple values into an array
+        if( is_array($arr[$name]) ) {
+          $arr[$name][] = $value;
+        }
+        else {
+          $arr[$name] = array($arr[$name], $value);
+        }
       }
+      # otherwise, simply stick it in a scalar
       else {
-        $arr[$name] = array($arr[$name], $value);
+        $arr[$name] = $value;
       }
     }
-    # otherwise, simply stick it in a scalar
-    else {
-      $arr[$name] = $value;
-    }
-  }
 
-  # return result array
-  return $arr;
-}
+    # return result array
+    return $arr;
+  }
 
   public function get_product_category(Request $request, $category_id){
 
@@ -149,5 +151,79 @@ class HomeController extends Controller
     $p = new ProductsController();
     $productos = $p->whereInProducts($products_id, ['isModels'=> false]);
     return response()->json($productos);
+  }
+
+  public function getCategorieSearch($categorie_id)
+  {
+
+    $categories = [ 1 => 'woman', 3 => 'man', 6 => 'xl', 4 => 'kids', 2 => 'accessories'];
+    $prefix = 'cache';
+    $categorieName = $categories[$categorie_id];
+    $paquetes = ['premium','black','platinum','gold','blue'];
+
+    $rutas = [];
+    foreach ($paquetes as $key => $paquete) {
+      $rutas[] = 'https://www.modatex.com.ar/modatexrosa3/json/'.$prefix.'_'.$categorieName.'_'.$paquete.'.json';
+    }
+
+    $collection = collect($rutas);
+    
+    $consultas = Http::pool(fn (Pool $pool) => 
+      $collection->map(fn ($url) => 
+           $pool->accept('application/json')->get($url)
+      )
+    );
+
+    $stores = [];
+    foreach ($paquetes as $key => $value) {
+      if(count($consultas[$key]->json()['stores'])){
+        foreach ($consultas[$key]->json()['stores'] as $key => $store) {
+          $stores[] = $store;
+        }
+      }
+    }
+
+    $stores = collect($stores);
+
+    $storesIds = $stores->pluck('local_cd');
+
+    $rutas = [];
+    foreach ($storesIds as $key => $id) {
+      $rutas[] = 'https://www.modatex.com.ar/modatexrosa3/?c=Products::get&categorie='.$categorieName.'&start=0&length=3&store='.$id.'&years=1&sections=&categories=&search=&order=manually';
+    }
+
+    $rutas = collect($rutas);
+
+    $response = Http::pool(fn (Pool $pool) => 
+      $rutas->map(fn ($url) => 
+        $pool->accept('application/json')->get($url)
+      )
+    );
+
+    $products = [];
+    foreach ($rutas->all() as $key => $value) {
+      if(count($response[$key]->json()['data'])){
+
+        foreach ($response[$key]->json()['data'] as $p => $product) {
+          $products[] = $product;
+        }
+
+      }
+    }
+
+    $pro = new ProductsController();
+    $products = $pro->arregloProduct($products);
+
+    $stores = $stores->map(function($store){
+      return [
+        'local_cd' => $store['local_cd'],
+        'logo'     => 'https://netivooregon.s3.amazonaws.com/'.$store['profile']['logo'],
+        'min'      => $store['profile']['min'],
+        'name'     => $store['cover']['title'],
+      ];
+    });
+    
+    return response()->json(['stores' => $stores, 'products' => $products]);
+
   }
 }
