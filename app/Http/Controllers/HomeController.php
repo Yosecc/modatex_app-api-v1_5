@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\ProductsController;
 use App\Http\Traits\ClientTraits;
 use App\Http\Traits\ProductsTraits;
 use App\Http\Traits\StoreTraits;
 use App\Models\Cart;
+use App\Models\ProductVisits;
 use App\Models\Products;
 use App\Models\Slider;
 use App\Models\Store;
@@ -143,6 +145,9 @@ class HomeController extends Controller
 
   public function productsVisitados(Request $request)
   {
-     return $this->products_visits( $request->all() );
+    $products_id = Auth::user()->productsVisits()->limit(4)->orderBy('created_at','desc')->get()->pluck('NUM');
+    $p = new ProductsController();
+    $productos = $p->whereInProducts($products_id, ['isModels'=> false]);
+    return response()->json($productos);
   }
 }
