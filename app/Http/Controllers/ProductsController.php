@@ -344,7 +344,7 @@ class ProductsController extends Controller
       return $data;
     }
 
-    public function whereInProducts($products_ids)
+    public function whereInProducts($products_ids, $config = ['isModels'=> true])
     {
       if(count($products_ids) == 0){
 
@@ -368,7 +368,7 @@ class ProductsController extends Controller
       for ($i=0; $i < count($urls) ; $i++) {
         $data = $consultas[$i]->collect()->all();
         if(count($consultas[$i]->collect()->all())){
-          $products[] = $this->arregloProduct($consultas[$i]->collect()->all(),['isModels'=> true])[0];
+          $products[] = $this->arregloProduct($consultas[$i]->collect()->all(),$config)[0];
         }
       }
       return collect($products)->all();
