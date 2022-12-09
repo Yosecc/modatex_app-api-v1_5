@@ -145,7 +145,7 @@ class HomeController extends Controller
 
   public function productsVisitados(Request $request)
   {
-    $products_id = Auth::user()->productsVisits()->limit(4)->orderBy('created_at','desc')->get()->pluck('NUM');
+    $products_id = Auth::user()->productsVisits()->limit(10)->orderBy('created_at','desc')->get()->pluck('NUM');
     $p = new ProductsController();
     $productos = $p->whereInProducts($products_id, ['isModels'=> false]);
     return response()->json($productos);
