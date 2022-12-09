@@ -224,7 +224,6 @@ class ProductsController extends Controller
 
       $data = $response->collect()->all();
 
-
       $productos = collect($data['modelos']);
 
       $idsProductos = $productos->pluck('num');
