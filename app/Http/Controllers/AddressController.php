@@ -144,7 +144,7 @@ class AddressController extends Controller
 
             $data = $response->json()['data'];
 
-            array_unshift($data,['id'=> 0, 'name'=>'Otro que no aparece en la lista']);
+            array_unshift($data,['id'=> '__other__', 'name'=>'Otro que no aparece en la lista']);
 
             return $data;
 
