@@ -203,11 +203,9 @@ class HomeController extends Controller
     $products = [];
     foreach ($rutas->all() as $key => $value) {
       if(count($response[$key]->json()['data'])){
-
         foreach ($response[$key]->json()['data'] as $p => $product) {
           $products[] = $product;
         }
-
       }
     }
 
