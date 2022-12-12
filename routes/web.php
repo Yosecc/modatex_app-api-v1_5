@@ -23,7 +23,7 @@ $router->group(['prefix' => 'auth'], function () use ($router) {
     $router->post('code_validation','AuthController@code_validation');
     $router->get('resend_code/{email}','AuthController@resend_code');
     $router->post('recover_password','AuthController@recover_password');
-    
+    $router->post('LoginSocial','AuthController@LoginSocial');
     
 });
 

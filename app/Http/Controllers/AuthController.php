@@ -97,6 +97,42 @@ class AuthController extends Controller
         return response()->json(['message'=>'Unauthorized'],401);
     }
 
+    public function LoginSocial(Request $request)
+    {
+        $this->validate($request, [
+            'id' => 'required',
+            'email'    => 'required|email',
+            'social_method'    => 'required',
+            // 'verified_email'    => 'required',
+        ]);
+
+        $client = Client::select($this->campos)->where('client_id',$request->email)->first();
+
+        if($client){ //LOGUEAR
+            return response()->json(['status'=>true,'client'=> $client],200);
+        }else{ //CREAR
+            $dataRegistro = ['email' => $request->email ];
+            if($request->social_method == 'Google'){
+                $dataRegistro['first_name'] = $request->given_name;
+                $dataRegistro['last_name'] = $request->family_name;
+            }
+            $dataRegistro['password'] = $request->id;
+            $dataRegistro['phone'] = '3468852';
+            $dataRegistro['cod_area'] = '247';
+
+            $register = $this->ApiRosa($dataRegistro, 'newuser', false);
+
+            if(json_decode($register)->status == 200){
+              $client = Client::where('client_id',$request->email)->first();
+              return response()->json(['status'=>true, 'message'=>'Registro realizado.','client'=>$client]);
+            }
+
+            return response()->json(['message'=>'Error'],422);
+        }
+
+
+
+    }
 
     private function ApiRosa($payload, $action, $isdecode = true)
     {
