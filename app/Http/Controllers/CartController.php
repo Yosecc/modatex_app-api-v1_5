@@ -396,7 +396,7 @@ class CartController extends Controller
       $datos['cupon'] = null;
 
       $cupones = new CouponsController();
-      $datos['cupon'] = [$cupones->getCupones($request->local_cd)];
+      $datos['cupon'] =  $cupones->getCupones($request->local_cd) ? [$cupones->getCupones($request->local_cd)]: null ;
 
 
 

@@ -55,18 +55,19 @@ class CouponsController extends Controller
           return explode('|', trim(preg_replace('/\s+/', '',  $tiendas), '|'));
         });
 
-        $cupon = [];
+        $cuponn = [];
 
         foreach ($cuponesTiendas->all() as $ct => $cupon) {
           foreach ($cupon as $t => $tienda) {
             if($tienda == $local_cd){
-              $cupon = $cupones->where('num',$ct)->first();
+              $cuponn = $cupones->where('num',$ct)->first();
             }
           }
         }
 
+        // dd($cuponesTiendas);
         
-        return $cupon;
+        return count($cuponn) ? $cuponn : null;
     }
 
     public function storeCupon($cupon)
