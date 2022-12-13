@@ -65,9 +65,15 @@ class CouponsController extends Controller
           }
         }
 
-        // dd($cuponesTiendas);
+        if(gettype($cuponn) == 'array'){
+          return count($cuponn) ? $cuponn : null;
+
+        }elseif(gettype($cuponn) == 'object'){
+          return $cuponn;
+        }
+
+        return null;
         
-        return count($cuponn) ? $cuponn : null;
     }
 
     public function storeCupon($cupon)
