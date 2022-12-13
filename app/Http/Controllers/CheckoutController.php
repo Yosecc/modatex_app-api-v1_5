@@ -134,8 +134,8 @@ class CheckoutController extends Controller
 
                 $precios = [
                     [
-                        'value' => isset($envio['extra_charges']) ?? $envio['extra_charges']['cost']:0,
-                        'concepto' =>  isset($envio['extra_charges']) ?? $envio['extra_charges']['descrip']:''
+                        'value' => isset($envio['extra_charges']) ? $envio['extra_charges']['cost']:0,
+                        'concepto' =>  isset($envio['extra_charges']) ? $envio['extra_charges']['descrip']:''
                     ]
                 ];
 
