@@ -133,12 +133,15 @@ class CheckoutController extends Controller
 
                 $data['isFree'] = $envio['is_free'];
 
-                $precios = [
-                    [
-                        'value' => isset($envio['extra_charges']) ? $envio['extra_charges']['cost']:0,
-                        'concepto' =>  isset($envio['extra_charges']) ? $envio['extra_charges']['descrip']:''
-                    ]
-                ];
+                $precios = [];
+                if(isset($envio['extra_charges']) ){
+
+                    $precios[] =
+                        [
+                            'value' => $envio['extra_charges']['cost'],
+                            'concepto' => $envio['extra_charges']['descrip']
+                        ];
+                }
 
                 if(isset($envio['curr'])){
                     $precios[] = [
