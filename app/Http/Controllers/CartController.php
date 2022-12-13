@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 // use App\Http\Middleware\Auth;
+use App\Http\Controllers\CouponsController;
 use App\Http\Controllers\ProductsController;
 use App\Models\Cart;
 use App\Models\Products;
@@ -11,8 +12,8 @@ use Auth;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Str;
 
 
 class CartController extends Controller
@@ -390,6 +391,14 @@ class CartController extends Controller
       ->post($this->url.'?c=User::is_missing_data');
 
       $datos['is_missing_data'] = $response->json();
+
+
+      $datos['cupon'] = null;
+
+      $cupones = new CouponsController();
+      $datos['cupon'] = $cupones->getCupones($request->local_cd);
+
+      
 
       return response()->json($datos);
 

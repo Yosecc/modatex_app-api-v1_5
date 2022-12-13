@@ -35,6 +35,39 @@ class CouponsController extends Controller
         return response()->json($cupones);
     }
 
+    public function getCupones($local_cd)
+    {
+        $cupones = Coupons::where(function($query) {
+          $query->where('CLIENT_NUM',Auth::user()->num)
+                ->whereIn('STAT_CD',[1000,2000]);
+        })
+        // ->where('COUPON_STR' != 'PROMOEMOTV916')
+        ->orderBy('REGISTER_DATE','desc')
+        ->get();
+
+        if(!$cupones){
+          return null;
+        }
+
+        $cuponesTiendas = $cupones->pluck('local_cd_valid','num');
+
+        $cuponesTiendas = $cuponesTiendas->map(function($tiendas){
+          return explode('|', trim(preg_replace('/\s+/', '',  $tiendas), '|'));
+        });
+
+        $cupon = null;
+
+        foreach ($cuponesTiendas->all() as $ct => $cupon) {
+          foreach ($cupon as $t => $tienda) {
+            if($tienda == $local_cd){
+              $cupon = $cupones->where('num',$ct)->first();
+            }
+          }
+        }
+
+        return collect($cupon)->all();
+    }
+
     public function storeCupon($cupon)
     {
 

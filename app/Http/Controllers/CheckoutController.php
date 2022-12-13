@@ -126,6 +126,7 @@ class CheckoutController extends Controller
             $envios = $this->envios;
             $datos = [];
 
+            
             foreach ($response->json()['data'] as $key => $envio) {
                 $indice = array_search($envio['method'], array_column($envios, 'method'));
                 $data = $envios[$indice];
