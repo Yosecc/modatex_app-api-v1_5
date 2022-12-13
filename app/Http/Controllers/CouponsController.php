@@ -115,46 +115,37 @@ class CouponsController extends Controller
     {
       $hoy = Carbon::now();
       $descuentos = ExclusiveDiscount::
-                    select('code','type', 'price', 'local_cd','positioning','total_quantity','expire_date','expire_days')
+                    select('code','type', 'price', 'local_cd','positioning','total_quantity','expire_date','expire_days', 'begin_date','category')
                     ->where(function($query) use ($hoy) {
                       $query->whereDate('begin_date', '>=', $hoy)->whereDate('end_date', '<=', $hoy);
                     })
-                    // limit(1)
+                    
                     ->latest('begin_date')
                     ->get();
 
         $grouped = $descuentos->groupBy('category');
 
-        // $principioMes = Carbon::create($hoy->year, $hoy->month, 1);
-        // $finalMes = Carbon::create($hoy->year, $hoy->month, $hoy->daysInMonth);
-       
+        $storesIds = $descuentos->pluck('local_cd')->reject(function($id){ 
+         return $id == '';
+        });
 
-        // $descuentos = ExclusiveDiscount::
-        //             where('category','like' ,'descexcl%')
-        //             // ->whereIn('local_cd',[2126])
-        //             ->where(function($query) use ($hoy, $principioMes, $finalMes) {
-        //               $query->whereDate('expire_date', '>=', $principioMes)->whereDate('expire_date', '<=', $finalMes);
-        //             })
-        //             ->latest('expire_date')
-        //             ->get()->dd();
+        $stores = Store::whereIn('LOCAL_CD', $storesIds->all())->select('GROUP_CD','LOGO_FILE_NAME','LOCAL_NAME','LIMIT_PRICE','LOCAL_CD','GROUP_CD')->get();
+
+        $grouped['descexcl']->map(function($cupon) use ($stores){
+          $store = $stores->where('LOCAL_CD',$cupon['local_cd'])->first();
+          $cupon['store'] = [
+            'logo' => env('URL_IMAGE').'/common/img/logo/'.$store['LOGO_FILE_NAME'],
+            'name' => $store['LOCAL_NAME'],
+            'min'  => $store['LIMIT_PRICE'],
+            "id"   => $store['LOCAL_CD'],
+            "company"     => $store['GROUP_CD'],
+          ]; 
+          return $cupon;
+        });
+
         $datos = [];
         $datos[] = ['name'=> 'Descuentos Exclusivos', 'data' => $grouped['descexcl'] ];
 
       return response()->json($datos);
     }
 }
-
-
- // "id" => 4569
- //      "code" => "PACCA80015DIC"
- //      "type" => "DESCEXCL17112022_PACCA80015DIC"
- //      "category" => "descexcl"
- //      "price" => 800.0
- //      "total_quantity" => null
- //      "begin_date" => "2022-11-17"
- //      "end_date" => "2022-12-15"
- //      "expire_date" => "2022-12-15"
- //      "expire_days" => null
- //      "local_cd" => "2126"
- //      "positioning" => ""
- //      "entry" => "2022-11-17 16:11:37"
