@@ -60,7 +60,7 @@ class CouponsController extends Controller
         foreach ($cuponesTiendas->all() as $ct => $cupon) {
           foreach ($cupon as $t => $tienda) {
             if($tienda == $local_cd){
-              $cupon = $cupones->where('num',$ct)->first();
+              $cupon = $cupones->where('num',$ct);
             }
           }
         }
