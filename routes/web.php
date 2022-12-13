@@ -126,7 +126,10 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
         $router->post('selectMethodPayment','CheckoutController@selectMethodPayment');
         $router->post('getResumen','CheckoutController@getResumen');
         $router->post('confirmarCompra','CheckoutController@confirmarCompra');
+        $router->post('couponUnselectAll','CheckoutController@couponUnselectAll');
+        $router->post('couponSelect','CheckoutController@couponSelect');
             
+
     });
 });
 

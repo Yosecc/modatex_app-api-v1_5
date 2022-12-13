@@ -508,7 +508,53 @@ class CheckoutController extends Controller
                 return response()->json(['message'=>$e->getMessage()],422);
         }
     }
-    
+
+    public function couponUnselectAll(Request $request)
+    {
+        try {
+            
+            $this->token = Auth::user()->api_token;
+             $response = Http::withHeaders([
+              'x-api-key' => $this->token,
+            ])
+            ->asForm()
+            ->post($this->generateUrl(['controller' => 'Coupons','method' => 'unselect_all']), 
+                $request->all());
+
+            if($response->json()['status'] != 'success'){
+                throw new \Exception("Error");
+            }
+
+            return response()->json($response->json());
+
+        } catch (\Exception $e) {
+            return response()->json(['message'=>$e->getMessage()],422);
+        }
+    }
+
+    public function couponSelect(Request $request)
+    {
+        try {
+            
+            $this->token = Auth::user()->api_token;
+             $response = Http::withHeaders([
+              'x-api-key' => $this->token,
+            ])
+            ->asForm()
+            ->post($this->generateUrl(['controller' => 'Coupons','method' => 'select']), 
+                $request->all());
+
+            if($response->json()['status'] != 'success'){
+                throw new \Exception("Error");
+            }
+
+            return response()->json($response->json());
+
+        } catch (\Exception $e) {
+            return response()->json(['message'=>$e->getMessage()],422);
+        }
+    }
+
     private function generateUrl($data)
     {
         return $this->url.$data['controller'].'::'.$data['method'];
