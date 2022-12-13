@@ -103,6 +103,8 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
         $router->group(['prefix' => 'coupons'], function () use ($router) {
             $router->get('/','CouponsController@index');
             $router->get('redeem_coupon','CouponsController@redeemCoupon');
+            $router->get('descuentosExclusivos','CouponsController@descuentosExclusivos');
+            
         });
 
         $router->group(['prefix' => 'client'], function () use ($router) {

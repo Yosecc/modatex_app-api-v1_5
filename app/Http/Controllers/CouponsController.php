@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Traits\StoreTraits;
 use App\Models\Coupons;
+use App\Models\ExclusiveDiscount;
 use App\Models\Store;
 use Auth;
 use Illuminate\Http\Request;
-use App\Http\Traits\StoreTraits;
 use Illuminate\Support\Facades\Http;
+use Carbon\Carbon;
 
 class CouponsController extends Controller
 {
@@ -108,4 +110,51 @@ class CouponsController extends Controller
 
       return $response->collect()->all();
     }
+
+    public function descuentosExclusivos(Request $request)
+    {
+      $hoy = Carbon::now();
+      $descuentos = ExclusiveDiscount::
+                    select('code','type', 'price', 'local_cd','positioning','total_quantity','expire_date','expire_days')
+                    ->where(function($query) use ($hoy) {
+                      $query->whereDate('begin_date', '>=', $hoy)->whereDate('end_date', '<=', $hoy);
+                    })
+                    // limit(1)
+                    ->latest('begin_date')
+                    ->get();
+
+        $grouped = $descuentos->groupBy('category');
+
+        // $principioMes = Carbon::create($hoy->year, $hoy->month, 1);
+        // $finalMes = Carbon::create($hoy->year, $hoy->month, $hoy->daysInMonth);
+       
+
+        // $descuentos = ExclusiveDiscount::
+        //             where('category','like' ,'descexcl%')
+        //             // ->whereIn('local_cd',[2126])
+        //             ->where(function($query) use ($hoy, $principioMes, $finalMes) {
+        //               $query->whereDate('expire_date', '>=', $principioMes)->whereDate('expire_date', '<=', $finalMes);
+        //             })
+        //             ->latest('expire_date')
+        //             ->get()->dd();
+        $datos = [];
+        $datos[] = ['name'=> 'Descuentos Exclusivos', 'data' => $grouped['descexcl'] ];
+
+      return response()->json($datos);
+    }
 }
+
+
+ // "id" => 4569
+ //      "code" => "PACCA80015DIC"
+ //      "type" => "DESCEXCL17112022_PACCA80015DIC"
+ //      "category" => "descexcl"
+ //      "price" => 800.0
+ //      "total_quantity" => null
+ //      "begin_date" => "2022-11-17"
+ //      "end_date" => "2022-12-15"
+ //      "expire_date" => "2022-12-15"
+ //      "expire_days" => null
+ //      "local_cd" => "2126"
+ //      "positioning" => ""
+ //      "entry" => "2022-11-17 16:11:37"
