@@ -129,9 +129,6 @@ class AuthController extends Controller
 
             return response()->json(['message'=>'Error'],422);
         }
-
-
-
     }
 
     private function ApiRosa($payload, $action, $isdecode = true)
