@@ -103,7 +103,7 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
         $router->group(['prefix' => 'coupons'], function () use ($router) {
             $router->get('/','CouponsController@index');
             $router->get('redeem_coupon','CouponsController@redeemCoupon');
-            $router->get('descuentosExclusivos','CouponsController@descuentosExclusivos');
+           
             
         });
 
@@ -112,7 +112,7 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
             $router->post('change_password','ClientController@change_password');
         });
     });
-
+ $router->get('descuentosExclusivos','CouponsController@descuentosExclusivos');
     $router->group(['prefix' => 'checkout'], function() use ($router){
         $router->post('getEnvios','CheckoutController@getEnvios');
         $router->post('editClient','CheckoutController@editClient');
