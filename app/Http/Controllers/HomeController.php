@@ -17,6 +17,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Http\Client\Pool;
+use Illuminate\Support\Facades\Cache;
 
 class HomeController extends Controller
 {
@@ -156,6 +157,10 @@ class HomeController extends Controller
   public function getCategorieSearch($categorie_id)
   {
 
+    if (Cache::has('categorie_'.$categorie_id)) {
+      return response()->json(Cache::get('categorie_'.$categorie_id));
+    }
+
     $categories = [ 1 => 'woman', 3 => 'man', 6 => 'xl', 4 => 'kids', 2 => 'accessories'];
     $prefix = 'cache';
     $categorieName = $categories[$categorie_id];
@@ -220,6 +225,8 @@ class HomeController extends Controller
         'name'     => $store['cover']['title'],
       ];
     });
+
+    Cache::put('categorie_'.$categorie_id, ['stores' => $stores, 'products' => $products] , $seconds = 10800);
     
     return response()->json(['stores' => $stores, 'products' => $products]);
 

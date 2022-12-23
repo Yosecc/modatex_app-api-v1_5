@@ -114,14 +114,19 @@ class CouponsController extends Controller
     public function descuentosExclusivos(Request $request)
     {
       $hoy = Carbon::now();
+      // dd($hoy);
       $descuentos = ExclusiveDiscount::
-                    select('code','type', 'price', 'local_cd','positioning','total_quantity','expire_date','expire_days', 'begin_date','category')
-                    ->where(function($query) use ($hoy) {
-                      $query->whereDate('begin_date', '>=', $hoy)->whereDate('end_date', '<=', $hoy);
-                    })
+                    // select('code','type', 'price', 'local_cd','positioning','total_quantity','expire_date','expire_days', 'begin_date','category')
+                    // where(function($query) use ($hoy) {
+                      // $query->whereDate('begin_date', '>=', $hoy);
+                      // ->whereDate('end_date', '<=', $hoy);
+                    // })
                     
-                    ->latest('begin_date')
-                    ->get();
+                    where('category','descexcl')
+                    ->orderBy('begin_date','desc')
+                    ->limit(10)
+                    // ->latest('begin_date')
+                    ->get()->dd();
 
         $grouped = $descuentos->groupBy('category');
 
@@ -130,7 +135,9 @@ class CouponsController extends Controller
         });
 
         $stores = Store::whereIn('LOCAL_CD', $storesIds->all())->select('GROUP_CD','LOGO_FILE_NAME','LOCAL_NAME','LIMIT_PRICE','LOCAL_CD','GROUP_CD')->get();
-
+        if(!isset($grouped['descexcl'])){
+          return null;
+        }
         $grouped['descexcl']->map(function($cupon) use ($stores){
           $store = $stores->where('LOCAL_CD',$cupon['local_cd'])->first();
           $cupon['store'] = [
