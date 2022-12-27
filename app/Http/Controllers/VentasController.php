@@ -10,81 +10,73 @@ use App\Models\Ventas;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Http\Client\Pool;
+use App\Http\Traits\StoreTraits; 
 use Auth;
 class VentasController extends Controller
 {
 
+    use StoreTraits;
     private  $url = 'https://www.modatex.com.ar/main/home_db.php';
 
     public function index()
     {
 
-        // $f = Http::withHeaders([
-        //   'x-api-key' => 'LcaAWMG94LZgcRM6k8VfsHQxBSPcP5PmbrYGRhv7',
-        //   'Cookie' => 'PHPSESSID=9scr813epdsm392jk9k535m9p7'
-        // ])
-        // ->acceptJson()
-        // ->get('https://www.modatex.com.ar/document/calification_ajax.php?ajax=true&page_hidden=1&jsonReturn=1&filter=');
-        // dd($f->json());
-        // dd($f->cookies());
-        // $g = Http::withHeaders([
-        //   'x-api-key' => 'LcaAWMG94LZgcRM6k8VfsHQxBSPcP5PmbrYGRhv7',
-        //   'Cookie' => $f->headers()['Set-Cookie'][0]
-        // ])
-        // ->acceptJson()
-        // ->get('https://www.modatex.com.ar/document/calification_ajax.php?ajax=true&page_hidden=1&jsonReturn=1&filter=');
+      $ventas = Ventas::where('CLIENT_NUM',Auth::user()->num)->latest()->paginate(6);
+      $ventas_ids = $ventas->pluck('num');
+      $local_cds = $ventas->pluck('local_cd')->unique();
 
-        // dd($g->json());
-        // ProductsDetail::where('MODA_NUM',1001072796)->get()->dd();
-        // DB::table('MODELO_DETALE')->where('MODA_NUM',1001072796)->get()->dd();
-        // dd(BillingInfo::where('CLIENT_NUM',1026071)->get());
-        $ventas = Ventas::where('CLIENT_NUM',Auth::user()->num)->latest()->paginate(6);
-        //dd($ventas);
-        $arreglo = function($venta){
-        //dd($venta);
-            $venta['delivery_price'] = $this->getDeliveryPrice($venta);
-            $venta['store'] = Store::GetStoreCD(['group_cd'=>$venta['group_cd'], 'local_cd' => $venta['local_cd']]);
+      $detailsProductosIDs = $ventas->pluck('detail')->collapse()->pluck('shop_modelo_num')->unique();
 
-            $productosIDS = [];
+      $deliveryPrices = $this->getDeliveryPriceIn($ventas_ids);
 
-            foreach ($venta['detail'] as $key => $detail) {
-              if( !in_array($detail['shop_modelo_num'],$productosIDS) ){
-                $productosIDS[] = $detail['shop_modelo_num'];
-              }
-            }
-            
-            $productos = [];
-            foreach ($productosIDS as $p => $id) {
-              $product = new ProductsController();
-              $product = $product->oneProduct($id);
+      $stores = Store::whereIn('LOCAL_CD', $local_cds)->get();
 
-              if(count($product)){
-                $product = $product[0];
-                $product['detalles'] = [];
-              }
-              
-              foreach ($venta['detail'] as $d => $detail) {
-                if($detail['shop_modelo_num'] == $id){
-                  $product['detalles'][] = $detail;
-                }
-              }
-              
-              $productos[] = $product;
-            }
-            
-            $venta['productos'] = $productos;
+      $products = new ProductsController();
+      $productos = collect($products->whereInProducts($detailsProductosIDs, [ 'isModels'=> false ]));
 
-            return $venta;
-        };
-        //dd(collect($ventas)->all());
-        $ventas = array_map($arreglo, collect($ventas)->all()['data']);
-        //dd($ventas);
-        return response()->json($ventas);
+      $ventas = $ventas->map(function ($venta) use ($deliveryPrices, $stores, $productos) {
+        if(isset($deliveryPrices[$venta['num']])){
+          $venta['delivery_price'] = $deliveryPrices[$venta['num']]->json();
+        }
+
+        $venta['store'] = $this->dataArrangement($stores->where('GROUP_CD', $venta['group_cd'])->where('LOCAL_CD',$venta['local_cd'])->first());
+
+        $products = [];
+
+        foreach ($venta['detail'] as $key => $detalle) {
+          $p = $productos->where('id',$detalle['shop_modelo_num'])->first();
+          if($p){
+            $products[] = $p;
+          }
+        }
+
+        $venta['productos'] = $products;
+        
+        return $venta;
+      });
+      
+      return response()->json($ventas);
+    }
+
+    private function getDeliveryPriceIn($ventas_ids){
+
+      $consultas = Http::pool(fn (Pool $pool) => 
+        $ventas_ids->map(fn ($id) => 
+          $pool->as($id)->asForm()->post($this->url, [
+            'menu' => 'prev_venta_new',
+            'venta_num' => $id,
+          ])
+        )
+      );
+      
+      return $consultas;
+
     }
 
     private function getDeliveryPrice($venta)
     {
-        
+
       $response = Http::asForm()->post($this->url, [
           'menu' => 'prev_venta_new',
           'venta_num' => $venta['num'],

@@ -46,7 +46,7 @@ trait StoreTraits {
         'address'     => $store->ADDRESS,
         'phone'       => $store->PHONE,
         'email'       => $store->MAIL,
-        'logo'        => $this->image('logo',$store->LOCAL_NAME),
+        'logo'        => env('URL_IMAGE').'/common/img/logo/'.$store->LOGO_FILE_NAME,
         'banner'      => $this->image('banner',$store->BANNER_FILE_NAME),
         'cover'       => $this->cover($store->LOCAL_NAME),
         'limit_price' => $store->LIMIT_PRICE,
