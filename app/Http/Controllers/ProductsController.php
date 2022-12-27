@@ -346,16 +346,17 @@ class ProductsController extends Controller
     public function whereInProducts($products_ids, $config = ['isModels'=> true])
     {
       if(count($products_ids) == 0){
-
         return [];
       }
+
       $urls;
       foreach ($products_ids as $key => $id) {
-        $request = [];
-        $request['product_id'] = $id;
-        $urls[] = $this->url.Arr::query($request);
+        if($id != '0'){
+          $request = [];
+          $request['product_id'] = $id;
+          $urls[] = $this->url.Arr::query($request);
+        }
       }
-      
       $collection = collect($urls);
 
       $consultas = Http::pool(fn (Pool $pool) => 
@@ -363,6 +364,7 @@ class ProductsController extends Controller
           $pool->acceptJson()->get($url)
         )
       );
+
       $products = [];
       for ($i=0; $i < count($urls) ; $i++) {
         $data = $consultas[$i]->collect()->all();
@@ -370,6 +372,7 @@ class ProductsController extends Controller
           $products[] = $this->arregloProduct($consultas[$i]->collect()->all(),$config)[0];
         }
       }
+
       return collect($products)->all();
     }
 }

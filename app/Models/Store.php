@@ -37,6 +37,7 @@ class Store extends Model
         self::TABLE_NAME.'.USE_SPECIAL',
         self::TABLE_NAME.'.USE_DEPORTIVA',
         self::TABLE_NAME.'.USE_LENCERIA',
+        self::TABLE_NAME.'.LOGO_FILE_NAME'
     ];
 
     public $store;
