@@ -112,7 +112,7 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
             $router->post('change_password','ClientController@change_password');
         });
     });
- $router->get('descuentosExclusivos','CouponsController@descuentosExclusivos');
+    $router->get('descuentosExclusivos','CouponsController@descuentosExclusivos');
     $router->group(['prefix' => 'checkout'], function() use ($router){
         $router->post('getEnvios','CheckoutController@getEnvios');
         $router->post('editClient','CheckoutController@editClient');
@@ -133,5 +133,12 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
             
 
     });
+
+    $router->group(['prefix' => 'notifications_push'], function() use ($router){
+        $router->post('save_token','NotificationsUserAppController@save_token');
+        $router->post('notification_send','NotificationsUserAppController@notification_send');
+        $router->post('getTokens','NotificationsUserAppController@getTokens');
+    });
+    
 });
 
