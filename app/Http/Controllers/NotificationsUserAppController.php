@@ -19,8 +19,10 @@ class NotificationsUserAppController extends Controller
 
         $validator = Validator::make($request->notification, [
             'title' => 'required',
-            'text' => 'required',
+            'body' => 'required',
         ]);
+        
+
 
         if ($validator->fails()) {
             return response()->json($validator->errors(), 422);

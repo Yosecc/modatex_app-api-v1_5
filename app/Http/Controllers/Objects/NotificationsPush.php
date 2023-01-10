@@ -23,7 +23,7 @@ class NotificationsPush
 
             $validator = Validator::make($request['notification'], [
                 'title' => 'required',
-                'text' => 'required',
+                'body' => 'required',
             ]);
 
             if ($validator->fails()) {
@@ -63,8 +63,9 @@ class NotificationsPush
             
              "notification" => [
                "title" => $this->notification['title'],
-               "text"  => $this->notification['text'],
-               "sound" => "default"
+               "body"  => $this->notification['body'],
+               "sound" => "default",
+               "image" => $this->notification['image']
              ],
              // "data"=> {"value"=> "si"},
              "priority"=> "High",
