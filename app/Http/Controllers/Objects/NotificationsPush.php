@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Objects;
 
+use App\Models\NotificationsApp;
 use App\Models\NotificationsUserApp;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Validator;
@@ -15,6 +16,7 @@ class NotificationsPush
     private $server_key;
     private $user_token;
     private $url = 'https://fcm.googleapis.com/fcm/send';
+    private $user_id;
 
     public function __construct($request)
     {
@@ -56,6 +58,8 @@ class NotificationsPush
         if($this->fails()){
             return $this->getErrors();
         }
+
+        $this->saveNotification();
         
         $response = Http::withHeaders([
             'Authorization' => 'key='.$this->server_key,
@@ -65,7 +69,7 @@ class NotificationsPush
                "title" => $this->notification['title'],
                "body"  => $this->notification['body'],
                "sound" => "default",
-               "image" => $this->notification['image']
+               "image" => $this->notification['image'],
              ],
              // "data"=> {"value"=> "si"},
              "priority"=> "High",
@@ -76,10 +80,22 @@ class NotificationsPush
 
     }
 
+    private function saveNotification(): void
+    {
+        $notificacion = new NotificationsApp();
+        $notificacion->title      =  $this->notification['title'];
+        $notificacion->body       =  $this->notification['body'];
+        $notificacion->image      =  $this->notification['image'];
+        $notificacion->data       =  NULL;
+        $notificacion->client_num =  $this->user_id;
+        $notificacion->save();
+        
+    }
+
     public function getUserToken($user_id): string
     {
         try {
-            
+            $this->user_id = $user_id;
             $consulta = NotificationsUserApp::where('client_num', $user_id)->first();
 
             if(!$consulta){
