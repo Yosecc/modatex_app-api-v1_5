@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Objects\NotificationsPush;
+use App\Models\NotificationsApp;
 use App\Models\NotificationsUserApp;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -55,5 +56,12 @@ class NotificationsUserAppController extends Controller
     public function getTokens()
     {
         return NotificationsUserApp::all();
+    }
+
+    public function get_notifications()
+    {
+        $notificaciones = NotificationsApp::where('client_num',Auth::user()->num)->orderBy('id','desc')->get();
+
+        return response()->json($notificaciones->makeHidden(['id','updated_at','client_num']));
     }
 }
