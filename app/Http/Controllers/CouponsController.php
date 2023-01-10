@@ -101,9 +101,10 @@ class CouponsController extends Controller
 
        $response = Http::withHeaders([
             'x-api-key' => $this->token,
+            // 'Content-Type' => 'application/x-www-form-urlencoded'
         ])->asForm()->post($this->url, [
           'menu' => 'register_coupon',
-          'venta_num' => $request->cp_num,
+          'cp_num' => $request->cp_num,
       ]);
 
         dd($response->body());
@@ -126,7 +127,7 @@ class CouponsController extends Controller
                     ->orderBy('begin_date','desc')
                     ->limit(10)
                     // ->latest('begin_date')
-                    ->get()->dd();
+                    ->get();
 
         $grouped = $descuentos->groupBy('category');
 
