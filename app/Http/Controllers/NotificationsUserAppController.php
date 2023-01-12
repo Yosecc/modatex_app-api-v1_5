@@ -60,7 +60,8 @@ class NotificationsUserAppController extends Controller
 
     public function get_notifications()
     {
-        $notificaciones = NotificationsApp::where('client_num',Auth::user()->num)->orderBy('id','desc')->get();
+        $notificaciones = NotificationsApp::where('client_num',Auth::user()->num)
+                            ->orderBy('id','desc')->get();
 
         return response()->json($notificaciones->makeHidden(['id','updated_at','client_num']));
     }

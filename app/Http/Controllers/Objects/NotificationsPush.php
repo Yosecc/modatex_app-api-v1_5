@@ -65,15 +65,15 @@ class NotificationsPush
             'Authorization' => 'key='.$this->server_key,
         ])->acceptJson()->post($this->url, [
             
-             "notification" => [
+            "notification" => [
                "title" => $this->notification['title'],
                "body"  => $this->notification['body'],
                "sound" => "default",
-               "image" => $this->notification['image'],
-             ],
-             // "data"=> {"value"=> "si"},
-             "priority"=> "High",
-             "to"=> $this->user_token
+               "image" => isset($this->notification['image']) ? $this->notification['image']:"",
+            ],
+            // "data"=> {"value"=> "si"},
+            "priority"=> "High",
+            "to"=> $this->user_token
         ]);
 
         return $response->status();
@@ -85,11 +85,10 @@ class NotificationsPush
         $notificacion = new NotificationsApp();
         $notificacion->title      =  $this->notification['title'];
         $notificacion->body       =  $this->notification['body'];
-        $notificacion->image      =  $this->notification['image'];
+        $notificacion->image      =  isset($this->notification['image']) ? $this->notification['image'] : null ;
         $notificacion->data       =  NULL;
         $notificacion->client_num =  $this->user_id;
         $notificacion->save();
-        
     }
 
     public function getUserToken($user_id): string

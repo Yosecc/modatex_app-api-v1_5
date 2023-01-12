@@ -502,6 +502,17 @@ class CheckoutController extends Controller
             if($response->json()['status'] != 'success'){
                 throw new \Exception("No se encontraron resultados");
             }
+              
+              try {
+                $notification = new NotificationsPush(['notification'=>[
+                  'title' => 'Gracias por tu compra'
+                  "body" => 'Su compra ha sido procesada con éxito. Pronto nos comunicaremos'
+                ]]);
+                $notification->sendUserNotification(Auth::user()->id);
+              } catch (\Exception $e) {
+                
+              }
+              
             if(isset($response->json()['data'])){
               return response()->json($response->json()['data']);
             }

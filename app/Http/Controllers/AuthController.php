@@ -2,26 +2,20 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Mail;
-
+use App\Http\Controllers\Objects\NotificationsPush;
 use App\Http\Traits\HelpersTraits;
-
-use Illuminate\Http\Request;
-
 use App\Mail\CodeConfirmation;
 use App\Mail\RecoverPassword;
-
-use Illuminate\Support\Str;
-use Illuminate\Support\Arr;
-
-use App\Models\Coupons;
 use App\Models\Client;
-
+use App\Models\Coupons;
+use Carbon\Carbon;
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
-
-use Carbon\Carbon;
+use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {
@@ -89,6 +83,8 @@ class AuthController extends Controller
                 return response()->json(['status'=>false,'message'=>'Ha ocurrido un error. La clave token no coincide, comuniquese con el administrador.'],401);
               }
 
+              
+              
               return response()->json(['status'=>true,'client'=> $client],200);
 
             }else{
