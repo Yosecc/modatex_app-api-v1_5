@@ -20,6 +20,7 @@ return new class extends Migration
             $table->text('image')->nullable();
             $table->text('data')->nullable();
             $table->integer('client_num');
+            $table->integer('view_status');
             $table->timestamps();
         });
     }
