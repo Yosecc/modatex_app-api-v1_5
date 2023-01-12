@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\General\CollectionHelper;
 use App\Http\Controllers\ProductsController;
 use App\Http\Traits\ClientTraits;
 use App\Http\Traits\ProductsTraits;
@@ -12,12 +13,12 @@ use App\Models\Products;
 use App\Models\Slider;
 use App\Models\Store;
 use App\Models\TipoModeloUno as Category;
+use Illuminate\Http\Client\Pool;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Http;
-use Illuminate\Http\Client\Pool;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Http;
 
 class HomeController extends Controller
 {
@@ -158,7 +159,8 @@ class HomeController extends Controller
   {
 
     if (Cache::has('categorie_'.$categorie_id)) {
-      return response()->json(Cache::get('categorie_'.$categorie_id));
+      $data = Cache::get('categorie_'.$categorie_id);
+      return response()->json(['stores' => $data['stores'], 'products' => CollectionHelper::paginate(collect($data['products']), 16) ]);
     }
 
     $categories = [ 1 => 'woman', 3 => 'man', 6 => 'xl', 4 => 'kids', 2 => 'accessories'];
@@ -228,7 +230,7 @@ class HomeController extends Controller
 
     Cache::put('categorie_'.$categorie_id, ['stores' => $stores, 'products' => $products] , $seconds = 10800);
     
-    return response()->json(['stores' => $stores, 'products' => $products]);
+    return response()->json(['stores' => $stores, 'products' => CollectionHelper::paginate(collect($products), 16) ]);
 
   }
 }

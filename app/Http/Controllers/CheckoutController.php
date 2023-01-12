@@ -505,11 +505,13 @@ class CheckoutController extends Controller
             }
               
               try {
+                
                 $notification = new NotificationsPush(['notification'=>[
                   'title' => 'Gracias por tu compra',
                   "body" => 'Su compra ha sido procesada con éxito. Pronto nos comunicaremos'
                 ]]);
                 $notification->sendUserNotification(Auth::user()->num);
+
               } catch (\Exception $e) {
                 
               }
