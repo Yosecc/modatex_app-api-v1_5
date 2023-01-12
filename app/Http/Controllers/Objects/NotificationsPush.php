@@ -30,6 +30,7 @@ class NotificationsPush
 
             if ($validator->fails()) {
                 $this->errors = $validator->errors();
+                \Log::info($this->errors);
                 throw new \Exception('Error validate');
             }
 
@@ -37,6 +38,7 @@ class NotificationsPush
 
             if(!$this->server_key || $this->server_key == ''){
                 $this->errors['server_key'] = 'The firebase server key is required';
+                \Log::info($this->errors);
                 throw new \Exception('Error validate');
             }
 
@@ -56,6 +58,7 @@ class NotificationsPush
         $this->user_token = $this->getUserToken($user_id);
         
         if($this->fails()){
+            \Log::info($this->errors);
             return $this->getErrors();
         }
 
@@ -99,6 +102,7 @@ class NotificationsPush
 
             if(!$consulta){
                 $this->errors['user_token'] = 'Client does not have app token';
+                \Log::info($this->errors);
                 throw new \Exception('Error validate');
             }
 
@@ -112,6 +116,7 @@ class NotificationsPush
 
     public function getErrors(): array
     {
+        \Log::info($this->errors);
         return $this->errors;
     }
 
