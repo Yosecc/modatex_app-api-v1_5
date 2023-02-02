@@ -40,7 +40,7 @@ class AuthController extends Controller
         if ($request->isJson()) {
           try{
             
-            $client = Client::select($this->campos)->where('client_id',$request->email)->first();
+            $client = Client::select($this->campos)->where('email',$request->email)->first();
             
             // dd($client);
             
@@ -52,7 +52,7 @@ class AuthController extends Controller
               if(in_array($client->email, ['tiendas@modatex.com.ar'])){
                 return response()->json(['status'=>true,'client'=> $client],200);
               }
-              
+
               $payload = [
                 'password' => $request->password,
                 'email' => $request->email,
