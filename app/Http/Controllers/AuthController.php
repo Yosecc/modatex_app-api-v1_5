@@ -42,15 +42,17 @@ class AuthController extends Controller
             
             $client = Client::select($this->campos)->where('client_id',$request->email)->first();
             
-            if(in_array($client->email, ['tiendas@modatex.com.ar'])){
-              return response()->json(['status'=>true,'client'=> $client],200);
-            }
+            // dd($client);
+            
 
 
              //return response()->json(['status'=>true,'client'=> $client],200);
 
             if ($client) {
-
+              if(in_array($client->email, ['tiendas@modatex.com.ar'])){
+                return response()->json(['status'=>true,'client'=> $client],200);
+              }
+              
               $payload = [
                 'password' => $request->password,
                 'email' => $request->email,
