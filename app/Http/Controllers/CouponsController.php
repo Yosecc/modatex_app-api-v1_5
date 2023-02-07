@@ -119,9 +119,14 @@ class CouponsController extends Controller
         $this->validate($request, [
           'code' => 'required',
         ]);
-
-        $cupon = ExclusiveDiscount::whereRaw('upper(code) = upper("'.$request->code.'")')->first();
         $hoy = Carbon::now('America/Argentina/Buenos_Aires');
+
+        $cupon = ExclusiveDiscount::whereRaw('upper(code) = upper("'.$request->code.'")')
+                                  ->whereDate('begin_date','>=', $hoy)
+                                  ->whereDate('end_date','<=', $hoy)
+                                  ->latest('entry')
+                                  ->first();
+        
 
         if($cupon->expire_days){
           $fechaVencimiento = Carbon::now()->addDays($cupon->expire_days);
@@ -130,7 +135,7 @@ class CouponsController extends Controller
         if($cupon->expire_date){
           $fechaVencimiento = $cupon->expire_date;
         }
-
+// dd($cupon);
         if(Carbon::create($hoy->year,$hoy->month, $hoy->day,0,0,0) > Carbon::parse($fechaVencimiento)){
           throw new \Exception('cupón expirado'); 
           return response()->json('cupón expirado', 422);
@@ -203,10 +208,11 @@ class CouponsController extends Controller
 
         $cuponesClient =  Coupons::where('client_num',Auth::user()->num)
                                 ->where('del_date',null)
+                                ->where('use_date',null)
                                 ->whereDate('expire_date','<=',Carbon::now())
                                 ->get();
 
-        // dd($cuponesClient);
+        
 
         $stores = Store::whereIn('LOCAL_CD', $storesIds->all())->select('GROUP_CD','LOGO_FILE_NAME','LOCAL_NAME','LIMIT_PRICE','LOCAL_CD','GROUP_CD')->get();
         if(!isset($grouped['descexcl'])){
