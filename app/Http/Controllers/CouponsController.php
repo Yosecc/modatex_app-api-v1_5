@@ -201,7 +201,10 @@ class CouponsController extends Controller
          return $id == '';
         });
 
-        $cuponesClient =  Coupons::where('client_num',Auth::user()->num)->get();
+        $cuponesClient =  Coupons::where('client_num',Auth::user()->num)
+                                ->where('del_date',null)
+                                ->whereDate('expire_data','<=',Carbon::now())
+                                ->get();
 
         // dd($cuponesClient);
 
