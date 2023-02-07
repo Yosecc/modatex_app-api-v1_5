@@ -126,6 +126,11 @@ class CouponsController extends Controller
                                   ->whereDate('end_date','<=', $hoy)
                                   ->latest('entry')
                                   ->first();
+
+        if(!$cupon){
+          throw new \Exception('Cupón no encontrado'); 
+          return response()->json('Cupón no encontrado', 422);
+        }
         
 
         if($cupon->expire_days){
@@ -135,7 +140,7 @@ class CouponsController extends Controller
         if($cupon->expire_date){
           $fechaVencimiento = $cupon->expire_date;
         }
-// dd($cupon);
+
         if(Carbon::create($hoy->year,$hoy->month, $hoy->day,0,0,0) > Carbon::parse($fechaVencimiento)){
           throw new \Exception('cupón expirado'); 
           return response()->json('cupón expirado', 422);
@@ -211,8 +216,6 @@ class CouponsController extends Controller
                                 ->where('use_date',null)
                                 ->whereDate('expire_date','<=',Carbon::now())
                                 ->get();
-
-        
 
         $stores = Store::whereIn('LOCAL_CD', $storesIds->all())->select('GROUP_CD','LOGO_FILE_NAME','LOCAL_NAME','LIMIT_PRICE','LOCAL_CD','GROUP_CD')->get();
         if(!isset($grouped['descexcl'])){
