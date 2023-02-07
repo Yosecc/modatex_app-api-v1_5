@@ -203,7 +203,7 @@ class CouponsController extends Controller
 
         $cuponesClient =  Coupons::where('client_num',Auth::user()->num)
                                 ->where('del_date',null)
-                                ->whereDate('expire_data','<=',Carbon::now())
+                                ->whereDate('expire_date','<=',Carbon::now())
                                 ->get();
 
         // dd($cuponesClient);
