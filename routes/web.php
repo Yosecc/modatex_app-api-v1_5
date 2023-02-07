@@ -103,6 +103,7 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
         $router->group(['prefix' => 'coupons'], function () use ($router) {
             $router->get('/','CouponsController@index');
             $router->get('redeem_coupon','CouponsController@redeemCoupon');
+            $router->post('canjear_cupon','CouponsController@canjearCupon');
            
             
         });
