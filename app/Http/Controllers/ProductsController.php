@@ -221,7 +221,7 @@ class ProductsController extends Controller
 
       $url = $this->urlSearch.Arr::query($request->all());
       $response = Http::acceptJson()->get($url);
-
+      
       $data = $response->collect()->all();
 
       $productos = collect($data['modelos']);
@@ -283,48 +283,6 @@ class ProductsController extends Controller
           ]
         ];
       });
-
-      
-
-      // $arreglo = function($product) use ($arregloImages, $i)
-      // {
-       
-        
-      //   $product['id'] = $product['num'];
-      //   $product['sizes'] = $product['talles'];
-      //   $product['price'] = isset($product['price_curr']) ? $product['price_curr']:$product['precio'];
-
-      //   dd($product);
-      //   return [
-      //     "id"          => $product['num'],
-      //     // "moda_id"     => $product['local_cd'],
-      //     "store"       => $product['local_cd'],
-      //     "company"     => $store['GROUP_CD'],
-      //     // "code"        => $product['code'],
-      //     "name"        => $product['descripcion'],
-      //     "category"    => isset($product['category_name']) ? $product['category_name']:null,
-      //     "category_id" => $product['category'],
-      //     "price"       => isset($product['price_curr']) ? $product['price_curr']:$product['precio'],
-      //     "prev_price"  => isset($product['price_prev']) ? $product['price_prev']:null,
-      //     "images"      => array_map($arregloImages, $product['images']),
-      //     "sizes"       => $product['talles'],
-      //     "colors"      => $colores,
-      //     "is_desc"     => $product['is_desc'],
-      //     "models"      => $this->generateModels($product),
-      //     "isCart"      => $this->isProductCarro($product['num']),
-      //     // "disc/ount"    => $product['discount'],
-      //     "has_stock"   => $product['con_stock'] == "" ? true:$product['con_stock'],
-      //     "store_data" => [
-      //       'logo' => env('URL_IMAGE').'/common/img/logo/'.$store['LOGO_FILE_NAME'],
-      //       'name' => $store['LOCAL_NAME'],
-      //       'min'  => $store['LIMIT_PRICE'],
-      //       "id"   => $store['LOCAL_CD'],
-      //       "company"     => $store['GROUP_CD'],
-      //     ]
-      //   ];
-      // };
-
-      // $data = array_map($arreglo, $data['modelos']);
 
               return response()->json($arr->all());
     }
