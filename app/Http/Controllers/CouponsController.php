@@ -132,8 +132,8 @@ class CouponsController extends Controller
         }
 
         if(Carbon::create($hoy->year,$hoy->month, $hoy->day,0,0,0) > Carbon::parse($fechaVencimiento)){
-          throw new \Exception('Cupon expirado'); 
-          return response()->json('Cupon expirado', 422);
+          throw new \Exception('cupón expirado'); 
+          return response()->json('cupón expirado', 422);
         }
 
         $cuponesClient =  Coupons::where('client_num',Auth::user()->num)->get();
@@ -190,18 +190,10 @@ class CouponsController extends Controller
     {
       $hoy = Carbon::now();
       // dd($hoy);
-      $descuentos = ExclusiveDiscount::
-                    // select('code','type', 'price', 'local_cd','positioning','total_quantity','expire_date','expire_days', 'begin_date','category')
-                    // where(function($query) use ($hoy) {
-                      // $query->whereDate('begin_date', '>=', $hoy);
-                      // ->whereDate('end_date', '<=', $hoy);
-                    // })
-                    
-                    where('category','descexcl')
-                    ->orderBy('begin_date','desc')
-                    ->limit(10)
-                    // ->latest('begin_date')
-                    ->get();
+      $descuentos = ExclusiveDiscount::where('category','descexcl')
+                                      ->orderBy('begin_date','desc')
+                                      ->limit(10)
+                                      ->get();
 
         $grouped = $descuentos->groupBy('category');
 
@@ -209,11 +201,15 @@ class CouponsController extends Controller
          return $id == '';
         });
 
+        $cuponesClient =  Coupons::where('client_num',Auth::user()->num)->get();
+
+        // dd($cuponesClient);
+
         $stores = Store::whereIn('LOCAL_CD', $storesIds->all())->select('GROUP_CD','LOGO_FILE_NAME','LOCAL_NAME','LIMIT_PRICE','LOCAL_CD','GROUP_CD')->get();
         if(!isset($grouped['descexcl'])){
           return null;
         }
-        $grouped['descexcl']->map(function($cupon) use ($stores){
+        $grouped['descexcl']->map(function($cupon) use ($stores,$cuponesClient){
           $store = $stores->where('LOCAL_CD',$cupon['local_cd'])->first();
           $cupon['store'] = [
             'logo' => env('URL_IMAGE').'/common/img/logo/'.$store['LOGO_FILE_NAME'],
@@ -222,8 +218,13 @@ class CouponsController extends Controller
             "id"   => $store['LOCAL_CD'],
             "company"     => $store['GROUP_CD'],
           ]; 
+
+          $cupon['isAdd'] = $cuponesClient->where('coupon_str', $cupon->type)->count();
+          
           return $cupon;
         });
+
+
 
         $datos = [];
         $datos[] = ['name'=> 'Descuentos Exclusivos', 'data' => $grouped['descexcl'] ];
