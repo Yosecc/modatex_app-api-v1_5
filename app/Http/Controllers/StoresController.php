@@ -240,4 +240,31 @@ class StoresController extends Controller
       return response()->json(Arr::collapse($products));
     }
 
+    public function searchStoresSegunPlanes($planes)
+    {
+      $urls = [];
+      foreach($planes as $key => $plan){
+        foreach($this->categories as $k => $categorie){
+          $urls[] = $this->url.'json/cache_'.$categorie."_".$plan.'.json';
+        }
+      }
+
+      $collection = collect($urls);
+      $consultas = Http::pool(fn (Pool $pool) => 
+        $collection->map(fn ($url) => 
+              $pool->accept('application/json')->get($url)
+        )
+      );
+
+      $storesAll = [];
+      foreach ($consultas as $c => $consulta) {
+        $storesAll[] = $consulta->collect()->all()['stores'];
+      }
+      
+
+      $storesAll = collect(Arr::collapse($storesAll));
+
+      return $storesAll;
+    }
+
 }
