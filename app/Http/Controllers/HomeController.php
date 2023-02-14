@@ -2,23 +2,24 @@
 
 namespace App\Http\Controllers;
 
-use App\Helpers\General\CollectionHelper;
-use App\Http\Controllers\ProductsController;
+use App\Models\Cart;
+use App\Models\Store;
+use App\Models\Slider;
+use App\Models\States;
+use App\Models\Products;
+use Illuminate\Support\Arr;
+use Illuminate\Http\Request;
+use App\Models\ProductVisits;
+use App\Http\Traits\StoreTraits;
+use Illuminate\Http\Client\Pool;
 use App\Http\Traits\ClientTraits;
 use App\Http\Traits\ProductsTraits;
-use App\Http\Traits\StoreTraits;
-use App\Models\Cart;
-use App\Models\ProductVisits;
-use App\Models\Products;
-use App\Models\Slider;
-use App\Models\Store;
-use App\Models\TipoModeloUno as Category;
-use Illuminate\Http\Client\Pool;
-use Illuminate\Http\Request;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Cache;
+use App\Helpers\General\CollectionHelper;
+use App\Models\TipoModeloUno as Category;
+use App\Http\Controllers\ProductsController;
 
 class HomeController extends Controller
 {
@@ -233,4 +234,11 @@ class HomeController extends Controller
     return response()->json(['stores' => $stores, 'products' => CollectionHelper::paginate(collect($products), 16) ]);
 
   }
+
+  public function statesGet()
+  {
+    return response()->json(States::select('NUM AS id','STATE_NAME AS name')
+    ->where('STAT_CD',1000)->orderBy('name','asc')->get());
+  }
+
 }

@@ -33,7 +33,8 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
     $router->get('home','HomeController@index');
     $router->get('productsVisitados','HomeController@productsVisitados');
     $router->get('sliders','HomeController@sliders');
-
+    $router->get('states/get','HomeController@statesGet');
+    
 
     $router->post('preferences','PreferencesController@store');
     $router->get('preferences','PreferencesController@getPreferences');
