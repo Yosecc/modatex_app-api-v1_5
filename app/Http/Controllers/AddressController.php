@@ -4,8 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\ClientLocal;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
-use Auth;
 
 class AddressController extends Controller
 {
@@ -46,23 +46,31 @@ class AddressController extends Controller
 
     public function create(Request $request)
     {
+        try {
+            // dd(ClientLocal::limit(1)->latest()->first());
+            $adress                = new ClientLocal();
+            $adress->CLIENT_NUM    = Auth::user()->num;
+            $adress->COUNTRY_NUM   = $request->COUNTRY_NUM;   
+            $adress->STAT_NUM      = $request->STAT_NUM;      
+            $adress->STAT_STR      = $request->STAT_STR;      
+            $adress->LOCALIDAD     = $request->LOCALIDAD;     
+            $adress->CALLE_NAME    = $request->CALLE_NAME;    
+            $adress->CALLE_NUM     = $request->CALLE_NUM;     
+            $adress->CALLE_DTO     = $request->CALLE_DTO;     
+            $adress->CALLE_PISO    = $request->CALLE_PISO;    
+            $adress->ADDRESS_ZIP   = $request->ADDRESS_ZIP;   
+            $adress->AREA_CODE     = $request->AREA_CODE;     
+            $adress->ADDRESS_NAME  = $request->ADDRESS_NAME;  
+            $adress->COMMENTS      = $request->COMMENTS;     
+            $adress->DELIVERY_HOUR = $request->DELIVERY_HOUR;
+            $adress->STAT_CD = 1000;
+            $adress->STAT_CD_TRA = 1000; 
+            $adress->save();
 
-        $adress                = new ClientLocal();
-        $adress->COUNTRY_NUM   = $request->COUNTRY_NUM;   
-        $adress->STAT_NUM      = $request->STAT_NUM;      
-        $adress->STAT_STR      = $request->STAT_STR;      
-        $adress->LOCALIDAD     = $request->LOCALIDAD;     
-        $adress->CALLE_NAME    = $request->CALLE_NAME;    
-        $adress->CALLE_NUM     = $request->CALLE_NUM;     
-        $adress->CALLE_DTO     = $request->CALLE_DTO;     
-        $adress->CALLE_PISO    = $request->CALLE_PISO;    
-        $adress->ADDRESS_ZIP   = $request->ADDRESS_ZIP;   
-        $adress->AREA_CODE     = $request->AREA_CODE;     
-        $adress->ADDRESS_NAME  = $request->ADDRESS_NAME;  
-        $adress->COMMENTS      = $request->COMMENTS;      
-        $adress->save();
-
-        return response()->json($this->getData($adress));
+            return response()->json($this->getData($adress));
+        } catch (\Throwable $th) {
+            return response()->json($th->getMessage());
+        }
     }
 
     public function changePrincipalAddress(Request $request)
