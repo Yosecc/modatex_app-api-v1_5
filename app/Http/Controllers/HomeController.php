@@ -156,12 +156,15 @@ class HomeController extends Controller
     return response()->json($productos);
   }
 
-  public function getCategorieSearch($categorie_id)
+  public function getCategorieSearch($categorie_id , Request $request)
   {
-
+    $product_paginate = 16;
+    if($request->product_paginate){
+      $product_paginate = $request->product_paginate;
+    }
     if (Cache::has('categorie_'.$categorie_id)) {
       $data = Cache::get('categorie_'.$categorie_id);
-      return response()->json(['stores' => $data['stores'], 'products' => CollectionHelper::paginate(collect($data['products']), 16) ]);
+      return response()->json(['stores' => $data['stores'], 'products' => CollectionHelper::paginate(collect($data['products']), $product_paginate) ]);
     }
 
     $categories = [ 1 => 'woman', 3 => 'man', 6 => 'xl', 4 => 'kids', 2 => 'accessories'];
@@ -191,6 +194,7 @@ class HomeController extends Controller
       }
     }
 
+    // dd($stores);
     $stores = collect($stores);
 
     $storesIds = $stores->pluck('local_cd');
@@ -231,7 +235,7 @@ class HomeController extends Controller
 
     Cache::put('categorie_'.$categorie_id, ['stores' => $stores, 'products' => $products] , $seconds = 10800);
     
-    return response()->json(['stores' => $stores, 'products' => CollectionHelper::paginate(collect($products), 16) ]);
+    return response()->json(['stores' => $stores, 'products' => CollectionHelper::paginate(collect($products), $product_paginate) ]);
 
   }
 
