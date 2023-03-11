@@ -162,8 +162,14 @@ class HomeController extends Controller
     if($request->product_paginate){
       $product_paginate = $request->product_paginate;
     }
-    if (Cache::has('categorie_'.$categorie_id)) {
-      $data = Cache::get('categorie_'.$categorie_id);
+    $product_for_store = 3;
+    if($request->product_for_store){
+      $product_for_store = $request->product_for_store;
+    }
+    
+    $nameChache = 'categorie_'.$categorie_id.'?product_for_store='.$product_for_store;
+    if (Cache::has($nameChache)) {
+      $data = Cache::get($nameChache);
       return response()->json(['stores' => $data['stores'], 'products' => CollectionHelper::paginate(collect($data['products']), $product_paginate) ]);
     }
 
@@ -200,8 +206,9 @@ class HomeController extends Controller
     $storesIds = $stores->pluck('local_cd');
 
     $rutas = [];
+    
     foreach ($storesIds as $key => $id) {
-      $rutas[] = 'https://www.modatex.com.ar/modatexrosa3/?c=Products::get&categorie='.$categorieName.'&start=0&length=3&store='.$id.'&years=1&sections=&categories=&search=&order=manually';
+      $rutas[] = 'https://www.modatex.com.ar/modatexrosa3/?c=Products::get&categorie='.$categorieName.'&start=0&length='.$product_for_store.'&store='.$id.'&years=1&sections=&categories=&search=&order=manually';
     }
 
     $rutas = collect($rutas);
@@ -233,7 +240,7 @@ class HomeController extends Controller
       ];
     });
 
-    Cache::put('categorie_'.$categorie_id, ['stores' => $stores, 'products' => $products] , $seconds = 10800);
+    Cache::put($nameChache, ['stores' => $stores, 'products' => $products] , $seconds = 10800);
     
     return response()->json(['stores' => $stores, 'products' => CollectionHelper::paginate(collect($products), $product_paginate) ]);
 
