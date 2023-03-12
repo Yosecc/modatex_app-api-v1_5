@@ -271,7 +271,7 @@ class HomeController extends Controller
           'is_title' => false,
           'is_card' => false,
         ],
-        'products' => collect($this->onGetCategorieSearch(1, ['product_paginate' => 4, 'product_for_store' => 1])['products'])->all()['data'],
+        'products' => collect($this->onGetCategorieSearch(1, ['product_paginate' => 8, 'product_for_store' => 1])['products'])->all()['data'],
       ],
       [
         'name' => 'Hombre',
