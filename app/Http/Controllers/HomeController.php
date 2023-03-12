@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Carbon\Carbon;
 use App\Models\Cart;
 use App\Models\Store;
 use App\Models\Slider;
@@ -158,19 +159,28 @@ class HomeController extends Controller
 
   public function getCategorieSearch($categorie_id , Request $request)
   {
-    $product_paginate = 16;
-    if($request->product_paginate){
-      $product_paginate = $request->product_paginate;
-    }
-    $product_for_store = 3;
-    if($request->product_for_store){
-      $product_for_store = $request->product_for_store;
-    }
     
-    $nameChache = 'categorie_'.$categorie_id.'?product_for_store='.$product_for_store;
+    if($request->product_paginate){
+      $config['product_paginate'] =  $request->product_paginate;
+    }
+    if($request->product_for_store){
+      $config['product_for_store'] = $request->product_for_store;
+    }
+
+    $response = $this->onGetCategorieSearch($categorie_id, $config );
+    
+    // 
+    return response()->json(['stores' => $response['stores'], 'products' => $response['products'] ]);
+
+  }
+
+  public function onGetCategorieSearch($categorie_id, $config = [ 'product_paginate' => 16, 'product_for_store' => 3 ])
+  {
+    
+    $nameChache = 'categorie_'.$categorie_id.'?product_for_store='.$config['product_for_store'];
     if (Cache::has($nameChache)) {
       $data = Cache::get($nameChache);
-      return response()->json(['stores' => $data['stores'], 'products' => CollectionHelper::paginate(collect($data['products']), $product_paginate) ]);
+      return ['stores' => $data['stores'], 'products' => CollectionHelper::paginate(collect($data['products']), $config['product_paginate']) ];
     }
 
     $categories = [ 1 => 'woman', 3 => 'man', 6 => 'xl', 4 => 'kids', 2 => 'accessories'];
@@ -208,7 +218,7 @@ class HomeController extends Controller
     $rutas = [];
     
     foreach ($storesIds as $key => $id) {
-      $rutas[] = 'https://www.modatex.com.ar/modatexrosa3/?c=Products::get&categorie='.$categorieName.'&start=0&length='.$product_for_store.'&store='.$id.'&years=1&sections=&categories=&search=&order=manually';
+      $rutas[] = 'https://www.modatex.com.ar/modatexrosa3/?c=Products::get&categorie='.$categorieName.'&start=0&length='.$config['product_for_store'].'&store='.$id.'&years=1&sections=&categories=&search=&order=manually';
     }
 
     $rutas = collect($rutas);
@@ -241,9 +251,82 @@ class HomeController extends Controller
     });
 
     Cache::put($nameChache, ['stores' => $stores, 'products' => $products] , $seconds = 10800);
-    
-    return response()->json(['stores' => $stores, 'products' => CollectionHelper::paginate(collect($products), $product_paginate) ]);
 
+    return ['stores' => $stores, 'products' => CollectionHelper::paginate(collect($products), $config['product_paginate']) ];
+  }
+
+  public function getBloques()
+  {
+
+    $products = new ProductsController();
+
+    return [
+      [
+        'name' => 'Mujer',
+        'type' => 'categorie',
+        'orden' => 0,
+        'value' => 1,
+        'products' => collect($this->onGetCategorieSearch(1, ['product_paginate' => 4, 'product_for_store' => 1])['products'])->all()['data'],
+      ],
+      [
+        'name' => 'Hombre',
+        'type' => 'categorie',
+        'orden' => 1,
+        'value' => 3,
+        'products' => collect($this->onGetCategorieSearch(3, ['product_paginate' => 4, 'product_for_store' => 1])['products'])->all()['data']
+      ],
+      [
+        'name' => 'Talle Especial',
+        'type' => 'categorie',
+        'orden' => 2,
+        'value' => 6,
+        'products' => collect($this->onGetCategorieSearch(6, ['product_paginate' => 4, 'product_for_store' => 1])['products'])->all()['data'],
+      ],
+      [
+        'name' => 'Niños',
+        'type' => 'categorie',
+        'orden' => 3,
+        'value' => 4,
+        'products' => collect($this->onGetCategorieSearch(4, ['product_paginate' => 4, 'product_for_store' => 1])['products'])->all()['data']
+      ],
+      [
+        'name' => 'Accesorios',
+        'type' => 'categorie',
+        'orden' => 2,
+        'value' => 2,
+        'products' => collect($this->onGetCategorieSearch(2, ['product_paginate' => 4, 'product_for_store' => 1])['products'])->all()['data'],
+      ],
+      [
+        'name' => 'Zapatos',
+        'type' => 'filter',
+        'orden' => 4,
+        'value' => 'zapatos',
+        'products' => $products->onGetSearch([
+          'menu' => 'get_catalog_products',
+          'date' => Carbon::now()->format('Y-m-d'),
+          'type' => 'search-box-input',
+          'sections' => [],
+          'search'=> 'zapatos',
+          'page' => 1,
+          'offset' => 4
+        ])
+      ],
+      [
+        'name' => 'Remeras',
+        'type' => 'filter',
+        'orden' => 5,
+        'value' => 'remeras',
+        'products' => $products->onGetSearch([
+          'menu' => 'get_catalog_products',
+          'date' => Carbon::now()->format('Y-m-d'),
+          'type' => 'search-box-input',
+          'sections' => [],
+          'search'=> 'remeras',
+          'page' => 1,
+          'offset' => 4
+        ])
+      ],
+    ];
   }
 
   public function statesGet()

@@ -218,8 +218,14 @@ class ProductsController extends Controller
 
     public function getSearch(Request $request)
     {
+      $response = $this->onGetSearch($request->all());
 
-      $url = $this->urlSearch.Arr::query($request->all());
+      return response()->json($response);
+    }
+
+    public function onGetSearch($data)
+    {
+      $url = $this->urlSearch.Arr::query($data);
       $response = Http::acceptJson()->get($url);
       
       $data = $response->collect()->all();
@@ -284,7 +290,7 @@ class ProductsController extends Controller
         ];
       });
 
-              return response()->json($arr->all());
+      return $arr->all();
     }
 
 
