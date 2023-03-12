@@ -264,42 +264,55 @@ class HomeController extends Controller
       [
         'name' => 'Mujer',
         'type' => 'categorie',
-        'orden' => 0,
+        
         'value' => 1,
+        'config' => [
+          'slider' => true,
+          'is_title' => false,
+          'is_card' => false,
+        ],
         'products' => collect($this->onGetCategorieSearch(1, ['product_paginate' => 4, 'product_for_store' => 1])['products'])->all()['data'],
       ],
       [
         'name' => 'Hombre',
         'type' => 'categorie',
-        'orden' => 1,
+        
         'value' => 3,
         'products' => collect($this->onGetCategorieSearch(3, ['product_paginate' => 4, 'product_for_store' => 1])['products'])->all()['data']
       ],
       [
         'name' => 'Talle Especial',
         'type' => 'categorie',
-        'orden' => 2,
+        
         'value' => 6,
         'products' => collect($this->onGetCategorieSearch(6, ['product_paginate' => 4, 'product_for_store' => 1])['products'])->all()['data'],
       ],
       [
+        'type' => 'promotion',
+        'value' => 'valor de busqueda',
+        'images' => [
+          'https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/minimos-promos3.gif',
+          'https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/enviogratis-promos3.gif?n'
+        ]
+      ],
+      [
         'name' => 'Niños',
         'type' => 'categorie',
-        'orden' => 3,
+        
         'value' => 4,
         'products' => collect($this->onGetCategorieSearch(4, ['product_paginate' => 4, 'product_for_store' => 1])['products'])->all()['data']
       ],
       [
         'name' => 'Accesorios',
         'type' => 'categorie',
-        'orden' => 2,
+        
         'value' => 2,
         'products' => collect($this->onGetCategorieSearch(2, ['product_paginate' => 4, 'product_for_store' => 1])['products'])->all()['data'],
       ],
       [
         'name' => 'Zapatos',
         'type' => 'filter',
-        'orden' => 4,
+        
         'value' => 'zapatos',
         'products' => $products->onGetSearch([
           'menu' => 'get_catalog_products',
@@ -314,7 +327,7 @@ class HomeController extends Controller
       [
         'name' => 'Remeras',
         'type' => 'filter',
-        'orden' => 5,
+        
         'value' => 'remeras',
         'products' => $products->onGetSearch([
           'menu' => 'get_catalog_products',
