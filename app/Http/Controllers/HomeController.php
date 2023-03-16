@@ -626,7 +626,8 @@ class HomeController extends Controller
               <p style="width: 800px; margin: auto; font-size: 17px; text-align: center; color: black;">&nbsp;&nbsp;</p>
               <p style="width: 800px; margin: auto; font-size: 17px; text-align: center; color: black;"><strong><span style="color: #5364ad;">De cuánto es el cupón?</span></strong></p>
               <p style="width: 800px; margin: auto; font-size: 17px; text-align: center; color: black; padding: 10px;">Tu cupón va a ser igual al 5% de tu compra, con un <strong>límite de devolución de $750</strong>.</p>
-              <p style="width: 800px; margin: auto; font-size: 17px; text-align: center; color: black;"><img src="https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/juevesmodapago-news2.gif" alt="modapago" width="300"></p>
+              <p style="width: 800px; margin: auto; font-size: 17px; text-align: center; color: black;">
+              <img src="https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/juevesmodapago-news2.gif" alt="modapago" width="300"/></p>
               <p style="width: 800px; margin: auto; font-size: 17px; text-align: center; color: black;">&nbsp;</p>
               <p style="width: 800px; margin: auto; font-size: 17px; text-align: center; color: #5364ad;">&nbsp;<strong>Hasta cuándo puedo usar el cupón?</strong></p>
               <p style="width: 800px; margin: auto; font-size: 17px; text-align: center; color: black;">Tenés&nbsp;una semana para usarlo&nbsp;desde el día del pedido. Aprovechalo! <span style="font-size: 9pt;">(4)</span></p>
