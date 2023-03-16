@@ -342,6 +342,273 @@ class HomeController extends Controller
     ];
   }
 
+  public function getPromociones()
+  {
+    return [ 
+      [ 
+        'url' => 'https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/enviosrebajados-promos3.gif?2',
+        'data' => [
+          'header' => [
+              'title' => 'Envíos Rebajados',
+              'subtitle' =>'Descuentos especiales todos los dias',
+              'image' => 'https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/enviosrebajados-promos3b.gif',
+              'config'=> [
+                  'isSubtitle' => false,
+                  'isTitle' => false,
+              ]
+          ],
+          'body' => [
+              [
+                'type'=>'section',
+                'title' =>'TARIFAS DESDE ENERO 2023',
+                'images' =>['https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/precios-envios-enero.gif?n1'],
+                'config' =>[
+                  'images' =>'scroll',
+                  'card' =>false,
+                  'padding' =>0
+                ]
+              ],
+              [
+                'type'=> 'section',
+                'title' => '',
+                'images' => [],
+                'buttons' => [
+                  [
+                    'title' => 'Mirá por dónde esta tu paquete',
+                    'action' => ''
+                  ],
+                  [
+                    'title' => 'Ver servicio de moto CABA 48HS',
+                    'action' => ''
+                  ],
+                ],
+                'config' =>[
+                    'card' => false
+                ]
+              ],
+              [
+                'type' => 'section',
+                'title' => 'Plazos',
+                'html' => '<p style="font-family: verdana, geneva; font-size: 13pt; text-align: left;"><span style="font-family: verdana, geneva;">Los plazos de entrega&nbsp;<strong>comienzan&nbsp;a dia siguiente que la marca entrega el paquete</strong> en nuestro depósito (no desde el día de la compra). </span></p><p style="font-family: verdana, geneva; font-size: 13pt; text-align: left;"><span style="font-family: verdana, geneva;"><span style="font-size: 11pt;">Si&nbsp;tu localidad es muy alejada puede ser que tarde un poco más de lo establecido.</span></span></p>',
+              ],
+              [
+                  'type' => 'section',
+                  'title' => 'Seguro',
+                  'html' => '<p style="text-align: left;"><span style="font-size: 13pt; font-family: verdana, geneva;"><strong>Modatex Garantiza el&nbsp;envío por OCA, CORREO ARGENTINO,&nbsp;INTEGRAL PACK, MOTO y Transporte Tradicional&nbsp;</strong></span><span style="font-size: 13pt; font-family: verdana, geneva;">ya que en caso de extravío o pérdida, posee un seguro.&nbsp;</span><strong><span style="font-size: 13pt;">Si hay algún problema con la entrega de tu mercaderia, Modatex te la reenvía TOTALMENTE GRATIS.</span></strong></p><p style="width: 800px; margin: auto; font-size: 20px;"><span style="font-size: 13pt; font-family: verdana, geneva;">Si en el segundo envío no llega a ser satisfactoria la entrega si se pagará el nuevo (3er) reenvío.</span></p><p style="text-decoration: underline; font-family: verdana, geneva; font-size: 11pt;"><span style="font-size: 11pt; color: #000000; font-family: verdana, geneva;"><a style="color: #000000; text-decoration: underline;" title="quedate" href="../../?page=268">Condiciones del seguro.</a></span></p>',
+              ],
+              [
+                  'type' =>'section',
+                  'title' => 'Más Promos de Envíos',
+                  'images' => ['https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/pinkdays-promos3.gif?n6','https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/enviogratis-promos3.gif?n'],
+                  'config' => []
+              ],
+
+          ]
+        ]
+      ],
+      [ 
+        'url' =>  'https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/enviogratis-promos3.gif?n',
+        'data' =>  [
+          'header' => [
+              'title' => 'Envíos Gratis',
+              'subtitle' => 'Minímo $3000',
+              'image' =>  'https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/enviogratis-promos3b.gif?n',
+              'config' => [
+                  'isSubtitle' =>  false,
+                  'isTitle' =>  false,
+              ]
+          ],
+          'body' => [
+              [
+                  'type' =>'section',
+                  'title' => 'Envío Gratis en toda la web',
+                  'html' => '<h2 style="text-align: center;"><span style="font-size: 12pt;">Ahorrá hasta $950</span></h2><p style="width: 800px; margin: auto; font-size: 20px; text-align: center;"><span style="color: #333333; font-size: 12pt;">A&nbsp;partir&nbsp;del monto mínimo especifícado,&nbsp;el envío es <strong>GRATIS</strong>! </span></p><p style="width: 800px; margin: auto; font-size: 20px; text-align: center;"><span style="color: #333333; font-size: 12pt;">A través de: <strong>sucursal de Oca o Correo Argentino</strong> a todo el país; sucursales seleccionadas de <strong>Integral Pack</strong>; y <strong>Moto</strong> dentro de Capital Federal y Gran Buenos Aires.</span></p>',
+                  'config' => []
+              ],
+              [
+                'type' => 'section',
+                'title' => 'A PARTIR DE $3000!',
+                'marcas' => [
+                  [
+                    "logo"=> "https://netivooregon.s3.amazonaws.com/common/img/logo/valery_1615838645.webp",
+                    "name"=> "valery",
+                    "local_cd"=> "2107",
+                    "min"=> 5000
+                  ],
+                ]
+              ],
+              [
+                'type'=> 'section',
+                'title'=> 'A PARTIR DE $4000!',
+                'marcas'=> [
+                  
+                  [
+                      "logo"=> "https://netivooregon.s3.amazonaws.com/common/img/logo/blackolive_1547561960.webp",
+                      "name"=> "blackolive",
+                      "local_cd"=> "1753",
+                      "min"=> 10000
+                  ],
+                  [
+                      "logo"=> "https://netivooregon.s3.amazonaws.com/common/img/logo/amaika_1616526803.webp",
+                      "name"=> "amaika",
+                      "local_cd"=> "2120",
+                      "min"=> 7000
+                  ],
+                 
+                ]
+              ],
+              [
+                'type'=> 'section',
+                'title'=> 'A PARTIR DE $5000!',
+                'marcas'=> [
+                  
+                [
+                    "logo"=> "https://netivooregon.s3.amazonaws.com/common/img/logo/dasom_1598037855.webp",
+                    "name"=> "dasom",
+                    "local_cd"=> "2011",
+                    "min"=> 6000
+                ],
+                [
+                    "logo"=> "https://netivooregon.s3.amazonaws.com/common/img/logo/explosive_1620757743.webp",
+                    "name"=> "explosive",
+                    "local_cd"=> "2271",
+                    "min"=> 10000
+                ],
+                [
+                    "logo"=> "https://netivooregon.s3.amazonaws.com/common/img/logo/monami_1601662041.webp",
+                    "name"=> "monami",
+                    "local_cd"=> "2153",
+                    "min"=> 6500
+                ],
+                [
+                    "logo"=> "https://netivooregon.s3.amazonaws.com/common/img/logo/chesmin_1623351440.webp",
+                    "name"=> "chesmin",
+                    "local_cd"=> "2250",
+                    "min"=> 4000
+                ],
+                [
+                    "logo"=> "https://netivooregon.s3.amazonaws.com/common/img/logo/nozomi_1664473458.webp",
+                    "name"=> "nozomi",
+                    "local_cd"=> "1897",
+                    "min"=> 10000
+                ],
+                [
+                    "logo"=> "https://netivooregon.s3.amazonaws.com/common/img/logo/anais_1619799015.webp",
+                    "name"=> "anais",
+                    "local_cd"=> "2298",
+                    "min"=> 20000
+                ],
+                [
+                    "logo"=> "https://netivooregon.s3.amazonaws.com/common/img/logo/lulu_1664473404.webp",
+                    "name"=> "lulu",
+                    "local_cd"=> "2390",
+                    "min"=> 10000
+                ],
+                [
+                    "logo"=> "https://netivooregon.s3.amazonaws.com/common/img/logo/numeroindumentaria_1663266928.webp",
+                    "name"=> "numeroindumentaria",
+                    "local_cd"=> "2529",
+                    "min"=> 10000
+                ],
+                 
+                ]
+              ],
+              [
+                'type' =>  'section',
+                'title' =>  '',
+                'html' =>  '<p style="width: 800px; margin: auto; font-size: 14px; text-align: center; color: white;"><span style="color: #000000;">Promoción válida cumpliendo el mínimo de compra de la marca correspondiente.</span></p><p style="width: 800px; margin: auto; font-size: 14px; text-align: center; color: white;"><span style="color: #000000;">Sólo para la República Argentina, en envíos por:</span></p><p style="width: 800px; margin: auto; font-size: 14px; text-align: center; color: white;"><span style="color: #000000;">-&nbsp;Sucursal de Correo Argentino a todo el país.</span></p><p style="width: 800px; margin: auto; font-size: 14px; text-align: center; color: white;"><span style="color: #000000;">-&nbsp;Sucursal de OCA a todo el país.</span></p><p style="width: 800px; margin: auto; font-size: 14px; text-align: center; color: white;"><span style="color: #000000;">- Moto a domicilio dentro de Capital Federal y Gran Buenos Aires.</span></p><p style="width: 800px; margin: auto; font-size: 14px; text-align: center; color: white;"><strong><span style="color: #000000;">NO ACUMULABLE CON OTRAS PROMOCIONES DE ENVÍOS</span></strong></p><p style="width: 800px; margin: auto; font-size: 14px; text-align: center; color: white;"><span style="color: #000000;">Aplican Bases y Condiciones</span></p>',
+              ]
+
+          ]
+        ]
+      ],
+      [ 
+        'url'=> 'https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/minimos-promos3.gif',
+        'data'=> [
+          'header'=>[
+              'title'=> 'Mínimos Rebajados',
+              'subtitle'=> 'Hasta $1! vie - sab - dom',
+              'image'=> 'https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/minimos-promos3b.gif',
+              'config'=>[
+                  'isSubtitle'=> false,
+                  'isTitle'=> false,
+              ]
+          ],
+          'body'=>[
+              [
+                  'type'=>'section',
+                  'title'=> '¡Comprá desde $1! ',
+                  'html'=> '<p style="text-align: center;"><span style="color: #333333; font-size: 13pt;">&nbsp;<span style="font-size: 12pt;">Todos los <strong>Viernes, Sábados y Domingos</strong>,&nbsp;las&nbsp;marcas bajan sus mínimos de compra.</span></span></p><p style="text-align: center;"><span style="color: #333333; font-size: 11pt;"><strong>Combinalo con nuestras <span style="text-decoration: underline;"><a style="color: #333333; text-decoration: underline;" href="http://www.modatex.com.ar/?page=220">promos en envíos</a></span>!&nbsp;</strong></span><span style="color: #333333;">&nbsp;</span>&nbsp;</p>',
+                  'config'=> []
+              ],
+              [
+                'type' => 'section',
+                'title' => 'Mínimos Rebajados Todos los Días. De Lunes a Lunes.',
+                'marcas' => [
+                  [
+                      "logo"=> "https://netivooregon.s3.amazonaws.com/common/img/logo/blackolive_1547561960.webp",
+                      "name"=> "blackolive",
+                      "local_cd"=> "1753",
+                      "min"=> 10000
+                  ],
+                  [
+                      "logo"=> "https://netivooregon.s3.amazonaws.com/common/img/logo/amaika_1616526803.webp",
+                      "name"=> "amaika",
+                      "local_cd"=> "2120",
+                      "min"=> 7000
+                  ],
+                ]
+              ],
+              [
+                'type' => 'section',
+                'title' => 'Mínimos menores a $1000 de viernes a domingo',
+                'marcas' => [
+                  [
+                      "logo"=> "https://netivooregon.s3.amazonaws.com/common/img/logo/blackolive_1547561960.webp",
+                      "name"=> "blackolive",
+                      "local_cd"=> "1753",
+                      "min"=> 10000
+                  ],
+                  [
+                      "logo"=> "https://netivooregon.s3.amazonaws.com/common/img/logo/amaika_1616526803.webp",
+                      "name"=> "amaika",
+                      "local_cd"=> "2120",
+                      "min"=> 7000
+                  ],
+                ]
+              ],
+              [
+                'type' => 'section',
+                'title' => 'Mínimos mayores a $1000 de viernes a domingo',
+                'marcas' => [
+                  [
+                      "logo"=> "https://netivooregon.s3.amazonaws.com/common/img/logo/blackolive_1547561960.webp",
+                      "name"=> "blackolive",
+                      "local_cd"=> "1753",
+                      "min"=> 10000
+                  ],
+                  [
+                      "logo"=> "https://netivooregon.s3.amazonaws.com/common/img/logo/amaika_1616526803.webp",
+                      "name"=> "amaika",
+                      "local_cd"=> "2120",
+                      "min"=> 7000
+                  ],
+                ]
+              ],
+          ]
+          ]
+      ],
+      [ url: 'https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/juevesmodapago-promos.gif' ],
+      
+      [ url: 'https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/otono-invierno-adelanto-promos.jpg',],
+      [ url: 'https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/liquidacion-verano-promos.jpg' ],
+      [ url: 'https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/outlet-cms.jpg'],
+      [ url: 'https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/cupones750-promos.jpg' ],
+      [ url: 'https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/lunesmayor-promos.gif?n4' ],
+      [ url: 'https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/pinkdays-promos3.gif?n6' ],
+    ];
+  }
+
   public function statesGet()
   {
     return response()->json(States::select('NUM AS id','STATE_NAME AS name')

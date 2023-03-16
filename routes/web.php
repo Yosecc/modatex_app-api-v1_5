@@ -81,6 +81,7 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
 
     $router->get('getCategorieSearch/{categorie_id}','HomeController@getCategorieSearch');
     $router->get('getBloques','HomeController@getBloques');
+    $router->get('getPromociones','HomeController@getPromociones');
     
     //ROSA
     $router->group(['prefix' => 'rosa'], function () use ($router) {
