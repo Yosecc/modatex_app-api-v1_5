@@ -596,9 +596,72 @@ class HomeController extends Controller
                 ]
               ],
           ]
-          ]
+        ]
       ],
-      [ 'url'=> 'https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/juevesmodapago-promos.gif' ],
+      [ 
+        'url'=> 'https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/juevesmodapago-promos.gif',
+        'data' => [
+          'header' => [
+            'title' => 'Reintegro del 5% de tu compra.',
+            'subtitle' => 'Modapago. Jueves',
+            'image' => 'https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/juevesmodapago-promos.gif',
+            'config' => [
+              'isSubtitle'=> false,
+              'isTitle'=> false,
+            ]
+          ],
+          'body' => [
+            [
+              'type'=>'section',
+              'title'=> '',
+              'html'=> '<div id="contents_area" class="contents_area_homelist_last_products">
+              <div style="width: auto; margin-left: auto; margin-right: auto; text-align: center;">
+              <span style="font-size: 16pt;">Transformá tu compra en un descuento!</span>&nbsp;
+              </div>
+              <p style="width: 800px; margin: auto; font-size: 17px; text-align: center; color: black;">Comprando todos los <strong>jueves</strong> y abonando con<strong>&nbsp;<strong>Modapago</strong></strong>, Modatex <strong>te devuelve 5%</strong> en forma de un cupón para tu próxima compra!</p>
+              <p style="width: 800px; margin: auto; font-size: 17px; text-align: center; color: black;">&nbsp;&nbsp;</p>
+              <p style="width: 800px; margin: auto; font-size: 17px; text-align: center; color: black;"><span style="color: #5757ad;"><strong>Cómo funciona?</strong></span></p>
+              <p style="width: 800px; margin: auto; font-size: 17px; text-align: center; color: black;"><strong>Pagando por Modapago</strong> con tarjeta de crédito o débito, Rapipago o Pagofácil;</p>
+              <p style="width: 800px; margin: auto; font-size: 17px; text-align: center; color: black;">se te va a generar automáticamente un cupón en tu perfil. <span style="font-size: 9pt;">(2)(3)</span></p>
+              <p style="width: 800px; margin: auto; font-size: 17px; text-align: center; color: black;">&nbsp;&nbsp;</p>
+              <p style="width: 800px; margin: auto; font-size: 17px; text-align: center; color: black;"><strong><span style="color: #5364ad;">De cuánto es el cupón?</span></strong></p>
+              <p style="width: 800px; margin: auto; font-size: 17px; text-align: center; color: black; padding: 10px;">Tu cupón va a ser igual al 5% de tu compra, con un <strong>límite de devolución de $750</strong>.</p>
+              <p style="width: 800px; margin: auto; font-size: 17px; text-align: center; color: black;"><img src="https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/juevesmodapago-news2.gif" alt="modapago" width="300"></p>
+              <p style="width: 800px; margin: auto; font-size: 17px; text-align: center; color: black;">&nbsp;</p>
+              <p style="width: 800px; margin: auto; font-size: 17px; text-align: center; color: #5364ad;">&nbsp;<strong>Hasta cuándo puedo usar el cupón?</strong></p>
+              <p style="width: 800px; margin: auto; font-size: 17px; text-align: center; color: black;">Tenés&nbsp;una semana para usarlo&nbsp;desde el día del pedido. Aprovechalo! <span style="font-size: 9pt;">(4)</span></p>
+              <p style="width: 800px; margin: auto; font-size: 17px; text-align: center; color: black;">&nbsp;</p>
+              <p style="width: 800px; margin: auto; font-size: 17px; text-align: center; color: black;"><span style="color: #5364ad;"><strong>En qué marcas puedo usar mi cupón?</strong></span></p>
+              <p style="width: 800px; margin: auto; font-size: 17px; text-align: center; color: black;">En todas las marcas.</p>
+              <p style="width: 800px; margin: auto; font-size: 17px; text-align: center; color: black;">&nbsp;</p>
+              <p style="width: 800px; margin: auto; font-size: 17px; text-align: center; color: #5364ad;"><br>&nbsp;</p>
+              <p style="width: 800px; margin: auto; font-size: 17px; text-align: center; color: black;"><span style="color: #5364ad; font-family: verdana, geneva;"><a style="color: #5364ad;" href="../../perfil?cupones">¿Dónde veo mis cupones?</a></span></p>
+              <p style="width: 800px; margin: auto; font-size: 17px; text-align: center; color: black;"><span style="font-family: verdana, geneva;">No olvides que para participar debés&nbsp;<span style="color: #5364ad;"><a style="color: #5364ad;" href="../../">ingresar&nbsp;con tu usuario de Modatex</a>.</span></span></p>
+              <p style="width: 800px; margin: auto; font-size: 17px; text-align: center; color: black;">&nbsp;</p>
+              <p style="width: 800px; margin: auto; font-size: 17px; text-align: center; color: black;">&nbsp;&nbsp;</p>
+              <p style="width: 800px; margin: auto; font-size: 17px; text-align: center; color: black;">&nbsp;</p>
+              <div>
+              <p style="width: 800px; margin: auto; text-align: center; font-size: 25px;">&nbsp;&nbsp;</p>
+              <p style="width: 800px; margin: auto; font-size: 14px; text-align: center; color: white;"><span style="color: #000000;">1-Promoción&nbsp;válida sólo para la República Argentina.</span></p>
+              <p style="width: 800px; margin: auto; font-size: 14px; text-align: center; color: white;"><span style="color: #000000;">2-Los&nbsp;cupones&nbsp;se&nbsp;generan una vez realizado el pago. El pago puede ser hecho en cualquier momento&nbsp;antes del jueves siguiente a hacer el pedido.</span></p>
+              <p style="width: 800px; margin: auto; font-size: 14px; text-align: center; color: white;"><span style="color: #000000;">3-Son válidos solamente los pagos relacionados a compras dentro de Modatex. No son válidos los pagos independientes. El número de cupón debe coincidir con el número de compra.</span></p>
+              <p style="width: 800px; margin: auto; font-size: 14px; text-align: center; color: white;"><span style="color: #000000;">4- Los cupones son válidos&nbsp;hasta el miercoles siguiente de hacer el pedido, a las 23:59 hs.</span></p>
+              <p style="width: 800px; margin: auto; font-size: 14px; text-align: center; color: white;"><span style="color: #000000;">5- El total a redimir no incluye el valor del envío.</span></p>
+              <p style="width: 800px; margin: auto; font-size: 14px; text-align: center; color: white;"><span style="color: #000000;">6- Aplican Bases y Condiciones</span></p>
+              <p style="width: 800px; margin: auto; font-size: 14px; text-align: center; color: white;">&nbsp;</p>
+              <p style="width: 800px; margin: auto; font-size: 14px; text-align: center; color: white;">&nbsp;</p>
+              <p><iframe style="display: block; margin-left: auto; margin-right: auto; max-width: 100%;" src="https://f0d938a3.sibforms.com/serve/MUIEAHz1LTZNZ9kzGoydvyRkZtZ3d86rFEqruk8SmPn8PYkLDKzvhs4vhwn7saG6VyEni59IeV9H34IluTe7ttoank-0aC0dN5w4pgYQDjl90pcBhJzc1znCoVt3MFvjq0EiibuVKQJcIP24g-1aoB82d7fpABvVdKJsD2pqXUD327FqDPT0SVfZ9iqixejZQgPi3SC3BETjQAt7" width="50%" height="100%" frameborder="0" scrolling="auto" allowfullscreen="allowfullscreen"></iframe></p>
+              <p style="width: 800px; margin: auto; font-size: 14px; text-align: center; color: white;">&nbsp;</p>
+              <p style="width: 800px; margin: auto;"><span style="color: #000000;">&nbsp;</span>&nbsp;&nbsp;</p>
+              <p style="width: 800px; margin: auto;">&nbsp;</p>
+              </div>
+              
+              </div>',
+              'config'=> []
+            ],
+          ]
+        ]
+      ],
 
       [ 'url'=> 'https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/otono-invierno-adelanto-promos.jpg',],
       [ 'url'=> 'https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/liquidacion-verano-promos.jpg' ],
