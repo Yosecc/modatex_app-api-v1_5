@@ -598,14 +598,14 @@ class HomeController extends Controller
           ]
           ]
       ],
-      [ url: 'https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/juevesmodapago-promos.gif' ],
-      
-      [ url: 'https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/otono-invierno-adelanto-promos.jpg',],
-      [ url: 'https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/liquidacion-verano-promos.jpg' ],
-      [ url: 'https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/outlet-cms.jpg'],
-      [ url: 'https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/cupones750-promos.jpg' ],
-      [ url: 'https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/lunesmayor-promos.gif?n4' ],
-      [ url: 'https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/pinkdays-promos3.gif?n6' ],
+      [ 'url'=> 'https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/juevesmodapago-promos.gif' ],
+
+      [ 'url'=> 'https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/otono-invierno-adelanto-promos.jpg',],
+      [ 'url'=> 'https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/liquidacion-verano-promos.jpg' ],
+      [ 'url'=> 'https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/outlet-cms.jpg'],
+      [ 'url'=> 'https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/cupones750-promos.jpg' ],
+      [ 'url'=> 'https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/lunesmayor-promos.gif?n4' ],
+      [ 'url'=> 'https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/pinkdays-promos3.gif?n6' ],
     ];
   }
 
