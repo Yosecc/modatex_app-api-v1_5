@@ -288,11 +288,10 @@ class HomeController extends Controller
         'products' => collect($this->onGetCategorieSearch(6, ['product_paginate' => 4, 'product_for_store' => 1])['products'])->all()['data'],
       ],
       [
-        'type' => 'promotion',
+        'type' => 'promotions',
         'value' => 'valor de busqueda',
-        'images' => [
-          'https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/minimos-promos3.gif',
-          'https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/enviogratis-promos3.gif?n'
+        'promotions' => [
+          $this->getPromociones()[array_search(3, array_column($this->getPromociones(), 'id'))]
         ]
       ],
       [
@@ -346,6 +345,7 @@ class HomeController extends Controller
   {
     return [ 
       [ 
+        'id' => 1,
         'url' => 'https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/enviosrebajados-promos3.gif?2',
         'data' => [
           'header' => [
@@ -407,6 +407,7 @@ class HomeController extends Controller
         ]
       ],
       [ 
+        'id' => 2,
         'url' =>  'https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/enviogratis-promos3.gif?n',
         'data' =>  [
           'header' => [
@@ -523,6 +524,7 @@ class HomeController extends Controller
         ]
       ],
       [ 
+        'id' => 3,
         'url'=> 'https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/minimos-promos3.gif',
         'data'=> [
           'header'=>[
@@ -599,6 +601,7 @@ class HomeController extends Controller
         ]
       ],
       [ 
+        'id' => 4,
         'url'=> 'https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/juevesmodapago-promos.gif',
         'data' => [
           'header' => [
@@ -664,6 +667,7 @@ class HomeController extends Controller
         ]
       ],
       [ 
+        'id' => 5,
         'url'=> 'https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/pinkdays-promos3.gif?n6',
         'data' => [
           'header' => [
@@ -714,6 +718,7 @@ class HomeController extends Controller
         ]
       ],
       [ 
+        'id' => 6,
         'url'=> 'https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/lunesmayor-promos.gif?n4',
         'data' => [
           'header' => [
@@ -770,6 +775,7 @@ class HomeController extends Controller
         ]
       ],
       [ 
+        'id' => 7,
         'url'=> 'https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/cupones750-promos.jpg',
         'action' => [
           'redirect' => [
@@ -780,6 +786,7 @@ class HomeController extends Controller
         'data' => []
       ],
       [ 
+        'id' => 8,
         'url'=> 'https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/outlet-cms.jpg',
         'data' => [
           'header' => [
@@ -968,6 +975,7 @@ class HomeController extends Controller
         ]
       ],
       [ 
+        'id' => 9,
         'url'=> 'https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/liquidacion-verano-promos.jpg',
         'data' => [
           'header' => [
@@ -1139,7 +1147,9 @@ class HomeController extends Controller
         ]
 
       ],
-      [ 'url'=> 'https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/otono-invierno-adelanto-promos.jpg' ],
+      [ 
+        'id' => 10,
+        'url'=> 'https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/otono-invierno-adelanto-promos.jpg' ],
     ];
   }
 
