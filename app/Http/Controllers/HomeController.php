@@ -264,7 +264,6 @@ class HomeController extends Controller
       [
         'name' => 'Mujer',
         'type' => 'categorie',
-        
         'value' => 1,
         'config' => [
           'slider' => true,
@@ -276,14 +275,12 @@ class HomeController extends Controller
       [
         'name' => 'Hombre',
         'type' => 'categorie',
-        
         'value' => 3,
         'products' => collect($this->onGetCategorieSearch(3, ['product_paginate' => 4, 'product_for_store' => 1])['products'])->all()['data']
       ],
       [
         'name' => 'Talle Especial',
         'type' => 'categorie',
-        
         'value' => 6,
         'products' => collect($this->onGetCategorieSearch(6, ['product_paginate' => 4, 'product_for_store' => 1])['products'])->all()['data'],
       ],
@@ -297,21 +294,18 @@ class HomeController extends Controller
       [
         'name' => 'Niños',
         'type' => 'categorie',
-        
         'value' => 4,
         'products' => collect($this->onGetCategorieSearch(4, ['product_paginate' => 4, 'product_for_store' => 1])['products'])->all()['data']
       ],
       [
         'name' => 'Accesorios',
         'type' => 'categorie',
-        
         'value' => 2,
         'products' => collect($this->onGetCategorieSearch(2, ['product_paginate' => 4, 'product_for_store' => 1])['products'])->all()['data'],
       ],
       [
         'name' => 'Zapatos',
         'type' => 'filter',
-        
         'value' => 'zapatos',
         'products' => $products->onGetSearch([
           'menu' => 'get_catalog_products',
@@ -326,7 +320,6 @@ class HomeController extends Controller
       [
         'name' => 'Remeras',
         'type' => 'filter',
-        
         'value' => 'remeras',
         'products' => $products->onGetSearch([
           'menu' => 'get_catalog_products',
@@ -1150,6 +1143,98 @@ class HomeController extends Controller
       [ 
         'id' => 10,
         'url'=> 'https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/otono-invierno-adelanto-promos.jpg' ],
+    ];
+  }
+
+  public function getCategories()
+  {
+    return [
+      [
+        'id' => 1,
+        'name' => 'Mujer',
+        'key' =>  'woman', 
+        'icon' => 'res://woman',
+        'color' =>  "",
+        'colSpan' =>  3,
+        'col' =>  0,
+        'row' =>  0,
+        'left' =>  100,
+      ],
+      [
+        'id' => 3,
+        'name' => 'Hombre',
+        'key' =>  'man', 
+        'icon' => 'res://men',
+        'color' =>  "",
+        'colSpan' =>  3,
+        'col' =>  3,
+        'row' =>  0,
+        'left' =>  100,
+      ],
+      [
+        'id' => 6,
+        'name' => 'Talle especial',
+        'key' =>  'xl', 
+        'icon' => 'res://label',
+        'color' =>  "",
+        'colSpan' =>  2,
+        'col' =>  0,
+        'row' => 1,
+        'left' =>  35,
+        'top' =>  20
+      ],
+      [
+        'id' => 4,
+        'name' => 'Niños',
+        'key' =>  'kids', 
+        'icon' => 'res://baby',
+        'color' =>  "",
+        'colSpan' =>  2,
+        'col' =>  2,
+        'row' =>  1,
+        'left' =>  35,
+        'top' =>  20
+      ],
+      [
+        'id' => 2,
+        'name' => 'Accesorios',
+        'key' =>  'accessories', 
+        'icon' => 'res://accessories',
+        'color' =>  "",
+        'colSpan' =>  2,
+        'col' =>  4,
+        'row' =>  1,
+        'left' =>  35,
+        'top' =>  20
+      ],
+      [
+        'id' => 5,
+        'name' => 'Zapatos',
+        'type' =>  'search',
+        'search' =>  'zapatos',
+        'key' =>  'zapatos', 
+        'icon' => 'res://shoes',
+        'color' =>  "",
+        'colSpan' =>  2,
+        'col' =>  4,
+        'row' =>  1,
+        'left' =>  35,
+        'top' =>  20
+      ],
+      [
+        'id' => 7,
+        'name' => 'Remeras',
+        'type' =>  'search',
+        'search' =>  'remera',
+        'key' =>  'tshitr', 
+        'icon' => 'res://tshirt',
+        'color' =>  "",
+        'colSpan' =>  2,
+        'col' =>  4,
+        'row' =>  1,
+        'left' =>  35,
+        'top' =>  20
+      ],
     ];
   }
 
