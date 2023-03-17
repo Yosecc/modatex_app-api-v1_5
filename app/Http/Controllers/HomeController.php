@@ -713,12 +713,432 @@ class HomeController extends Controller
           ]
         ]
       ],
+      [ 
+        'url'=> 'https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/lunesmayor-promos.gif?n4',
+        'data' => [
+          'header' => [
+            'title'=> 'Lunes por mayor',
+            'subtitle'=> 'Especial moyoristas',
+            'image'=> 'https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/lunesmayor-promos.gif?n4',
+            'config'=>[
+                'isSubtitle'=> false,
+                'isTitle'=> false,
+            ]
+          ],
+          'body' => [
+            [
+              'type' => 'section',
+              'title' => '',
+              'html' => '<h1 style="text-align: center;"><strong><span style="font-size: 16pt; font-family: helvetica;">Mirá este beneficio&nbsp;para comprar ropa&nbsp;por mayor</span></strong></h1>
+                <p style="text-align: center;"><span style="font-size: 12pt; font-family: helvetica;">Comprando los Lunes a partir de $40.000,&nbsp;tenés&nbsp;<strong>$2.000 de descuento.&nbsp;</strong>Combinalo con <strong>Envío Gratis</strong> en tiendas seleccionadas a sucursal de Correo Argentino y OCA a todo el país y a domicilio por Moto dentro de Capital Federal y GBA.</span></p>
+                <h2 style="text-align: center;"><span style="font-size: 14pt; font-family: helvetica;">Comprá online en los locales de Flores, Avenida Avellaneda</span></h2>
+                <p style="text-align: center;"><span style="font-size: 12pt; font-family: helvetica;">Si tenés una tienda de ropa, esta promoción es especial para vos! También&nbsp;podés aprovechar para&nbsp;renovar tu guardarropa, o comprar en conjunto con amigos.</span></p>',
+              'config' => []
+            ],
+            [
+              'type'=> 'section',
+              'title'=> 'Marcas con Envío Gratis',
+              'marcas'=> [
+                [
+                  "logo"=> "https://netivooregon.s3.amazonaws.com/common/img/logo/blackolive_1547561960.webp",
+                  "name"=> "blackolive",
+                  "local_cd"=> "1753",
+                  "min"=> 10000
+                ],
+                [
+                  "logo"=> "https://netivooregon.s3.amazonaws.com/common/img/logo/amaika_1616526803.webp",
+                  "name"=> "amaika",
+                  "local_cd"=> "2120",
+                  "min"=> 7000
+                ],
+              ]
+            ],
+            [
+              'type' => 'section',
+              'title' => '',
+              'html' => '<p style="width: 800px; margin: auto;"><span style="font-size: 11pt; color: #808080;">1)&nbsp;El cupón se generará una vez superados los $40.000</span></p>
+              <p style="width: 800px; margin: auto;"><span style="font-size: 11pt; color: #808080;">2) El cupón debe estar&nbsp;seleccionado previo a la confirmación del pedido.</span></p>
+              <p style="width: 800px; margin: auto;"><span style="font-size: 11pt; color: #808080;">3)&nbsp;El cupón sólo puede utilizarse durante&nbsp;el mismo día en el que se realizó el pedido&nbsp;y en la misma marca.</span></p>
+              <p style="width: 800px; margin: auto;"><span style="font-size: 11pt; color: #808080;">4) Para poder realizar el pedido el total de la compra (incluído el cupón) deberá ser igual o mayor al monto mínimo de compra de la marca expresado en el banner. El total no incluye el valor del envío.</span></p>
+              <p style="width: 800px; margin: auto;"><span style="font-size: 11pt; color: #808080;">5)&nbsp;Promoción no acumulable con otros cupones de Modatex.</span></p>
+              <p style="width: 800px; margin: auto;"><span style="font-size: 11pt; color: #808080;">6)&nbsp;Se otorgarán un total de 1 cupón por compra. <strong>1 cupón = 1 compra</strong>.</span></p>
+              <p style="width: 800px; margin: auto;"><span style="font-size: 11pt; color: #808080;">7) Promoción válida hasta diciembre&nbsp;2023 inclusive.</span></p>',
+              'config' => []
+            ],
+  
+          ]
+        ]
+      ],
+      [ 
+        'url'=> 'https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/cupones750-promos.jpg',
+        'action' => [
+          'redirect' => [
+            'route' => '/discount_especial',
+            'params' => []
+          ]
+        ],
+        'data' => []
+      ],
+      [ 
+        'url'=> 'https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/outlet-cms.jpg',
+        'data' => [
+          'header' => [
+            'title'=> 'Outlet',
+            'subtitle'=> 'de temporadas anterioes',
+            'image'=> 'https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/outlet-cms.jpg',
+            'config'=>[
+                'isSubtitle'=> false,
+                'isTitle'=> false,
+            ]
+          ],
+          'body' => [
+            [
+              'type' => 'section',
+              'title' => 'Outlet de Temporadas Pasadas',
+              'subtitle' => 'Encontrá ofertas de Otoño Invierno 2022 y Primavera Verano 2023.',
+              'group_buttons' => [
+                [
+                  'type' => 'tag',
+                  'title' => 'TOPS',
+                  'redirect' => [
+                    'route' => '/search',
+                    'params' => [
+                      'search' => 'top',
+                      'section' => 'ofertas'
+                    ]
+                  ]
+                ],
+                [
+                  'type' => 'tag',
+                  'title' => 'REMERAS',
+                  'redirect' => [
+                    'route' => '/search',
+                    'params' => [
+                      'search' => 'remera',
+                      'section' => 'ofertas'
+                    ]
+                  ]
+                ],
+                [
+                  'type' => 'tag',
+                  'title' => 'CAMISAS',
+                  'redirect' => [
+                    'route' => '/search',
+                    'params' => [
+                      'search' => 'camisa',
+                      'section' => 'ofertas'
+                    ]
+                  ]
+                ],
+                [
+                  'type' => 'tag',
+                  'title' => 'BLUSAS',
+                  'redirect' => [
+                    'route' => '/search',
+                    'params' => [
+                      'search' => 'blusa',
+                      'section' => 'ofertas'
+                    ]
+                  ]
+                ],
+                [
+                  'type' => 'tag',
+                  'title' => 'MUSCULOSAS',
+                  'redirect' => [
+                    'route' => '/search',
+                    'params' => [
+                      'search' => 'musculosa',
+                      'section' => 'ofertas'
+                    ]
+                  ]
+                ],
+                [
+                  'type' => 'tag',
+                  'title' => 'Bodies',
+                  'redirect' => [
+                    'route' => '/search',
+                    'params' => [
+                      'search' => 'body',
+                      'section' => 'ofertas'
+                    ]
+                  ]
+                ],
+                [
+                  'type' => 'tag',
+                  'title' => 'VESTIDOS',
+                  'redirect' => [
+                    'route' => '/search',
+                    'params' => [
+                      'search' => 'vestido',
+                      'section' => 'ofertas'
+                    ]
+                  ]
+                ],
+                [
+                  'type' => 'tag',
+                  'title' => 'MONOS',
+                  'redirect' => [
+                    'route' => '/search',
+                    'params' => [
+                      'search' => 'mono',
+                      'section' => 'ofertas'
+                    ]
+                  ]
+                ],
+                [
+                  'type' => 'tag',
+                  'title' => 'ENTERITOS',
+                  'redirect' => [
+                    'route' => '/search',
+                    'params' => [
+                      'search' => 'enterito mono',
+                      'section' => 'ofertas'
+                    ]
+                  ]
+                ],
+                [
+                  'type' => 'tag',
+                  'title' => 'BLAZERS',
+                  'redirect' => [
+                    'route' => '/search',
+                    'params' => [
+                      'search' => 'blazer',
+                      'section' => 'ofertas'
+                    ]
+                  ]
+                ],
+                [
+                  'type' => 'tag',
+                  'title' => 'Pantalones',
+                  'redirect' => [
+                    'route' => '/search',
+                    'params' => [
+                      'search' => 'pantalon',
+                      'section' => 'ofertas'
+                    ]
+                  ]
+                ],
+                [
+                  'type' => 'tag',
+                  'title' => 'SHORTS',
+                  'redirect' => [
+                    'route' => '/search',
+                    'params' => [
+                      'search' => 'sshort',
+                      'section' => 'ofertas'
+                    ]
+                  ]
+                ],
+                [
+                  'type' => 'tag',
+                  'title' => 'POLLERAS',
+                  'redirect' => [
+                    'route' => '/search',
+                    'params' => [
+                      'search' => 'pollera',
+                      'section' => 'ofertas'
+                    ]
+                  ]
+                ],
+                [
+                  'type' => 'tag',
+                  'title' => 'JEANS',
+                  'redirect' => [
+                    'route' => '/search',
+                    'params' => [
+                      'search' => 'jean',
+                      'section' => 'ofertas'
+                    ]
+                  ]
+                ],
+                [
+                  'type' => 'tag',
+                  'title' => 'CALZADO',
+                  'redirect' => [
+                    'route' => '/search',
+                    'params' => [
+                      'search' => 'calzados zap',
+                      'section' => 'ofertas'
+                    ]
+                  ]
+                ],
+              ]
+            ]
+          ]
+        ]
+      ],
+      [ 
+        'url'=> 'https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/liquidacion-verano-promos.jpg',
+        'data' => [
+          'header' => [
+            'title'=> 'Rebajas en primavera verano 2023',
+            'subtitle'=> 'hassta 50% Off',
+            'image'=> 'https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/liquidacion-verano-promos.jpg',
+            'config'=>[
+                'isSubtitle'=> false,
+                'isTitle'=> false,
+            ]
+          ],
+          'body' => [
+            [
+              'type' => 'images',
+              'title' => ' Rebajas en primavera verano 2023',
+              'images' => [
+                [
+                  'url' => 'https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/liquidacion-ss23-blusas.jpg',
+                  'col' => 3,
+                  'label_html' => '<span style="display: flex; clear: both; widht: 20%; text-align: center; justify-content: center;"><span style="text-decoration: underline;">blusas desde <span style="text-decoration: line-through;">$2700</span> $1500 · ver<br></span></span>',
+                  'redirect' => [
+                    'route' => '/search',
+                    'params' => [
+                      'search' => 'blusa',
+                      'section' => 'ofertas'
+                    ]
+                  ]
+                ]
+              ]
+            ],
+            [
+              'type' => 'images',
+              'images' => [
+                [
+                  'url' => 'https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/liquidacion-ss23-vestidos.jpg',
+                  'col' => 1.5,
+                  'label_html' => '<span style="display: flex; clear: both; widht: 20%; text-align: center; justify-content: center;"><span style="text-decoration: underline;">vestidos desde <span style="text-decoration: line-through;">$2400</span> $1500 · ver<br></span></span>',
+                  'redirect' => [
+                    'route' => '/search',
+                    'params' => [
+                      'search' => 'vestido',
+                      'section' => 'ofertas'
+                    ]
+                  ]
+                ],
+                [
+                  'url' => 'https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/liquidacion-ss23-lino.jpg',
+                  'col' => 1.5,
+                  'label_html' => '<span style="display: flex; clear: both; widht: 20%; text-align: center; justify-content: center;"><span style="text-decoration: underline;">prendas de lino&nbsp;· ver</span></span>',
+                  'redirect' => [
+                    'route' => '/search',
+                    'params' => [
+                      'search' => 'lino',
+                      'section' => '1'
+                    ]
+                  ]
+                ],
+              ]
+            ],
+            [
+              'type' => 'images',
+              'images' => [
+                [
+                  'url' => 'https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/liquidacion-ss23-top.jpg',
+                  'col' => 1,
+                  'label_html' => '<span style="display: flex; clear: both; widht: 20%; text-align: center; justify-content: center;"><span style="text-decoration: underline;">tops desde <span style="text-decoration: line-through;">$1200</span> $750 · ver</span></span>',
+                  'redirect' => [
+                    'route' => '/search',
+                    'params' => [
+                      'search' => 'top',
+                      'section' => 'ofertas'
+                    ]
+                  ]
+                ],
+                [
+                  'url' => 'https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/liquidacion-ss23-remera.jpg',
+                  'col' => 1,
+                  'label_html' => '<span style="display: flex; clear: both; widht: 20%; text-align: center; justify-content: center;"><span style="text-decoration: underline;">remeras desde <span style="text-decoration: line-through;">$1200</span> $600 · ver</span></span>',
+                  'redirect' => [
+                    'route' => '/search',
+                    'params' => [
+                      'search' => 'remera manga corta remeron',
+                      'section' => 'ofertas'
+                    ]
+                  ]
+                ],
+                [
+                  'url' => 'https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/liquidacion-ss23-remera.jpg',
+                  'col' => 1,
+                  'label_html' => '<span style="display: flex; clear: both; widht: 20%; text-align: center; justify-content: center;"><span style="text-decoration: underline;">remeras desde <span style="text-decoration: line-through;">$1200</span> $600 · ver</span></span>',
+                  'redirect' => [
+                    'route' => '/search',
+                    'params' => [
+                      'search' => 'remera manga corta remeron',
+                      'section' => 'ofertas'
+                    ]
+                  ]
+                ],
+              ]
+            ],
+            [
+              'type'=>'section',
+              'title'=> '',
+              'html'=> '<div id="tiendas" style="width-max: 70%; margin: auto; clear: both;">
+              <p style="margin: auto; text-align: center;"><span style="color: #000000;"><strong><span style="font-family: calibri; font-size: 15pt; letter-spacing: 3px; padding: 5px;">TIENDAS CON DESCUENTOS</span></strong></span></p>
+              <p style="margin: auto; text-align: center;">&nbsp;</p>
+              <p style="margin: auto; text-align: center;"><span style="color: #606060; line-height: 30px; letter-spacing: 3px;"><span style="font-family: verdana;">hasta 60% off</span></span></p>
+              </div>',
+              'config'=> [
+                'card' => false,
+              ]
+            ],
+            [
+              'type' => 'section',
+              'title' => 'hasta 60% off',
+              'marcas' => [
+                [
+                    "logo"=> "https://netivooregon.s3.amazonaws.com/common/img/logo/blackolive_1547561960.webp",
+                    "name"=> "blackolive",
+                    "local_cd"=> "1753",
+                    "min"=> 10000
+                ],
+                [
+                    "logo"=> "https://netivooregon.s3.amazonaws.com/common/img/logo/amaika_1616526803.webp",
+                    "name"=> "amaika",
+                    "local_cd"=> "2120",
+                    "min"=> 7000
+                ],
+              ]
+            ],
+            [
+              'type' => 'section',
+              'title' => 'hasta 50% off',
+              'marcas' => [
+                [
+                    "logo"=> "https://netivooregon.s3.amazonaws.com/common/img/logo/blackolive_1547561960.webp",
+                    "name"=> "blackolive",
+                    "local_cd"=> "1753",
+                    "min"=> 10000
+                ],
+                [
+                    "logo"=> "https://netivooregon.s3.amazonaws.com/common/img/logo/amaika_1616526803.webp",
+                    "name"=> "amaika",
+                    "local_cd"=> "2120",
+                    "min"=> 7000
+                ],
+              ]
+            ],
+            [
+              'type' => 'section',
+              'title' => 'hasta 40% off',
+              'marcas' => [
+                [
+                    "logo"=> "https://netivooregon.s3.amazonaws.com/common/img/logo/blackolive_1547561960.webp",
+                    "name"=> "blackolive",
+                    "local_cd"=> "1753",
+                    "min"=> 10000
+                ],
+                [
+                    "logo"=> "https://netivooregon.s3.amazonaws.com/common/img/logo/amaika_1616526803.webp",
+                    "name"=> "amaika",
+                    "local_cd"=> "2120",
+                    "min"=> 7000
+                ],
+              ]
+            ],
+          ]
+        ]
 
-      [ 'url'=> 'https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/otono-invierno-adelanto-promos.jpg',],
-      [ 'url'=> 'https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/liquidacion-verano-promos.jpg' ],
-      [ 'url'=> 'https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/outlet-cms.jpg'],
-      [ 'url'=> 'https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/cupones750-promos.jpg' ],
-      [ 'url'=> 'https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/lunesmayor-promos.gif?n4' ],
+      ],
+      [ 'url'=> 'https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/otono-invierno-adelanto-promos.jpg' ],
     ];
   }
 
