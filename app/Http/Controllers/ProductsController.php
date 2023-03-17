@@ -227,9 +227,14 @@ class ProductsController extends Controller
     {
       $url = $this->urlSearch.Arr::query($data);
       $response = Http::acceptJson()->get($url);
+
+      if($response->json()['status'] == 'error'){
+        return [];
+      }
       
       $data = $response->collect()->all();
 
+      
       $productos = collect($data['modelos']);
 
       $idsProductos = $productos->pluck('num');
