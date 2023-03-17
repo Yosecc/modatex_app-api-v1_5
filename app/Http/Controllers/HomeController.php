@@ -854,7 +854,7 @@ class HomeController extends Controller
                 ],
                 [
                   'type' => 'tag',
-                  'title' => 'Bodies',
+                  'title' => 'BODIES',
                   'redirect' => [
                     'route' => '/search',
                     'params' => [
@@ -909,7 +909,7 @@ class HomeController extends Controller
                 ],
                 [
                   'type' => 'tag',
-                  'title' => 'Pantalones',
+                  'title' => 'PANTALONES',
                   'redirect' => [
                     'route' => '/search',
                     'params' => [
@@ -987,6 +987,7 @@ class HomeController extends Controller
                 [
                   'url' => 'https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/liquidacion-ss23-blusas.jpg',
                   'col' => 3,
+                  'height' => 500,
                   'label_html' => '<span style="display: flex; clear: both; widht: 20%; text-align: center; justify-content: center;"><span style="text-decoration: underline;">blusas desde <span style="text-decoration: line-through;">$2700</span> $1500 · ver<br></span></span>',
                   'redirect' => [
                     'route' => '/search',
