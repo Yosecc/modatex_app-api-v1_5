@@ -663,13 +663,62 @@ class HomeController extends Controller
           ]
         ]
       ],
+      [ 
+        'url'=> 'https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/pinkdays-promos3.gif?n6',
+        'data' => [
+          'header' => [
+            'title' => 'Pink Day',
+            'subtitle' => 'Envíos desde $199. Miércoles',
+            'image' => 'https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/pinkdays-promos3.gif?n6',
+            'config'=>[
+              'isSubtitle'=> false,
+              'isTitle'=> false,
+            ]
+          ],
+          'body' => [
+            [
+              'type' => 'section',
+              'title' => '',
+              'html' => '<p style="width: 800px; margin: auto; font-size: 17px; color: black; text-align: center;"><span style="font-size: 9pt; color: #333333;">&nbsp;</span></p>
+              <div style="width: auto; margin-left: auto; margin-right: auto; text-align: center;"><span style="font-size: 13pt; color: #333333;">Sólo los miércoles!</span></div>
+              <div style="width: auto; margin-left: auto; margin-right: auto; text-align: center;"><span style="font-size: 13pt; color: #333333;">El envío te sale hasta <strong>75% más barato</strong>!</span></div>
+              <div style="width: auto; margin-left: auto; margin-right: auto; text-align: center;">&nbsp;</div>
+              <div style="width: auto; margin-left: auto; margin-right: auto; text-align: center;"><span style="color: #333333;">&nbsp;</span></div>
+              <div style="width: auto; margin-left: auto; margin-right: auto; text-align: center;"><span style="text-decoration: underline; color: #333333;"><span style="font-size: 13pt;"><strong>Todos los miércoles:</strong></span></span></div>
+              <div style="width: auto; margin-left: auto; margin-right: auto; text-align: center;"><span style="font-size: 13pt; color: #333333;"><strong>Envío a $199 </strong>a&nbsp;domicilio por<strong> <strong>Moto</strong> </strong>dentro de CABA,</span></div>
+              <div style="width: auto; margin-left: auto; margin-right: auto; text-align: center;"><span style="font-size: 13pt; color: #333333;"><strong>Envío a $249&nbsp;</strong>a&nbsp;domicilio por<strong>&nbsp;<strong>Moto</strong>&nbsp;</strong>dentro de GBA,</span></div>
+              <div style="width: auto; margin-left: auto; margin-right: auto; text-align: center;"><span style="font-size: 13pt; color: #333333;"><strong>Envío a $399 </strong>por<strong>&nbsp;</strong>sucursal de&nbsp;<strong><strong>Correo Argentino</strong></strong> a todo el país,</span></div>
+              <div style="width: auto; margin-left: auto; margin-right: auto; text-align: center;"><span style="font-size: 13pt; color: #333333;"><strong>Envío a $399&nbsp;</strong>por<strong>&nbsp;</strong>sucursal de <strong><strong>OCA</strong></strong>, y<strong><strong>&nbsp;</strong></strong>por terminal de&nbsp;<strong>Integral Pack</strong> a todo el país</span></div>',
+              'config'=> []
+            ],
+            [
+              'type' =>'section',
+              'title' => 'Más Promos de Envíos',
+              'images' => ['https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/enviogratis-promos3.gif','https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/enviosrebajados-promos3.gif?2'],
+              'config' => []
+            ],
+            [
+              'type' => 'section',
+              'title' => '',
+              'html' => '<div style="width: auto; margin-left: auto; margin-right: auto; text-align: center;">
+
+                <p style="width: 800px; margin: auto; font-size: 14px; text-align: center; color: white;"><span style="color: #000000;">1- Promoción válida sólo para la República Argentina.</span></p>
+                <p style="width: 800px; margin: auto; font-size: 14px; text-align: center; color: white;"><span style="color: #000000;">2- Los precios expresados son válidos durante los días miércoles.</span></p>
+                <p style="width: 800px; margin: auto; font-size: 14px; text-align: center; color: white;"><span style="color: #000000;">3- El pedido debe ser hecho el día miércoles.</span></p>
+                <p style="width: 800px; margin: auto; font-size: 14px; text-align: center; color: white;"><strong><span style="color: #000000;">4- NO ACUMULABLE CON OTRAS PROMOCIONES DE ENVÍOS</span></strong></p>
+                <p style="width: 800px; margin: auto; font-size: 14px; text-align: center; color: white;"><span style="color: #000000;">5- Aplican Bases y Condiciones</span></p>
+              </div>',
+              'config'=> []
+            ],
+          ]
+        ]
+      ],
 
       [ 'url'=> 'https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/otono-invierno-adelanto-promos.jpg',],
       [ 'url'=> 'https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/liquidacion-verano-promos.jpg' ],
       [ 'url'=> 'https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/outlet-cms.jpg'],
       [ 'url'=> 'https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/cupones750-promos.jpg' ],
       [ 'url'=> 'https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/lunesmayor-promos.gif?n4' ],
-      [ 'url'=> 'https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/pinkdays-promos3.gif?n6' ],
     ];
   }
 
