@@ -48,8 +48,7 @@ class NotificationsUserAppController extends Controller
             'token' => 'required'
         ]);
 
-        $notification = NotificationsUserApp::insert([ 'client_num' => Auth::user()->num ],[
-            'token' => $request->token, 
+        $notification = NotificationsUserApp::updateOrInsert([ 'client_num' => Auth::user()->num , 'token' => $request->token ],[
             'platform' => 'app',
         ]);
 
