@@ -98,7 +98,9 @@ class NotificationsPush
     {
         try {
             $this->user_id = $user_id;
-            $consulta = NotificationsUserApp::where('client_num', $user_id)->first();
+            $consulta = NotificationsUserApp::where('client_num', $user_id)->where('platform','app')->first();
+
+            // dd($consulta);
 
             if(!$consulta){
                 $this->errors['user_token'] = 'Client does not have app token';

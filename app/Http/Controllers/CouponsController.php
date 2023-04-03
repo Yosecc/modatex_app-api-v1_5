@@ -126,10 +126,11 @@ class CouponsController extends Controller
                                   ->whereDate('end_date','<=', $hoy)
                                   ->latest('entry')
                                   ->first();
+        // dd($cupon);
 
         if(!$cupon){
-          throw new \Exception('Cupón no encontrado'); 
-          return response()->json('Cupón no encontrado', 422);
+          throw new \Exception('Código de cupón inválido.'); 
+          return response()->json('Código de cupón inválido.', 422);
         }
         
 

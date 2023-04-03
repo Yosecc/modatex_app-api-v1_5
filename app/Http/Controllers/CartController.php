@@ -110,11 +110,11 @@ class CartController extends Controller
       } catch (\Exception $e) {
         return response()->json(['status'=> false,'message'=> $e->getMessage()], 422); 
       }
-      return response()->json(['status'=> true]);
+      return response()->json(['status'=> true ,]);
     }
 
 
-    public $selectCar = ['CART.NUM','CART.CLIENT_NUM','CART.GROUP_CD','CART.LOCAL_CD','CART.MODELO_NUM','CART.MODELO_DETALE_NUM','CART.SIZE_NUM','CART.COLOR_NUM','CART.PRICE','CART.CANTIDAD','CART.TOTAL_PRICE','LOCAL.LOCAL_NAME','LOCAL.LIMIT_PRICE'];
+    public $selectCar = ['CART.NUM','CART.STAT_CD','CART.CLIENT_NUM','CART.GROUP_CD','CART.LOCAL_CD','CART.MODELO_NUM','CART.MODELO_DETALE_NUM','CART.SIZE_NUM','CART.COLOR_NUM','CART.PRICE','CART.CANTIDAD','CART.TOTAL_PRICE','LOCAL.LOCAL_NAME','LOCAL.LIMIT_PRICE'];
 
     // TRAE TODOS LOS STORE/CARRITOS
     public function getCarts(Request $request){ 
@@ -139,7 +139,7 @@ class CartController extends Controller
           $stores = $stores->map(fn ($store)=>
              $this->arregloCart($store,$carts)
           );
-          
+          // dd($stores);  
           return response()->json(['stores' => $stores]);
         }
 
@@ -169,6 +169,7 @@ class CartController extends Controller
 
         $stores = Arr::collapse($stores);
 
+       
         return response()->json($stores);
 
       }
