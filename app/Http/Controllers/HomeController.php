@@ -980,6 +980,7 @@ class HomeController extends Controller
                 'isTitle'=> false,
             ]
           ],
+
           'body' => [
             [
               'type' => 'images',

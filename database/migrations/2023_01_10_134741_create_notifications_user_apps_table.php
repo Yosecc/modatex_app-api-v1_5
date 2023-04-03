@@ -17,6 +17,7 @@ return new class extends Migration
             $table->id();
             $table->integer('client_num');
             $table->text('token');
+            $table->text('platform')->nullable();
             $table->timestamps();
         });
     }

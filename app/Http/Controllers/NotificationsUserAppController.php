@@ -24,14 +24,15 @@ class NotificationsUserAppController extends Controller
         ]);
         
 
-
         if ($validator->fails()) {
             return response()->json($validator->errors(), 422);
         }
 
 
         $notification = new NotificationsPush($request->all());
+
         $notificacion = $notification->sendUserNotification(Auth::user()->num);
+
 
         if($notification->fails()){
              return response()->json($notification->getErrors(), 422);
@@ -47,8 +48,10 @@ class NotificationsUserAppController extends Controller
             'token' => 'required'
         ]);
 
-        $notification = NotificationsUserApp::
-            updateOrInsert([ 'client_num' => Auth::user()->num ],['token' => $request->token ]);
+        $notification = NotificationsUserApp::insert([ 'client_num' => Auth::user()->num ],[
+            'token' => $request->token, 
+            'platform' => 'app',
+        ]);
 
         return response()->json($notification ? true : false);
     }
@@ -62,6 +65,7 @@ class NotificationsUserAppController extends Controller
     {
         $notificaciones = NotificationsApp::where('client_num',Auth::user()->num)
                             ->orderBy('id','desc')->get();
+        
 
         return response()->json($notificaciones->makeHidden(['id','updated_at','client_num']));
     }
