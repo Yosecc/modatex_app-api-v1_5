@@ -338,67 +338,268 @@ class HomeController extends Controller
   {
     return [ 
       [ 
-        'id' => 1,
-        'url' => 'https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/enviosrebajados-promos3.gif?2',
+        'id' => 6,
+        'url'=> 'https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/lunesmayor-promos.gif?n4',
         'data' => [
           'header' => [
-              'title' => 'Envíos Rebajados',
-              'subtitle' =>'Descuentos especiales todos los dias',
-              'image' => 'https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/enviosrebajados-promos3b.gif',
-              'config'=> [
-                  'isSubtitle' => false,
-                  'isTitle' => false,
-              ]
+            'title'=> 'Lunes por mayor',
+            'subtitle'=> 'Especial moyoristas',
+            'image'=> 'https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/lunesmayor-promos.gif?n4',
+            'config'=>[
+                'isSubtitle'=> false,
+                'isTitle'=> false,
+            ]
           ],
           'body' => [
+            [
+              'type' => 'section',
+              'title' => '',
+              'html' => '<h1 style="text-align: center;"><strong><span style="font-size: 16pt; font-family: helvetica;">Mirá este beneficio&nbsp;para comprar ropa&nbsp;por mayor</span></strong></h1>
+                <p style="text-align: center;"><span style="font-size: 12pt; font-family: helvetica;">Comprando los Lunes a partir de $40.000,&nbsp;tenés&nbsp;<strong>$2.000 de descuento.&nbsp;</strong>Combinalo con <strong>Envío Gratis</strong> en tiendas seleccionadas a sucursal de Correo Argentino y OCA a todo el país y a domicilio por Moto dentro de Capital Federal y GBA.</span></p>
+                <h2 style="text-align: center;"><span style="font-size: 14pt; font-family: helvetica;">Comprá online en los locales de Flores, Avenida Avellaneda</span></h2>
+                <p style="text-align: center;"><span style="font-size: 12pt; font-family: helvetica;">Si tenés una tienda de ropa, esta promoción es especial para vos! También&nbsp;podés aprovechar para&nbsp;renovar tu guardarropa, o comprar en conjunto con amigos.</span></p>',
+              'config' => []
+            ],
+            [
+              'type'=> 'section',
+              'title'=> 'Marcas con Envío Gratis',
+              'marcas'=> [
+                [
+                  "logo"=> "https://netivooregon.s3.amazonaws.com/common/img/logo/blackolive_1547561960.webp",
+                  "name"=> "blackolive",
+                  "local_cd"=> "1753",
+                  "min"=> 10000
+                ],
+                [
+                  "logo"=> "https://netivooregon.s3.amazonaws.com/common/img/logo/amaika_1616526803.webp",
+                  "name"=> "amaika",
+                  "local_cd"=> "2120",
+                  "min"=> 7000
+                ],
+              ]
+            ],
+            [
+              'type' => 'section',
+              'title' => '',
+              'html' => '<p style="width: 800px; margin: auto;"><span style="font-size: 11pt; color: #808080;">1)&nbsp;El cupón se generará una vez superados los $40.000</span></p>
+              <p style="width: 800px; margin: auto;"><span style="font-size: 11pt; color: #808080;">2) El cupón debe estar&nbsp;seleccionado previo a la confirmación del pedido.</span></p>
+              <p style="width: 800px; margin: auto;"><span style="font-size: 11pt; color: #808080;">3)&nbsp;El cupón sólo puede utilizarse durante&nbsp;el mismo día en el que se realizó el pedido&nbsp;y en la misma marca.</span></p>
+              <p style="width: 800px; margin: auto;"><span style="font-size: 11pt; color: #808080;">4) Para poder realizar el pedido el total de la compra (incluído el cupón) deberá ser igual o mayor al monto mínimo de compra de la marca expresado en el banner. El total no incluye el valor del envío.</span></p>
+              <p style="width: 800px; margin: auto;"><span style="font-size: 11pt; color: #808080;">5)&nbsp;Promoción no acumulable con otros cupones de Modatex.</span></p>
+              <p style="width: 800px; margin: auto;"><span style="font-size: 11pt; color: #808080;">6)&nbsp;Se otorgarán un total de 1 cupón por compra. <strong>1 cupón = 1 compra</strong>.</span></p>
+              <p style="width: 800px; margin: auto;"><span style="font-size: 11pt; color: #808080;">7) Promoción válida hasta diciembre&nbsp;2023 inclusive.</span></p>',
+              'config' => []
+            ],
+  
+          ]
+        ]
+      ],
+      [ 
+        'id' => 7,
+        'url'=> 'https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/cupones750-promos.jpg',
+        'action' => [
+          'redirect' => [
+            'route' => '/discount_especial',
+            'params' => []
+          ]
+        ],
+        'data' => []
+      ],
+      [ 
+        'id' => 5,
+        'url'=> 'https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/pinkdays-promos3.gif?n6',
+        'data' => [
+          'header' => [
+            'title' => 'Pink Day',
+            'subtitle' => 'Envíos desde $199. Miércoles',
+            'image' => 'https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/pinkdays-promos3.gif?n6',
+            'config'=>[
+              'isSubtitle'=> false,
+              'isTitle'=> false,
+            ]
+          ],
+          'body' => [
+            [
+              'type' => 'section',
+              'title' => '',
+              'html' => '<p style="width: 800px; margin: auto; font-size: 17px; color: black; text-align: center;"><span style="font-size: 9pt; color: #333333;">&nbsp;</span></p>
+              <div style="width: auto; margin-left: auto; margin-right: auto; text-align: center;"><span style="font-size: 13pt; color: #333333;">Sólo los miércoles!</span></div>
+              <div style="width: auto; margin-left: auto; margin-right: auto; text-align: center;"><span style="font-size: 13pt; color: #333333;">El envío te sale hasta <strong>75% más barato</strong>!</span></div>
+              <div style="width: auto; margin-left: auto; margin-right: auto; text-align: center;">&nbsp;</div>
+              <div style="width: auto; margin-left: auto; margin-right: auto; text-align: center;"><span style="color: #333333;">&nbsp;</span></div>
+              <div style="width: auto; margin-left: auto; margin-right: auto; text-align: center;"><span style="text-decoration: underline; color: #333333;"><span style="font-size: 13pt;"><strong>Todos los miércoles:</strong></span></span></div>
+              <div style="width: auto; margin-left: auto; margin-right: auto; text-align: center;"><span style="font-size: 13pt; color: #333333;"><strong>Envío a $199 </strong>a&nbsp;domicilio por<strong> <strong>Moto</strong> </strong>dentro de CABA,</span></div>
+              <div style="width: auto; margin-left: auto; margin-right: auto; text-align: center;"><span style="font-size: 13pt; color: #333333;"><strong>Envío a $249&nbsp;</strong>a&nbsp;domicilio por<strong>&nbsp;<strong>Moto</strong>&nbsp;</strong>dentro de GBA,</span></div>
+              <div style="width: auto; margin-left: auto; margin-right: auto; text-align: center;"><span style="font-size: 13pt; color: #333333;"><strong>Envío a $399 </strong>por<strong>&nbsp;</strong>sucursal de&nbsp;<strong><strong>Correo Argentino</strong></strong> a todo el país,</span></div>
+              <div style="width: auto; margin-left: auto; margin-right: auto; text-align: center;"><span style="font-size: 13pt; color: #333333;"><strong>Envío a $399&nbsp;</strong>por<strong>&nbsp;</strong>sucursal de <strong><strong>OCA</strong></strong>, y<strong><strong>&nbsp;</strong></strong>por terminal de&nbsp;<strong>Integral Pack</strong> a todo el país</span></div>',
+              'config'=> []
+            ],
+            [
+              'type' =>'section',
+              'title' => 'Más Promos de Envíos',
+              'images' => ['https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/enviogratis-promos3.gif','https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/enviosrebajados-promos3.gif?2'],
+              'config' => []
+            ],
+            [
+              'type' => 'section',
+              'title' => '',
+              'html' => '<div style="width: auto; margin-left: auto; margin-right: auto; text-align: center;">
+
+                <p style="width: 800px; margin: auto; font-size: 14px; text-align: center; color: white;"><span style="color: #000000;">1- Promoción válida sólo para la República Argentina.</span></p>
+                <p style="width: 800px; margin: auto; font-size: 14px; text-align: center; color: white;"><span style="color: #000000;">2- Los precios expresados son válidos durante los días miércoles.</span></p>
+                <p style="width: 800px; margin: auto; font-size: 14px; text-align: center; color: white;"><span style="color: #000000;">3- El pedido debe ser hecho el día miércoles.</span></p>
+                <p style="width: 800px; margin: auto; font-size: 14px; text-align: center; color: white;"><strong><span style="color: #000000;">4- NO ACUMULABLE CON OTRAS PROMOCIONES DE ENVÍOS</span></strong></p>
+                <p style="width: 800px; margin: auto; font-size: 14px; text-align: center; color: white;"><span style="color: #000000;">5- Aplican Bases y Condiciones</span></p>
+              </div>',
+              'config'=> []
+            ],
+          ]
+        ]
+      ],
+      [ 
+        'id' => 4,
+        'url'=> 'https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/juevesmodapago-promos.gif',
+        'data' => [
+          'header' => [
+            'title' => 'Reintegro del 5% de tu compra.',
+            'subtitle' => 'Modapago. Jueves',
+            'image' => 'https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/juevesmodapago-promos.gif',
+            'config' => [
+              'isSubtitle'=> false,
+              'isTitle'=> false,
+            ]
+          ],
+          'body' => [
+            [
+              'type'=>'section',
+              'title'=> '',
+              'html'=> '<div id="contents_area" class="contents_area_homelist_last_products">
+              <div style="width: auto; margin-left: auto; margin-right: auto; text-align: center;">
+              <span style="font-size: 16pt;">Transformá tu compra en un descuento!</span>&nbsp;
+              </div>
+              <p style="width: 800px; margin: auto; font-size: 17px; text-align: center; color: black;">Comprando todos los <strong>jueves</strong> y abonando con<strong>&nbsp;<strong>Modapago</strong></strong>, Modatex <strong>te devuelve 5%</strong> en forma de un cupón para tu próxima compra!</p>
+              <p style="width: 800px; margin: auto; font-size: 17px; text-align: center; color: black;">&nbsp;&nbsp;</p>
+              <p style="width: 800px; margin: auto; font-size: 17px; text-align: center; color: black;"><span style="color: #5757ad;"><strong>Cómo funciona?</strong></span></p>
+              <p style="width: 800px; margin: auto; font-size: 17px; text-align: center; color: black;"><strong>Pagando por Modapago</strong> con tarjeta de crédito o débito, Rapipago o Pagofácil;</p>
+              <p style="width: 800px; margin: auto; font-size: 17px; text-align: center; color: black;">se te va a generar automáticamente un cupón en tu perfil. <span style="font-size: 9pt;">(2)(3)</span></p>
+              <p style="width: 800px; margin: auto; font-size: 17px; text-align: center; color: black;">&nbsp;&nbsp;</p>
+              <p style="width: 800px; margin: auto; font-size: 17px; text-align: center; color: black;"><strong><span style="color: #5364ad;">De cuánto es el cupón?</span></strong></p>
+              <p style="width: 800px; margin: auto; font-size: 17px; text-align: center; color: black; padding: 10px;">Tu cupón va a ser igual al 5% de tu compra, con un <strong>límite de devolución de $750</strong>.</p>
+              <p style="width: 800px; margin: auto; font-size: 17px; text-align: center; color: black;">
+              <img src="https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/juevesmodapago-news2.gif" alt="modapago" width="300"/></p>
+              <p style="width: 800px; margin: auto; font-size: 17px; text-align: center; color: black;">&nbsp;</p>
+              <p style="width: 800px; margin: auto; font-size: 17px; text-align: center; color: #5364ad;">&nbsp;<strong>Hasta cuándo puedo usar el cupón?</strong></p>
+              <p style="width: 800px; margin: auto; font-size: 17px; text-align: center; color: black;">Tenés&nbsp;una semana para usarlo&nbsp;desde el día del pedido. Aprovechalo! <span style="font-size: 9pt;">(4)</span></p>
+              <p style="width: 800px; margin: auto; font-size: 17px; text-align: center; color: black;">&nbsp;</p>
+              <p style="width: 800px; margin: auto; font-size: 17px; text-align: center; color: black;"><span style="color: #5364ad;"><strong>En qué marcas puedo usar mi cupón?</strong></span></p>
+              <p style="width: 800px; margin: auto; font-size: 17px; text-align: center; color: black;">En todas las marcas.</p>
+              <p style="width: 800px; margin: auto; font-size: 17px; text-align: center; color: black;">&nbsp;</p>
+              <p style="width: 800px; margin: auto; font-size: 17px; text-align: center; color: #5364ad;"><br>&nbsp;</p>
+              <p style="width: 800px; margin: auto; font-size: 17px; text-align: center; color: black;"><span style="color: #5364ad; font-family: verdana, geneva;"><a style="color: #5364ad;" href="../../perfil?cupones">¿Dónde veo mis cupones?</a></span></p>
+              <p style="width: 800px; margin: auto; font-size: 17px; text-align: center; color: black;"><span style="font-family: verdana, geneva;">No olvides que para participar debés&nbsp;<span style="color: #5364ad;"><a style="color: #5364ad;" href="../../">ingresar&nbsp;con tu usuario de Modatex</a>.</span></span></p>
+              <p style="width: 800px; margin: auto; font-size: 17px; text-align: center; color: black;">&nbsp;</p>
+              <p style="width: 800px; margin: auto; font-size: 17px; text-align: center; color: black;">&nbsp;&nbsp;</p>
+              <p style="width: 800px; margin: auto; font-size: 17px; text-align: center; color: black;">&nbsp;</p>
+              <div>
+              <p style="width: 800px; margin: auto; text-align: center; font-size: 25px;">&nbsp;&nbsp;</p>
+              <p style="width: 800px; margin: auto; font-size: 14px; text-align: center; color: white;"><span style="color: #000000;">1-Promoción&nbsp;válida sólo para la República Argentina.</span></p>
+              <p style="width: 800px; margin: auto; font-size: 14px; text-align: center; color: white;"><span style="color: #000000;">2-Los&nbsp;cupones&nbsp;se&nbsp;generan una vez realizado el pago. El pago puede ser hecho en cualquier momento&nbsp;antes del jueves siguiente a hacer el pedido.</span></p>
+              <p style="width: 800px; margin: auto; font-size: 14px; text-align: center; color: white;"><span style="color: #000000;">3-Son válidos solamente los pagos relacionados a compras dentro de Modatex. No son válidos los pagos independientes. El número de cupón debe coincidir con el número de compra.</span></p>
+              <p style="width: 800px; margin: auto; font-size: 14px; text-align: center; color: white;"><span style="color: #000000;">4- Los cupones son válidos&nbsp;hasta el miercoles siguiente de hacer el pedido, a las 23:59 hs.</span></p>
+              <p style="width: 800px; margin: auto; font-size: 14px; text-align: center; color: white;"><span style="color: #000000;">5- El total a redimir no incluye el valor del envío.</span></p>
+              <p style="width: 800px; margin: auto; font-size: 14px; text-align: center; color: white;"><span style="color: #000000;">6- Aplican Bases y Condiciones</span></p>
+              <p style="width: 800px; margin: auto; font-size: 14px; text-align: center; color: white;">&nbsp;</p>
+              <p style="width: 800px; margin: auto; font-size: 14px; text-align: center; color: white;">&nbsp;</p>
+              <p><iframe style="display: block; margin-left: auto; margin-right: auto; max-width: 100%;" src="https://f0d938a3.sibforms.com/serve/MUIEAHz1LTZNZ9kzGoydvyRkZtZ3d86rFEqruk8SmPn8PYkLDKzvhs4vhwn7saG6VyEni59IeV9H34IluTe7ttoank-0aC0dN5w4pgYQDjl90pcBhJzc1znCoVt3MFvjq0EiibuVKQJcIP24g-1aoB82d7fpABvVdKJsD2pqXUD327FqDPT0SVfZ9iqixejZQgPi3SC3BETjQAt7" width="50%" height="100%" frameborder="0" scrolling="auto" allowfullscreen="allowfullscreen"></iframe></p>
+              <p style="width: 800px; margin: auto; font-size: 14px; text-align: center; color: white;">&nbsp;</p>
+              <p style="width: 800px; margin: auto;"><span style="color: #000000;">&nbsp;</span>&nbsp;&nbsp;</p>
+              <p style="width: 800px; margin: auto;">&nbsp;</p>
+              </div>
+              
+              </div>',
+              'config'=> []
+            ],
+          ]
+        ]
+      ],
+      [ 
+        'id' => 3,
+        'url'=> 'https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/minimos-promos3.gif',
+        'data'=> [
+          'header'=>[
+              'title'=> 'Mínimos Rebajados',
+              'subtitle'=> 'Hasta $1! vie - sab - dom',
+              'image'=> 'https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/minimos-promos3b.gif',
+              'config'=>[
+                  'isSubtitle'=> false,
+                  'isTitle'=> false,
+              ]
+          ],
+          'body'=>[
               [
-                'type'=>'section',
-                'title' =>'TARIFAS DESDE ENERO 2023',
-                'images' =>['https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/precios-envios-enero.gif?n1'],
-                'config' =>[
-                  'images' =>'scroll',
-                  'card' =>false,
-                  'padding' =>0
-                ]
+                  'type'=>'section',
+                  'title'=> '¡Comprá desde $1! ',
+                  'html'=> '<p style="text-align: center;"><span style="color: #333333; font-size: 13pt;">&nbsp;<span style="font-size: 12pt;">Todos los <strong>Viernes, Sábados y Domingos</strong>,&nbsp;las&nbsp;marcas bajan sus mínimos de compra.</span></span></p><p style="text-align: center;"><span style="color: #333333; font-size: 11pt;"><strong>Combinalo con nuestras <span style="text-decoration: underline;"><a style="color: #333333; text-decoration: underline;" href="http://www.modatex.com.ar/?page=220">promos en envíos</a></span>!&nbsp;</strong></span><span style="color: #333333;">&nbsp;</span>&nbsp;</p>',
+                  'config'=> []
               ],
               [
-                'type'=> 'section',
-                'title' => '',
-                'images' => [],
-                'buttons' => [
+                'type' => 'section',
+                'title' => 'Mínimos Rebajados Todos los Días. De Lunes a Lunes.',
+                'marcas' => [
                   [
-                    'title' => 'Mirá por dónde esta tu paquete',
-                    'action' => ''
+                      "logo"=> "https://netivooregon.s3.amazonaws.com/common/img/logo/blackolive_1547561960.webp",
+                      "name"=> "blackolive",
+                      "local_cd"=> "1753",
+                      "min"=> 10000
                   ],
                   [
-                    'title' => 'Ver servicio de moto CABA 48HS',
-                    'action' => ''
+                      "logo"=> "https://netivooregon.s3.amazonaws.com/common/img/logo/amaika_1616526803.webp",
+                      "name"=> "amaika",
+                      "local_cd"=> "2120",
+                      "min"=> 7000
                   ],
-                ],
-                'config' =>[
-                    'card' => false
                 ]
               ],
               [
                 'type' => 'section',
-                'title' => 'Plazos',
-                'html' => '<p style="font-family: verdana, geneva; font-size: 13pt; text-align: left;"><span style="font-family: verdana, geneva;">Los plazos de entrega&nbsp;<strong>comienzan&nbsp;a dia siguiente que la marca entrega el paquete</strong> en nuestro depósito (no desde el día de la compra). </span></p><p style="font-family: verdana, geneva; font-size: 13pt; text-align: left;"><span style="font-family: verdana, geneva;"><span style="font-size: 11pt;">Si&nbsp;tu localidad es muy alejada puede ser que tarde un poco más de lo establecido.</span></span></p>',
+                'title' => 'Mínimos menores a $1000 de viernes a domingo',
+                'marcas' => [
+                  [
+                      "logo"=> "https://netivooregon.s3.amazonaws.com/common/img/logo/blackolive_1547561960.webp",
+                      "name"=> "blackolive",
+                      "local_cd"=> "1753",
+                      "min"=> 10000
+                  ],
+                  [
+                      "logo"=> "https://netivooregon.s3.amazonaws.com/common/img/logo/amaika_1616526803.webp",
+                      "name"=> "amaika",
+                      "local_cd"=> "2120",
+                      "min"=> 7000
+                  ],
+                ]
               ],
               [
-                  'type' => 'section',
-                  'title' => 'Seguro',
-                  'html' => '<p style="text-align: left;"><span style="font-size: 13pt; font-family: verdana, geneva;"><strong>Modatex Garantiza el&nbsp;envío por OCA, CORREO ARGENTINO,&nbsp;INTEGRAL PACK, MOTO y Transporte Tradicional&nbsp;</strong></span><span style="font-size: 13pt; font-family: verdana, geneva;">ya que en caso de extravío o pérdida, posee un seguro.&nbsp;</span><strong><span style="font-size: 13pt;">Si hay algún problema con la entrega de tu mercaderia, Modatex te la reenvía TOTALMENTE GRATIS.</span></strong></p><p style="width: 800px; margin: auto; font-size: 20px;"><span style="font-size: 13pt; font-family: verdana, geneva;">Si en el segundo envío no llega a ser satisfactoria la entrega si se pagará el nuevo (3er) reenvío.</span></p><p style="text-decoration: underline; font-family: verdana, geneva; font-size: 11pt;"><span style="font-size: 11pt; color: #000000; font-family: verdana, geneva;"><a style="color: #000000; text-decoration: underline;" title="quedate" href="../../?page=268">Condiciones del seguro.</a></span></p>',
+                'type' => 'section',
+                'title' => 'Mínimos mayores a $1000 de viernes a domingo',
+                'marcas' => [
+                  [
+                      "logo"=> "https://netivooregon.s3.amazonaws.com/common/img/logo/blackolive_1547561960.webp",
+                      "name"=> "blackolive",
+                      "local_cd"=> "1753",
+                      "min"=> 10000
+                  ],
+                  [
+                      "logo"=> "https://netivooregon.s3.amazonaws.com/common/img/logo/amaika_1616526803.webp",
+                      "name"=> "amaika",
+                      "local_cd"=> "2120",
+                      "min"=> 7000
+                  ],
+                ]
               ],
-              [
-                  'type' =>'section',
-                  'title' => 'Más Promos de Envíos',
-                  'images' => ['https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/pinkdays-promos3.gif?n6','https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/enviogratis-promos3.gif?n'],
-                  'config' => []
-              ],
-
           ]
         ]
       ],
+
       [ 
         'id' => 2,
         'url' =>  'https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/enviogratis-promos3.gif?n',
@@ -516,268 +717,76 @@ class HomeController extends Controller
           ]
         ]
       ],
-      [ 
-        'id' => 3,
-        'url'=> 'https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/minimos-promos3.gif',
-        'data'=> [
-          'header'=>[
-              'title'=> 'Mínimos Rebajados',
-              'subtitle'=> 'Hasta $1! vie - sab - dom',
-              'image'=> 'https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/minimos-promos3b.gif',
-              'config'=>[
-                  'isSubtitle'=> false,
-                  'isTitle'=> false,
-              ]
-          ],
-          'body'=>[
-              [
-                  'type'=>'section',
-                  'title'=> '¡Comprá desde $1! ',
-                  'html'=> '<p style="text-align: center;"><span style="color: #333333; font-size: 13pt;">&nbsp;<span style="font-size: 12pt;">Todos los <strong>Viernes, Sábados y Domingos</strong>,&nbsp;las&nbsp;marcas bajan sus mínimos de compra.</span></span></p><p style="text-align: center;"><span style="color: #333333; font-size: 11pt;"><strong>Combinalo con nuestras <span style="text-decoration: underline;"><a style="color: #333333; text-decoration: underline;" href="http://www.modatex.com.ar/?page=220">promos en envíos</a></span>!&nbsp;</strong></span><span style="color: #333333;">&nbsp;</span>&nbsp;</p>',
-                  'config'=> []
-              ],
-              [
-                'type' => 'section',
-                'title' => 'Mínimos Rebajados Todos los Días. De Lunes a Lunes.',
-                'marcas' => [
-                  [
-                      "logo"=> "https://netivooregon.s3.amazonaws.com/common/img/logo/blackolive_1547561960.webp",
-                      "name"=> "blackolive",
-                      "local_cd"=> "1753",
-                      "min"=> 10000
-                  ],
-                  [
-                      "logo"=> "https://netivooregon.s3.amazonaws.com/common/img/logo/amaika_1616526803.webp",
-                      "name"=> "amaika",
-                      "local_cd"=> "2120",
-                      "min"=> 7000
-                  ],
-                ]
-              ],
-              [
-                'type' => 'section',
-                'title' => 'Mínimos menores a $1000 de viernes a domingo',
-                'marcas' => [
-                  [
-                      "logo"=> "https://netivooregon.s3.amazonaws.com/common/img/logo/blackolive_1547561960.webp",
-                      "name"=> "blackolive",
-                      "local_cd"=> "1753",
-                      "min"=> 10000
-                  ],
-                  [
-                      "logo"=> "https://netivooregon.s3.amazonaws.com/common/img/logo/amaika_1616526803.webp",
-                      "name"=> "amaika",
-                      "local_cd"=> "2120",
-                      "min"=> 7000
-                  ],
-                ]
-              ],
-              [
-                'type' => 'section',
-                'title' => 'Mínimos mayores a $1000 de viernes a domingo',
-                'marcas' => [
-                  [
-                      "logo"=> "https://netivooregon.s3.amazonaws.com/common/img/logo/blackolive_1547561960.webp",
-                      "name"=> "blackolive",
-                      "local_cd"=> "1753",
-                      "min"=> 10000
-                  ],
-                  [
-                      "logo"=> "https://netivooregon.s3.amazonaws.com/common/img/logo/amaika_1616526803.webp",
-                      "name"=> "amaika",
-                      "local_cd"=> "2120",
-                      "min"=> 7000
-                  ],
-                ]
-              ],
-          ]
-        ]
-      ],
-      [ 
-        'id' => 4,
-        'url'=> 'https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/juevesmodapago-promos.gif',
-        'data' => [
-          'header' => [
-            'title' => 'Reintegro del 5% de tu compra.',
-            'subtitle' => 'Modapago. Jueves',
-            'image' => 'https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/juevesmodapago-promos.gif',
-            'config' => [
-              'isSubtitle'=> false,
-              'isTitle'=> false,
-            ]
-          ],
-          'body' => [
-            [
-              'type'=>'section',
-              'title'=> '',
-              'html'=> '<div id="contents_area" class="contents_area_homelist_last_products">
-              <div style="width: auto; margin-left: auto; margin-right: auto; text-align: center;">
-              <span style="font-size: 16pt;">Transformá tu compra en un descuento!</span>&nbsp;
-              </div>
-              <p style="width: 800px; margin: auto; font-size: 17px; text-align: center; color: black;">Comprando todos los <strong>jueves</strong> y abonando con<strong>&nbsp;<strong>Modapago</strong></strong>, Modatex <strong>te devuelve 5%</strong> en forma de un cupón para tu próxima compra!</p>
-              <p style="width: 800px; margin: auto; font-size: 17px; text-align: center; color: black;">&nbsp;&nbsp;</p>
-              <p style="width: 800px; margin: auto; font-size: 17px; text-align: center; color: black;"><span style="color: #5757ad;"><strong>Cómo funciona?</strong></span></p>
-              <p style="width: 800px; margin: auto; font-size: 17px; text-align: center; color: black;"><strong>Pagando por Modapago</strong> con tarjeta de crédito o débito, Rapipago o Pagofácil;</p>
-              <p style="width: 800px; margin: auto; font-size: 17px; text-align: center; color: black;">se te va a generar automáticamente un cupón en tu perfil. <span style="font-size: 9pt;">(2)(3)</span></p>
-              <p style="width: 800px; margin: auto; font-size: 17px; text-align: center; color: black;">&nbsp;&nbsp;</p>
-              <p style="width: 800px; margin: auto; font-size: 17px; text-align: center; color: black;"><strong><span style="color: #5364ad;">De cuánto es el cupón?</span></strong></p>
-              <p style="width: 800px; margin: auto; font-size: 17px; text-align: center; color: black; padding: 10px;">Tu cupón va a ser igual al 5% de tu compra, con un <strong>límite de devolución de $750</strong>.</p>
-              <p style="width: 800px; margin: auto; font-size: 17px; text-align: center; color: black;">
-              <img src="https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/juevesmodapago-news2.gif" alt="modapago" width="300"/></p>
-              <p style="width: 800px; margin: auto; font-size: 17px; text-align: center; color: black;">&nbsp;</p>
-              <p style="width: 800px; margin: auto; font-size: 17px; text-align: center; color: #5364ad;">&nbsp;<strong>Hasta cuándo puedo usar el cupón?</strong></p>
-              <p style="width: 800px; margin: auto; font-size: 17px; text-align: center; color: black;">Tenés&nbsp;una semana para usarlo&nbsp;desde el día del pedido. Aprovechalo! <span style="font-size: 9pt;">(4)</span></p>
-              <p style="width: 800px; margin: auto; font-size: 17px; text-align: center; color: black;">&nbsp;</p>
-              <p style="width: 800px; margin: auto; font-size: 17px; text-align: center; color: black;"><span style="color: #5364ad;"><strong>En qué marcas puedo usar mi cupón?</strong></span></p>
-              <p style="width: 800px; margin: auto; font-size: 17px; text-align: center; color: black;">En todas las marcas.</p>
-              <p style="width: 800px; margin: auto; font-size: 17px; text-align: center; color: black;">&nbsp;</p>
-              <p style="width: 800px; margin: auto; font-size: 17px; text-align: center; color: #5364ad;"><br>&nbsp;</p>
-              <p style="width: 800px; margin: auto; font-size: 17px; text-align: center; color: black;"><span style="color: #5364ad; font-family: verdana, geneva;"><a style="color: #5364ad;" href="../../perfil?cupones">¿Dónde veo mis cupones?</a></span></p>
-              <p style="width: 800px; margin: auto; font-size: 17px; text-align: center; color: black;"><span style="font-family: verdana, geneva;">No olvides que para participar debés&nbsp;<span style="color: #5364ad;"><a style="color: #5364ad;" href="../../">ingresar&nbsp;con tu usuario de Modatex</a>.</span></span></p>
-              <p style="width: 800px; margin: auto; font-size: 17px; text-align: center; color: black;">&nbsp;</p>
-              <p style="width: 800px; margin: auto; font-size: 17px; text-align: center; color: black;">&nbsp;&nbsp;</p>
-              <p style="width: 800px; margin: auto; font-size: 17px; text-align: center; color: black;">&nbsp;</p>
-              <div>
-              <p style="width: 800px; margin: auto; text-align: center; font-size: 25px;">&nbsp;&nbsp;</p>
-              <p style="width: 800px; margin: auto; font-size: 14px; text-align: center; color: white;"><span style="color: #000000;">1-Promoción&nbsp;válida sólo para la República Argentina.</span></p>
-              <p style="width: 800px; margin: auto; font-size: 14px; text-align: center; color: white;"><span style="color: #000000;">2-Los&nbsp;cupones&nbsp;se&nbsp;generan una vez realizado el pago. El pago puede ser hecho en cualquier momento&nbsp;antes del jueves siguiente a hacer el pedido.</span></p>
-              <p style="width: 800px; margin: auto; font-size: 14px; text-align: center; color: white;"><span style="color: #000000;">3-Son válidos solamente los pagos relacionados a compras dentro de Modatex. No son válidos los pagos independientes. El número de cupón debe coincidir con el número de compra.</span></p>
-              <p style="width: 800px; margin: auto; font-size: 14px; text-align: center; color: white;"><span style="color: #000000;">4- Los cupones son válidos&nbsp;hasta el miercoles siguiente de hacer el pedido, a las 23:59 hs.</span></p>
-              <p style="width: 800px; margin: auto; font-size: 14px; text-align: center; color: white;"><span style="color: #000000;">5- El total a redimir no incluye el valor del envío.</span></p>
-              <p style="width: 800px; margin: auto; font-size: 14px; text-align: center; color: white;"><span style="color: #000000;">6- Aplican Bases y Condiciones</span></p>
-              <p style="width: 800px; margin: auto; font-size: 14px; text-align: center; color: white;">&nbsp;</p>
-              <p style="width: 800px; margin: auto; font-size: 14px; text-align: center; color: white;">&nbsp;</p>
-              <p><iframe style="display: block; margin-left: auto; margin-right: auto; max-width: 100%;" src="https://f0d938a3.sibforms.com/serve/MUIEAHz1LTZNZ9kzGoydvyRkZtZ3d86rFEqruk8SmPn8PYkLDKzvhs4vhwn7saG6VyEni59IeV9H34IluTe7ttoank-0aC0dN5w4pgYQDjl90pcBhJzc1znCoVt3MFvjq0EiibuVKQJcIP24g-1aoB82d7fpABvVdKJsD2pqXUD327FqDPT0SVfZ9iqixejZQgPi3SC3BETjQAt7" width="50%" height="100%" frameborder="0" scrolling="auto" allowfullscreen="allowfullscreen"></iframe></p>
-              <p style="width: 800px; margin: auto; font-size: 14px; text-align: center; color: white;">&nbsp;</p>
-              <p style="width: 800px; margin: auto;"><span style="color: #000000;">&nbsp;</span>&nbsp;&nbsp;</p>
-              <p style="width: 800px; margin: auto;">&nbsp;</p>
-              </div>
-              
-              </div>',
-              'config'=> []
-            ],
-          ]
-        ]
-      ],
-      [ 
-        'id' => 5,
-        'url'=> 'https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/pinkdays-promos3.gif?n6',
-        'data' => [
-          'header' => [
-            'title' => 'Pink Day',
-            'subtitle' => 'Envíos desde $199. Miércoles',
-            'image' => 'https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/pinkdays-promos3.gif?n6',
-            'config'=>[
-              'isSubtitle'=> false,
-              'isTitle'=> false,
-            ]
-          ],
-          'body' => [
-            [
-              'type' => 'section',
-              'title' => '',
-              'html' => '<p style="width: 800px; margin: auto; font-size: 17px; color: black; text-align: center;"><span style="font-size: 9pt; color: #333333;">&nbsp;</span></p>
-              <div style="width: auto; margin-left: auto; margin-right: auto; text-align: center;"><span style="font-size: 13pt; color: #333333;">Sólo los miércoles!</span></div>
-              <div style="width: auto; margin-left: auto; margin-right: auto; text-align: center;"><span style="font-size: 13pt; color: #333333;">El envío te sale hasta <strong>75% más barato</strong>!</span></div>
-              <div style="width: auto; margin-left: auto; margin-right: auto; text-align: center;">&nbsp;</div>
-              <div style="width: auto; margin-left: auto; margin-right: auto; text-align: center;"><span style="color: #333333;">&nbsp;</span></div>
-              <div style="width: auto; margin-left: auto; margin-right: auto; text-align: center;"><span style="text-decoration: underline; color: #333333;"><span style="font-size: 13pt;"><strong>Todos los miércoles:</strong></span></span></div>
-              <div style="width: auto; margin-left: auto; margin-right: auto; text-align: center;"><span style="font-size: 13pt; color: #333333;"><strong>Envío a $199 </strong>a&nbsp;domicilio por<strong> <strong>Moto</strong> </strong>dentro de CABA,</span></div>
-              <div style="width: auto; margin-left: auto; margin-right: auto; text-align: center;"><span style="font-size: 13pt; color: #333333;"><strong>Envío a $249&nbsp;</strong>a&nbsp;domicilio por<strong>&nbsp;<strong>Moto</strong>&nbsp;</strong>dentro de GBA,</span></div>
-              <div style="width: auto; margin-left: auto; margin-right: auto; text-align: center;"><span style="font-size: 13pt; color: #333333;"><strong>Envío a $399 </strong>por<strong>&nbsp;</strong>sucursal de&nbsp;<strong><strong>Correo Argentino</strong></strong> a todo el país,</span></div>
-              <div style="width: auto; margin-left: auto; margin-right: auto; text-align: center;"><span style="font-size: 13pt; color: #333333;"><strong>Envío a $399&nbsp;</strong>por<strong>&nbsp;</strong>sucursal de <strong><strong>OCA</strong></strong>, y<strong><strong>&nbsp;</strong></strong>por terminal de&nbsp;<strong>Integral Pack</strong> a todo el país</span></div>',
-              'config'=> []
-            ],
-            [
-              'type' =>'section',
-              'title' => 'Más Promos de Envíos',
-              'images' => ['https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/enviogratis-promos3.gif','https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/enviosrebajados-promos3.gif?2'],
-              'config' => []
-            ],
-            [
-              'type' => 'section',
-              'title' => '',
-              'html' => '<div style="width: auto; margin-left: auto; margin-right: auto; text-align: center;">
 
-                <p style="width: 800px; margin: auto; font-size: 14px; text-align: center; color: white;"><span style="color: #000000;">1- Promoción válida sólo para la República Argentina.</span></p>
-                <p style="width: 800px; margin: auto; font-size: 14px; text-align: center; color: white;"><span style="color: #000000;">2- Los precios expresados son válidos durante los días miércoles.</span></p>
-                <p style="width: 800px; margin: auto; font-size: 14px; text-align: center; color: white;"><span style="color: #000000;">3- El pedido debe ser hecho el día miércoles.</span></p>
-                <p style="width: 800px; margin: auto; font-size: 14px; text-align: center; color: white;"><strong><span style="color: #000000;">4- NO ACUMULABLE CON OTRAS PROMOCIONES DE ENVÍOS</span></strong></p>
-                <p style="width: 800px; margin: auto; font-size: 14px; text-align: center; color: white;"><span style="color: #000000;">5- Aplican Bases y Condiciones</span></p>
-              </div>',
-              'config'=> []
-            ],
-          ]
-        ]
-      ],
+
       [ 
-        'id' => 6,
-        'url'=> 'https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/lunesmayor-promos.gif?n4',
+        'id' => 1,
+        'url' => 'https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/enviosrebajados-promos3.gif?2',
         'data' => [
           'header' => [
-            'title'=> 'Lunes por mayor',
-            'subtitle'=> 'Especial moyoristas',
-            'image'=> 'https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/lunesmayor-promos.gif?n4',
-            'config'=>[
-                'isSubtitle'=> false,
-                'isTitle'=> false,
-            ]
+              'title' => 'Envíos Rebajados',
+              'subtitle' =>'Descuentos especiales todos los dias',
+              'image' => 'https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/enviosrebajados-promos3b.gif',
+              'config'=> [
+                  'isSubtitle' => false,
+                  'isTitle' => false,
+              ]
           ],
           'body' => [
-            [
-              'type' => 'section',
-              'title' => '',
-              'html' => '<h1 style="text-align: center;"><strong><span style="font-size: 16pt; font-family: helvetica;">Mirá este beneficio&nbsp;para comprar ropa&nbsp;por mayor</span></strong></h1>
-                <p style="text-align: center;"><span style="font-size: 12pt; font-family: helvetica;">Comprando los Lunes a partir de $40.000,&nbsp;tenés&nbsp;<strong>$2.000 de descuento.&nbsp;</strong>Combinalo con <strong>Envío Gratis</strong> en tiendas seleccionadas a sucursal de Correo Argentino y OCA a todo el país y a domicilio por Moto dentro de Capital Federal y GBA.</span></p>
-                <h2 style="text-align: center;"><span style="font-size: 14pt; font-family: helvetica;">Comprá online en los locales de Flores, Avenida Avellaneda</span></h2>
-                <p style="text-align: center;"><span style="font-size: 12pt; font-family: helvetica;">Si tenés una tienda de ropa, esta promoción es especial para vos! También&nbsp;podés aprovechar para&nbsp;renovar tu guardarropa, o comprar en conjunto con amigos.</span></p>',
-              'config' => []
-            ],
-            [
-              'type'=> 'section',
-              'title'=> 'Marcas con Envío Gratis',
-              'marcas'=> [
-                [
-                  "logo"=> "https://netivooregon.s3.amazonaws.com/common/img/logo/blackolive_1547561960.webp",
-                  "name"=> "blackolive",
-                  "local_cd"=> "1753",
-                  "min"=> 10000
+              [
+                'type'=>'section',
+                'title' =>'TARIFAS DESDE ENERO 2023',
+                'images' =>['https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/precios-envios-enero.gif?n1'],
+                'config' =>[
+                  'images' =>'scroll',
+                  'card' =>false,
+                  'padding' =>0
+                ]
+              ],
+              [
+                'type'=> 'section',
+                'title' => '',
+                'images' => [],
+                'buttons' => [
+                  [
+                    'title' => 'Mirá por dónde esta tu paquete',
+                    'action' => ''
+                  ],
+                  [
+                    'title' => 'Ver servicio de moto CABA 48HS',
+                    'action' => ''
+                  ],
                 ],
-                [
-                  "logo"=> "https://netivooregon.s3.amazonaws.com/common/img/logo/amaika_1616526803.webp",
-                  "name"=> "amaika",
-                  "local_cd"=> "2120",
-                  "min"=> 7000
-                ],
-              ]
-            ],
-            [
-              'type' => 'section',
-              'title' => '',
-              'html' => '<p style="width: 800px; margin: auto;"><span style="font-size: 11pt; color: #808080;">1)&nbsp;El cupón se generará una vez superados los $40.000</span></p>
-              <p style="width: 800px; margin: auto;"><span style="font-size: 11pt; color: #808080;">2) El cupón debe estar&nbsp;seleccionado previo a la confirmación del pedido.</span></p>
-              <p style="width: 800px; margin: auto;"><span style="font-size: 11pt; color: #808080;">3)&nbsp;El cupón sólo puede utilizarse durante&nbsp;el mismo día en el que se realizó el pedido&nbsp;y en la misma marca.</span></p>
-              <p style="width: 800px; margin: auto;"><span style="font-size: 11pt; color: #808080;">4) Para poder realizar el pedido el total de la compra (incluído el cupón) deberá ser igual o mayor al monto mínimo de compra de la marca expresado en el banner. El total no incluye el valor del envío.</span></p>
-              <p style="width: 800px; margin: auto;"><span style="font-size: 11pt; color: #808080;">5)&nbsp;Promoción no acumulable con otros cupones de Modatex.</span></p>
-              <p style="width: 800px; margin: auto;"><span style="font-size: 11pt; color: #808080;">6)&nbsp;Se otorgarán un total de 1 cupón por compra. <strong>1 cupón = 1 compra</strong>.</span></p>
-              <p style="width: 800px; margin: auto;"><span style="font-size: 11pt; color: #808080;">7) Promoción válida hasta diciembre&nbsp;2023 inclusive.</span></p>',
-              'config' => []
-            ],
-  
+                'config' =>[
+                    'card' => false
+                ]
+              ],
+              [
+                'type' => 'section',
+                'title' => 'Plazos',
+                'html' => '<p style="font-family: verdana, geneva; font-size: 13pt; text-align: left;"><span style="font-family: verdana, geneva;">Los plazos de entrega&nbsp;<strong>comienzan&nbsp;a dia siguiente que la marca entrega el paquete</strong> en nuestro depósito (no desde el día de la compra). </span></p><p style="font-family: verdana, geneva; font-size: 13pt; text-align: left;"><span style="font-family: verdana, geneva;"><span style="font-size: 11pt;">Si&nbsp;tu localidad es muy alejada puede ser que tarde un poco más de lo establecido.</span></span></p>',
+              ],
+              [
+                  'type' => 'section',
+                  'title' => 'Seguro',
+                  'html' => '<p style="text-align: left;"><span style="font-size: 13pt; font-family: verdana, geneva;"><strong>Modatex Garantiza el&nbsp;envío por OCA, CORREO ARGENTINO,&nbsp;INTEGRAL PACK, MOTO y Transporte Tradicional&nbsp;</strong></span><span style="font-size: 13pt; font-family: verdana, geneva;">ya que en caso de extravío o pérdida, posee un seguro.&nbsp;</span><strong><span style="font-size: 13pt;">Si hay algún problema con la entrega de tu mercaderia, Modatex te la reenvía TOTALMENTE GRATIS.</span></strong></p><p style="width: 800px; margin: auto; font-size: 20px;"><span style="font-size: 13pt; font-family: verdana, geneva;">Si en el segundo envío no llega a ser satisfactoria la entrega si se pagará el nuevo (3er) reenvío.</span></p><p style="text-decoration: underline; font-family: verdana, geneva; font-size: 11pt;"><span style="font-size: 11pt; color: #000000; font-family: verdana, geneva;"><a style="color: #000000; text-decoration: underline;" title="quedate" href="../../?page=268">Condiciones del seguro.</a></span></p>',
+              ],
+              [
+                  'type' =>'section',
+                  'title' => 'Más Promos de Envíos',
+                  'images' => ['https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/pinkdays-promos3.gif?n6','https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/enviogratis-promos3.gif?n'],
+                  'config' => []
+              ],
+
           ]
         ]
       ],
-      [ 
-        'id' => 7,
-        'url'=> 'https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/cupones750-promos.jpg',
-        'action' => [
-          'redirect' => [
-            'route' => '/discount_especial',
-            'params' => []
-          ]
-        ],
-        'data' => []
-      ],
+      
+      
+      
+      
+      
+      
       [ 
         'id' => 8,
         'url'=> 'https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/outlet-cms.jpg',
@@ -1141,9 +1150,10 @@ class HomeController extends Controller
         ]
 
       ],
-      [ 
-        'id' => 10,
-        'url'=> 'https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/otono-invierno-adelanto-promos.jpg' ],
+      // [ 
+      //   'id' => 10,
+      //   'url'=> 'https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/otono-invierno-adelanto-promos.jpg' 
+      // ],
     ];
   }
 

@@ -17,6 +17,8 @@ class NotificationsPush
     private $user_token;
     private $url = 'https://fcm.googleapis.com/fcm/send';
     private $user_id;
+    private $tokens;
+    private $request;
 
     public function __construct($request)
     {
@@ -44,6 +46,7 @@ class NotificationsPush
 
             
             $this->notification = $request['notification'];
+            $this->request = $request;
 
            
         } catch (\Exception $e) {
@@ -55,7 +58,7 @@ class NotificationsPush
     public function sendUserNotification($user_id)
     {
 
-        $this->user_token = $this->getUserToken($user_id);
+        $this->tokens = $this->getUserToken($user_id);
         
         if($this->fails()){
             \Log::info($this->errors);
@@ -63,21 +66,23 @@ class NotificationsPush
         }
 
         $this->saveNotification();
-        
-        $response = Http::withHeaders([
-            'Authorization' => 'key='.$this->server_key,
-        ])->acceptJson()->post($this->url, [
-            
-            "notification" => [
-               "title" => $this->notification['title'],
-               "body"  => $this->notification['body'],
-               "sound" => "default",
-               "image" => isset($this->notification['image']) ? $this->notification['image']:"",
-            ],
-            // "data"=> {"value"=> "si"},
-            "priority"=> "High",
-            "to"=> $this->user_token
-        ]);
+
+        foreach ($this->tokens as $key => $token) {
+            $response = Http::withHeaders([
+                'Authorization' => 'key='.$this->server_key,
+            ])->acceptJson()->post($this->url, [
+                
+                "notification" => [
+                "title" => $this->notification['title'],
+                "body"  => $this->notification['body'],
+                "sound" => "default",
+                "image" => isset($this->notification['image']) ? $this->notification['image']:"",
+                ],
+                "data"=> $this->request['data'],
+                "priority"=> "High",
+                "to"=> $token
+            ]);
+        }
 
         return $response->status();
 
@@ -94,7 +99,7 @@ class NotificationsPush
         $notificacion->save();
     }
 
-    public function getUserToken($user_id): string
+    public function getUserToken($user_id): array
     {
         try {
             $this->user_id = $user_id;
@@ -102,7 +107,7 @@ class NotificationsPush
                 ->where('platform','app')
                 ->get();
 
-            // dd($consulta);
+            // dd();
 
             if(!$consulta){
                 $this->errors['user_token'] = 'Client does not have app token';
@@ -110,7 +115,7 @@ class NotificationsPush
                 throw new \Exception('Error validate');
             }
 
-            return $consulta->token;
+            return $consulta->pluck('token')->all();
 
         } catch (\Exception $e) {
             return $e->getMessage();
