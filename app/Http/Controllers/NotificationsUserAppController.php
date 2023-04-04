@@ -28,10 +28,9 @@ class NotificationsUserAppController extends Controller
             return response()->json($validator->errors(), 422);
         }
 
-
+        // dd(Auth::user()->num);
         $notification = new NotificationsPush($request->all());
-
-        $notificacion = $notification->sendUserNotification(Auth::user()->num);
+        $notificacion = $notification->sendUserNotification($request->client_id);
 
 
         if($notification->fails()){
