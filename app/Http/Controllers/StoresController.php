@@ -68,6 +68,9 @@ class StoresController extends Controller
       $url = $this->url.'json/cache_'.$request->categorie."_".$request->plan.'.json';
       $response = Http::accept('application/json')->get($url);
 
+
+      // dd($response->collect());
+
       $data = $response->collect()->all()['stores'];
 
       if(isset($request->search) && $request->search != ''){
@@ -106,6 +109,8 @@ class StoresController extends Controller
             "name" => $store['cover']['title'],
             "local_cd" => $store['local_cd'],
             "min" => $store['profile']['min'],
+            "rep" => $store['profile']['modapoints'],
+            "vc" => $store['profile']['comp_sal_perc'],
         ];
       }
 
