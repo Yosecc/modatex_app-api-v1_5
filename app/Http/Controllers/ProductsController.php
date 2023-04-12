@@ -153,7 +153,7 @@ class ProductsController extends Controller
       $idsProductos = $productos->pluck('id');
       $localCds     = $productos->pluck('store');
       
-      $stores = Store::whereIn('LOCAL_CD', $localCds->all())->select('GROUP_CD','LOGO_FILE_NAME','LOCAL_NAME','LIMIT_PRICE','LOCAL_CD','GROUP_CD')->get();
+      $stores = Store::whereIn('LOCAL_CD', $localCds->all())->select('GROUP_CD','LOGO_FILE_NAME','LOCAL_NAME','LIMIT_PRICE','LOCAL_CD','GROUP_CD','MODAPOINT')->get();
 
       $products_carro = $this->isProductCarro($idsProductos->all(), ['whereIn'=>true]);
 
@@ -197,6 +197,8 @@ class ProductsController extends Controller
             'min'  => $store['LIMIT_PRICE'],
             "id"   => $store['LOCAL_CD'],
             "company"     => $store['GROUP_CD'],
+            'rep' => $store['MODAPOINT'],
+
           ]
         ];
       });
@@ -240,7 +242,7 @@ class ProductsController extends Controller
       $idsProductos = $productos->pluck('num');
       $localCds     = $productos->pluck('local_cd');
 
-      $stores = Store::whereIn('LOCAL_CD', $localCds->all())->select('GROUP_CD','LOGO_FILE_NAME','LOCAL_NAME','LIMIT_PRICE','LOCAL_CD','GROUP_CD')->get();
+      $stores = Store::whereIn('LOCAL_CD', $localCds->all())->select('GROUP_CD','LOGO_FILE_NAME','LOCAL_NAME','LIMIT_PRICE','LOCAL_CD','GROUP_CD','MODAPOINT')->get();
 
       $talles = $productos->pluck('talles','num');
 
@@ -291,6 +293,7 @@ class ProductsController extends Controller
             'min'  => $store['LIMIT_PRICE'],
             "id"   => $store['LOCAL_CD'],
             "company"     => $store['GROUP_CD'],
+            'rep' => $store['MODAPOINT']
           ]
         ];
       });
