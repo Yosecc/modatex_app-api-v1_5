@@ -10,6 +10,9 @@ use App\Http\Traits\StoreTraits;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Cache;
+use App\Helpers\General\CollectionHelper;
+
 
 use Illuminate\Http\Client\Pool;
 class StoresController extends Controller
@@ -62,59 +65,77 @@ class StoresController extends Controller
 
       $this->validate($request, [
           'categorie' => 'required',
-          'plan'    => 'required',
+          // 'plan'    => 'required',
       ]);
 
-      $url = $this->url.'json/cache_'.$request->categorie."_".$request->plan.'.json';
-      $response = Http::accept('application/json')->get($url);
+      $nameChache = 'stores';
 
+      if (Cache::has($nameChache)) {
+        $data = Cache::get($nameChache);
+        $data = $data->where('type', $request->categorie)->pluck('data')->collapse();
+      
+        return response()->json(CollectionHelper::paginate($data, 16));
+      }
 
-      // dd($response->collect());
+      $urls = [];
 
-      $data = $response->collect()->all()['stores'];
+      foreach ($this->storesPlanes as $p => $plan) {
+        foreach ($this->categories as $c => $categorie) {
+          $urls[$categorie.$plan][] = $this->url.'json/cache_'.$categorie.$plan;
+        }
+      }
 
-      if(isset($request->search) && $request->search != ''){
-        $urls = [];
-        foreach ($this->storesPlanes as $p => $plan) {
-          foreach ($this->categories as $c => $categorie) {
-            $urls[] = $this->url.'json/cache_'.$categorie."".$plan.'';
+      $collection = collect($urls);
+
+      $consultas = Http::pool(fn (Pool $pool) => 
+        $collection->map(function($urls, $plan) use($pool){
+          foreach ($urls as $u => $url) {
+            $url = $pool->as($plan)->accept('application/json')->get($url);
           }
-        }
-
-        $collection = collect($urls);
-
-        $consultas = Http::pool(fn (Pool $pool) => 
-          $collection->map(fn ($url) => 
-               $pool->accept('application/json')->get($url)
-          )
-        );
-        
-        $storesAll = [];
-        foreach ($consultas as $c => $consulta) {
-          $storesAll[] = $consulta->collect()->all()['stores'];
-        }
-        
-
-        $storesAll = collect(Arr::collapse($storesAll));
-        
-        $data = $storesAll->where('cover.title', $request->search);
-      }
-
-      $stores = [];
-
-      foreach($data as $key => $store){
-
-        $stores[] = [
-            "logo" => env('URL_IMAGE').'/'. $store['profile']['logo'],
-            "name" => $store['cover']['title'],
-            "local_cd" => $store['local_cd'],
-            "min" => $store['profile']['min'],
-            "rep" => $store['profile']['modapoints'],
-            "vc" => $store['profile']['comp_sal_perc'],
+          return $urls;
+        })->collapse()
+      );
+    
+      $consultas = collect($consultas)->map(function($response, $key) use ($collection){
+        $data = [
+          'type' => $key,
+          'data' => $response->json()['stores'],
+          'count' => count($response->json()['stores'])
         ];
-      }
+        return $data;
+      });
 
-      return response()->json($stores);
+
+      $categories = collect($this->categories)->map(function($categorie) use ($consultas){
+        
+        $data = $consultas->filter(function($value, $key) use ($categorie) {
+          return str_contains($key ,$categorie);
+        })->map(function($value){
+          return collect($value['data'])->map(function($store){
+            return [
+              "logo" => env('URL_IMAGE').'/'. $store['profile']['logo'],
+              "name" => $store['cover']['title'],
+              "local_cd" => $store['local_cd'],
+              "min" => $store['profile']['min'],
+              "rep" => $store['profile']['modapoints'],
+              "vc" => $store['profile']['comp_sal_perc'],
+            ];
+          });
+        })->collapse();
+
+        return [
+          'type' => $categorie,
+          'data' => $data,
+          'count' => count($data)
+        ];
+
+      });
+
+      Cache::put($nameChache, $categories , $seconds = 10800);
+
+      $data = $categories->where('type', $request->categorie)->pluck('data')->collapse();
+      
+      return response()->json(CollectionHelper::paginate($data, 16));
     }
 
     public function getCategoriesStore(Request $request){
