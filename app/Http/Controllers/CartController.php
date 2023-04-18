@@ -183,8 +183,10 @@ class CartController extends Controller
       $products = $carts->where('LOCAL_CD',$store['LOCAL_CD']);
       $suma = 0;
       $cart_ids = [];
+      $conteo = 0;
       foreach ($products->all() as $key => $value) {
         $suma += (floatval($value['PRICE']) * $value['CANTIDAD']);
+        $conteo+=$value['CANTIDAD'];
         $cart_ids[] = $value['NUM'];
       }
 
@@ -194,7 +196,7 @@ class CartController extends Controller
         "name"           => $store['LOCAL_NAME'],
         "limit_price"    => floatval($store['LIMIT_PRICE']),
         "logo"           => env('URL_IMAGE').'/common/img/logo/'.$store['LOGO_FILE_NAME'],
-        "products_count" => $products->count(), 
+        "products_count" => $conteo, 
         "total"          => $suma, 
         "is_limit"       => $suma >= floatval($store['LIMIT_PRICE']),
         'cart_ids'       => $cart_ids
