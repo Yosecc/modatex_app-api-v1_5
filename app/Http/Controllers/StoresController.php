@@ -71,18 +71,19 @@ class StoresController extends Controller
 
       $nameChache = 'stores';
 
-      if (Cache::has($nameChache)) {
+      if (Cache::has($nameChache) && !isset($request->reload)) {
         $data = Cache::get($nameChache);
 
-
+        // dd($request->search);
         if($request->search){
           $data = $data->pluck('data')->collapse()->unique()->filter(fn ($store) => Str::is($request->search.'*',$store['name']) )
           ;
         }else{
           $data = $data->where('type', $request->categorie)
-                ->pluck('data')
-                ->collapse()
-                ;
+          ->pluck('data')
+          ->collapse()
+          ;
+          // dd($data);
         }
       
         return response()->json(CollectionHelper::paginate($data, 16));
@@ -106,6 +107,8 @@ class StoresController extends Controller
           return $urls;
         })->collapse()
       );
+
+     
     
       $consultas = collect($consultas)->map(function($response, $key) use ($collection){
         $data = [
@@ -117,11 +120,13 @@ class StoresController extends Controller
       });
 
 
+
       $categories = collect($this->categories)->map(function($categorie) use ($consultas){
-        
+        // dd($categorie);
         $data = $consultas->filter(function($value, $key) use ($categorie) {
-          return str_contains($key ,$categorie);
-        })->map(function($value){
+          return Str::is($categorie.'*',$key);
+        })
+        ->map(function($value){
           return collect($value['data'])->map(function($store){
             return [
               "logo" => env('URL_IMAGE').'/'. $store['profile']['logo'],
@@ -132,7 +137,9 @@ class StoresController extends Controller
               "vc" => $store['profile']['comp_sal_perc'],
             ];
           });
-        })->collapse();
+        })
+        ->collapse()
+        ;
 
         return [
           'type' => $categorie,
@@ -141,6 +148,7 @@ class StoresController extends Controller
         ];
 
       });
+
 
       Cache::put($nameChache, $categories , $seconds = 10800);
 
