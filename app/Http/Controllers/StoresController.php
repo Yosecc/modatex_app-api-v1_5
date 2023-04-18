@@ -10,6 +10,7 @@ use App\Http\Traits\StoreTraits;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Cache;
 use App\Helpers\General\CollectionHelper;
 
@@ -72,7 +73,17 @@ class StoresController extends Controller
 
       if (Cache::has($nameChache)) {
         $data = Cache::get($nameChache);
-        $data = $data->where('type', $request->categorie)->pluck('data')->collapse();
+
+
+        if($request->search){
+          $data = $data->pluck('data')->collapse()->unique()->filter(fn ($store) => Str::is($request->search.'*',$store['name']) )
+          ;
+        }else{
+          $data = $data->where('type', $request->categorie)
+                ->pluck('data')
+                ->collapse()
+                ;
+        }
       
         return response()->json(CollectionHelper::paginate($data, 16));
       }
@@ -133,7 +144,17 @@ class StoresController extends Controller
 
       Cache::put($nameChache, $categories , $seconds = 10800);
 
-      $data = $categories->where('type', $request->categorie)->pluck('data')->collapse();
+      $data = $categories;
+
+      if($request->search){
+        $data = $data->pluck('data')->collapse()->unique()->filter(fn ($store) => Str::is($request->search.'*',$store['name']) )
+        ;
+      }else{
+        $data = $data->where('type', $request->categorie)
+              ->pluck('data')
+              ->collapse()
+              ;
+      }
       
       return response()->json(CollectionHelper::paginate($data, 16));
     }
