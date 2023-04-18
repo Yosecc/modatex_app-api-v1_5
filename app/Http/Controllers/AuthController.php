@@ -43,10 +43,7 @@ class AuthController extends Controller
             $client = Client::select($this->campos)->where('client_id',$request->email)->first();
             
             // dd($client);
-            
-
-
-             //return response()->json(['status'=>true,'client'=> $client],200);
+            //return response()->json(['status'=>true,'client'=> $client],200);
 
             if ($client) {
               if(in_array($client->email, ['tiendas@modatex.com.ar'])){
@@ -171,16 +168,18 @@ class AuthController extends Controller
 
     public function register(Request $request){
 
+      // dd('si');
         //TODO: validacion de codigo
         $this->validate($request, [
             'first_name' => 'required|max:50',
             'last_name'  => 'required|max:50',
             'cod_area'   => 'required|max:4',
-            'phone'      => 'required|max:20|unique:oracle.CLIENT,mobile',
-            'email'      => 'required|email|unique:oracle.CLIENT,client_id',
+            'phone'      => 'required|max:20|unique:oracle.T_SHOP_CLIENT,mobile',
+            'email'      => 'required|email|unique:oracle.T_SHOP_CLIENT,client_id',
             'password'   => 'required|max:20'
         ]);
 
+      
         $payload = [
             "name"     => $request->first_name,
             "lastname" => $request->last_name,
@@ -190,9 +189,9 @@ class AuthController extends Controller
             "mobile"   => $request->phone
         ];
 
-
-        $register = $this->ApiRosa($payload, 'newuser', false);
-
+ 
+        $register = $this->ApiRosa($payload, 'newuser', true);
+// dd($register);
         if(json_decode($register)->status == 200){
           $client = Client::where('client_id',$request->email)->first();
           return response()->json(['status'=>true, 'message'=>'Registro realizado.','client'=>$client]);
