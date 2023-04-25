@@ -129,7 +129,11 @@ class CartController extends Controller
                   ->where('LOCAL.STAT_CD', 1000)
                   ->where('LOCAL.LOGO_FILE_NAME','!=','')
                   ->where('LOCAL.LOGO_FILE_NAME','!=',NULL)
+                  ->where('CART.PRICE', '>', 0)
+
                   ->get();
+
+        // dd($carts);
 
         $stores_ids = array_unique(Arr::pluck($carts->all(), ['LOCAL_CD']));
 
