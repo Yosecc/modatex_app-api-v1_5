@@ -44,6 +44,10 @@ class CartController extends Controller
       try {
         foreach ($request->all() as $key => $value) {
 
+          if($value['price'] == 0 || $value['price'] == ''){
+            throw new \Exception("Ha ocurrido un problema con este producto. Inetente mas tarde");
+          }
+
             $cart = Cart::where('CLIENT_NUM',Auth::user()->num)
                 ->where('GROUP_CD', $value['group_cd'])
                 ->where('LOCAL_CD', $value['local_cd'])
@@ -79,9 +83,6 @@ class CartController extends Controller
             $cart->TOTAL_PRICE       = $value['total_price'];
             
             $cart->save();
-
-
-            \Log::info($cart);
         }
       } catch (\Exception $e) {
           return response()->json(['status'=> false,'message'=> $e->getMessage()], 422);  
@@ -156,6 +157,7 @@ class CartController extends Controller
                   ->orderBy('CART.INSERT_DATE','desc')
                   ->join('LOCAL', 'LOCAL.LOCAL_CD', '=', 'CART.LOCAL_CD')
                   ->where('LOCAL.STAT_CD', 1000)
+                  ->where('CART.PRICE', '>', 0)
                   ->get();
 
       $stores_ids = array_unique(Arr::pluck($carts->all(), ['LOCAL_CD']));
@@ -184,6 +186,8 @@ class CartController extends Controller
       $suma = 0;
       $cart_ids = [];
       $conteo = 0;
+
+ //    dd($products->all() );
       foreach ($products->all() as $key => $value) {
         $suma += (floatval($value['PRICE']) * $value['CANTIDAD']);
         $conteo+=$value['CANTIDAD'];
