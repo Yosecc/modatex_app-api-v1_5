@@ -191,7 +191,7 @@ class CartController extends Controller
       $cart_ids = [];
       $conteo = 0;
 
- //    dd($products->all() );
+        //    dd($products->all() );
       foreach ($products->all() as $key => $value) {
         $suma += (floatval($value['PRICE']) * $value['CANTIDAD']);
         $conteo+=$value['CANTIDAD'];
@@ -223,6 +223,7 @@ class CartController extends Controller
                 ->orderBy('CART.INSERT_DATE','desc')
                 ->join('LOCAL', 'LOCAL.LOCAL_CD', '=', 'CART.LOCAL_CD')
                 ->where('LOCAL.STAT_CD', 1000)
+                ->where('CART.PRICE', '>', 0)
                 ->get();
 
       $productos = [];
