@@ -56,8 +56,13 @@ class CartController extends Controller
                 ->where('SIZE_NUM', $value['size_id'])
                 ->where('COLOR_NUM', $value['color_id'])
                 ->where('STAT_CD',1000)
+                ->where('PRICE', '>', 0)
                 ->first();
-                // dd($cart);
+
+                // if($key == 1){
+
+                //   dd($cart);
+                // }
 
             if(!$cart){
               $cart = new Cart();
@@ -78,7 +83,6 @@ class CartController extends Controller
               $cart->PRICE             = $value['price'];
             }
 
-            
             $cart->CANTIDAD          = $value['cantidad'];
             $cart->TOTAL_PRICE       = $value['total_price'];
             
