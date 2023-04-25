@@ -30,31 +30,34 @@ class AuthController extends Controller
     }
 
     public function login(Request $request){
-        // phpinfo();
-
-        $this->validate($request, [
-            'password' => 'required|max:20',
-            'email'    => 'required|email',
-        ]);
-        
-        if ($request->isJson()) {
-          try{
-            
-            $client = Client::select($this->campos)->where('client_id',$request->email)->first();
-            
+      
+      $this->validate($request, [
+        'password' => 'required|max:20',
+        'email'    => 'required|email',
+      ]);
+      
+      if ($request->isJson()) {
+        try{
+          
+          $client = Client::select($this->campos)->where('client_id',$request->email)->first();
+          
+          // dd('llegae');
             // dd($client);
             //return response()->json(['status'=>true,'client'=> $client],200);
 
             if ($client) {
-              if(in_array($client->email, ['tiendas@modatex.com.ar'])){
-                return response()->json(['status'=>true,'client'=> $client],200);
-              }
+
+              // if(in_array($client->email, ['tiendas@modatex.com.ar'])){
+              //   return response()->json(['status'=>true,'client'=> $client],200);
+              // }
               
               $payload = [
                 'password' => $request->password,
                 'email' => $request->email,
                 'action' => 'login'
               ];
+
+              // dd($payload);
 
               // social_method: 'Facebook|Google'
               // social_id: 'XXXXX'
@@ -142,6 +145,8 @@ class AuthController extends Controller
                     'data' => $jwt,
                     'action' => $action
                 ]);
+
+              // dd($response->body());
             $token = str_replace("\n", "",$response->body());
             $decode = false;
             
@@ -191,7 +196,7 @@ class AuthController extends Controller
 
  
         $register = $this->ApiRosa($payload, 'newuser', true);
-// dd($register);
+        // dd($register);
         if( gettype($register) == 'object' &&  $register->status == 200){
           $client = Client::where('client_id',$request->email)->first();
           return response()->json(['status'=>true, 'message'=>'Registro realizado.','client'=>$client]);
@@ -243,7 +248,10 @@ class AuthController extends Controller
             $client = Client::where('client_id', $request->email)->first();
 
             if($client){
-              $response = $this->ApiRosa(['client_num' => $client->num, 'newpass'=> $request->newpass ], 'recoverypass');
+              $response = $this->ApiRosa([ 
+                'client_num' => $client->num, 
+                'newpass'=> $request->newpass 
+              ], 'recoverypass');
 
               if($response->status == 200){
                 return response()->json(['status'=> true,'message'=> 'Contrasena cambiada con exito']);
