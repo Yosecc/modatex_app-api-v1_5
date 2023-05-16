@@ -591,7 +591,6 @@ class HomeController extends Controller
           ]
         ]
       ],
-
       [ 
         'id' => 2,
         'url' =>  'https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/enviogratis-promos3.gif?n',
@@ -709,8 +708,6 @@ class HomeController extends Controller
           ]
         ]
       ],
-
-
       [ 
         'id' => 1,
         'url' => 'https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/enviosrebajados-promos3.gif?2',
@@ -783,12 +780,6 @@ class HomeController extends Controller
           ]
         ]
       ],
-      
-      
-      
-      
-      
-      
       [ 
         'id' => 8,
         'url'=> 'https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/outlet-cms.jpg',
@@ -1152,7 +1143,6 @@ class HomeController extends Controller
         ]
 
       ],
-      // 6
     ];
   }
 
@@ -1253,6 +1243,7 @@ class HomeController extends Controller
     return response()->json(States::select('NUM AS id','STATE_NAME AS name')
     ->where('STAT_CD',1000)->orderBy('name','asc')->get());
   }
+
   public function menuList()
   {
     return [
@@ -1293,13 +1284,41 @@ class HomeController extends Controller
         ]
       ],
       [
+        "icon" => '~/assets/icons/icon_menu_5.png',
+        "name" => 'Notificaciones',
+        "disabled" => false,
+        "redirect"=> [
+          "route"=> "/notifications- ",
+          "params"=> []
+        ]
+      ],
+      [
         "icon" => '~/assets/icons/icon_menu_1.png',
         "name" => '¿Cómo comprar?',
         "disabled" => false,
-        "redirect"=> [
-          "route"=> "/how_to_buy",
-          "params"=> []
+        "data" => [
+          "header" => [
+            'title'=> '¿Cómo comprar en Modatex?',
+            'subtitle'=> '',
+            'image'=> '',
+            'config'=>[
+                'isSubtitle'=> false,
+                'isTitle'=> true,
+            ]
+          ],
+          "body" => [
+            [
+              'type' => 'section',
+              'title' => 'Creá tu carrito da compras',
+              'html' => '<span style="font-family: verdana, geneva; font-size: 16pt;"><span style="font-size: 13pt;">La compra<strong> es individual&nbsp;por tienda</strong>, buscá tu favorita!&nbsp;</span></span><span style="font-family: verdana, geneva; font-size: 16pt;"><span style="font-size: 13pt;">El <strong>sistema de reputación</strong>&nbsp;Modapoint te ayuda a elegir mejor.</span></span><span style="font-family: verdana, geneva; font-size: 16pt;">&nbsp;</span><a style="padding: 2px 5px; border: 2px solid #e40175; background-color: #efefef; color: #e40175; border-radius: 3px; font-weight: bold;" href="../../?page=81">Ver Modapoints</a><span style="font-size: 13pt;">Cada marca tiene su mínimo de compra.&nbsp;Llená tu carrito con prendas <strong>hasta superar el monto mínimo</strong>.</span><span style="font-size: 13pt;">Pst! De viernes a domingo, las marcas bajan el monto mínimo ¡Aprovechá!&nbsp;</span>&nbsp;<a style="padding: 2px 5px; border: 2px solid #e40175; background-color: #efefef; color: #e40175; border-radius: 3px; font-weight: bold;" href="../../montosminimos">Ver Montos Rebajados</a>',
+              'config' => []
+            ],
+          ]
         ]
+        // "redirect"=> [
+        //   "route"=> "/how_to_buy",
+        //   "params"=> []
+        // ]
       ],
       [
         "icon" => '~/assets/icons/icon_menu_2.png',
@@ -1319,15 +1338,7 @@ class HomeController extends Controller
           "params"=> []
         ]
       ],
-      [
-        "icon" => '~/assets/icons/icon_menu_5.png',
-        "name" => 'Notificaciones',
-        "disabled" => false,
-        "redirect"=> [
-          "route"=> "/notifications- ",
-          "params"=> []
-        ]
-      ],
+      
     ];
   }
 
