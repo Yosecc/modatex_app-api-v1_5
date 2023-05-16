@@ -26,14 +26,6 @@ class HomeController extends Controller
 {
   use StoreTraits, ProductsTraits, ClientTraits;
 
-  /*
-   * @return Stores Favorites
-   * @return Categories
-   * @return Products
-   * @return Stores Recents
-   * @return Slider
-   */
-
   public function index(Request $request){
 
     //dd(Cart::where('CLIENT_NUM',Auth::user()->num)->where('STAT_CD',1000)->orderBy('INSERT_DATE','desc')->get());
@@ -750,7 +742,17 @@ class HomeController extends Controller
                 'buttons' => [
                   [
                     'title' => 'Mirá por dónde esta tu paquete',
-                    'action' => ''
+                    'action' => '',
+                    'redirect' =>[
+                      'route'=> '/search',
+                      'params' => [
+                        'params' => [
+                          'search' => 'value',
+                          'sections' => [3],
+                          'section' => 'ofertas'
+                        ]
+                      ]
+                    ]
                   ],
                   [
                     'title' => 'Ver servicio de moto CABA 48HS',
@@ -1150,10 +1152,7 @@ class HomeController extends Controller
         ]
 
       ],
-      // [ 
-      //   'id' => 10,
-      //   'url'=> 'https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/otono-invierno-adelanto-promos.jpg' 
-      // ],
+      // 6
     ];
   }
 
@@ -1253,6 +1252,83 @@ class HomeController extends Controller
   {
     return response()->json(States::select('NUM AS id','STATE_NAME AS name')
     ->where('STAT_CD',1000)->orderBy('name','asc')->get());
+  }
+  public function menuList()
+  {
+    return [
+      [
+        "icon" => '~/assets/icons/home.png',
+        "name" => 'Inicio',
+        "disabled" => false,
+        "redirect"=> [
+          "route"=> "/home",
+          "params"=> []
+        ]
+      ],
+      [
+        "icon" => '~/assets/icons/icon_menu_0.png',
+        "name" => 'Tiendas',
+        "disabled" => false,
+        "redirect"=> [
+          "route"=> "/all_stores",
+          "params"=> []
+        ]
+      ],
+      [
+        "icon" => '~/assets/icons/icon_menu_0.png',
+        "name" => 'Mis pedidos',
+        "disabled" => false,
+        "redirect"=> [
+          "route"=> "/profile",
+          "params"=> []
+        ]
+      ],
+      [
+        "icon" => '~/assets/icons/icon_menu_6.png',
+        "name" => 'Descuentos Especiales',
+        "disabled" => false,
+        "redirect"=> [
+          "route"=> "/discount_especial",
+          "params"=> []
+        ]
+      ],
+      [
+        "icon" => '~/assets/icons/icon_menu_1.png',
+        "name" => '¿Cómo comprar?',
+        "disabled" => false,
+        "redirect"=> [
+          "route"=> "/how_to_buy",
+          "params"=> []
+        ]
+      ],
+      [
+        "icon" => '~/assets/icons/icon_menu_2.png',
+        "name" => 'Envíos a todo el país',
+        "disabled" => false,
+        "redirect"=> [
+          "route"=> "/shipping",
+          "params"=> []
+        ]
+      ],
+      [
+        "icon" => '~/assets/icons/icon_menu_3.png',
+        "name" => 'Formas de pago',
+        "disabled" => false,
+        "redirect"=> [
+          "route"=> "/payment_methods",
+          "params"=> []
+        ]
+      ],
+      [
+        "icon" => '~/assets/icons/icon_menu_5.png',
+        "name" => 'Notificaciones',
+        "disabled" => false,
+        "redirect"=> [
+          "route"=> "/notifications- ",
+          "params"=> []
+        ]
+      ],
+    ];
   }
 
 }
