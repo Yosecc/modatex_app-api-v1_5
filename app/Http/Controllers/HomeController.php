@@ -1309,8 +1309,26 @@ class HomeController extends Controller
           "body" => [
             [
               'type' => 'section',
-              'title' => 'Creá tu carrito da compras',
+              'title' => '1. Creá tu carrito da compras',
               'html' => '<span style="font-family: verdana, geneva; font-size: 16pt;"><span style="font-size: 13pt;">La compra<strong> es individual&nbsp;por tienda</strong>, buscá tu favorita!&nbsp;</span></span><span style="font-family: verdana, geneva; font-size: 16pt;"><span style="font-size: 13pt;">El <strong>sistema de reputación</strong>&nbsp;Modapoint te ayuda a elegir mejor.</span></span><span style="font-family: verdana, geneva; font-size: 16pt;">&nbsp;</span><a style="padding: 2px 5px; border: 2px solid #e40175; background-color: #efefef; color: #e40175; border-radius: 3px; font-weight: bold;" href="../../?page=81">Ver Modapoints</a><span style="font-size: 13pt;">Cada marca tiene su mínimo de compra.&nbsp;Llená tu carrito con prendas <strong>hasta superar el monto mínimo</strong>.</span><span style="font-size: 13pt;">Pst! De viernes a domingo, las marcas bajan el monto mínimo ¡Aprovechá!&nbsp;</span>&nbsp;<a style="padding: 2px 5px; border: 2px solid #e40175; background-color: #efefef; color: #e40175; border-radius: 3px; font-weight: bold;" href="../../montosminimos">Ver Montos Rebajados</a>',
+              'config' => []
+            ],
+            [
+              'type' => 'section',
+              'title' => '2. Elegí el método de envío',
+              'html' => '<span style="font-family: verdana, geneva; font-size: 13pt;">Hacemos envíos a todo el país por <strong>Correo Argentino y OCA</strong>&nbsp;(sucursal y domicilio) y por&nbsp;<strong>Moto</strong> domicilio a&nbsp;Capital Federal&nbsp;o GBA.&nbsp;</span>&nbsp;<a style="padding: 2px 5px; border: 2px solid #e40175; background-color: #efefef; color: #e40175; border-radius: 3px; font-weight: bold;" href="../../envios">+Info de Envíos</a>&nbsp;<span style="font-family: verdana, geneva; font-size: 13pt;">Estas dos modalidades tienen<strong> seguro garantizado</strong>, además de poseer un número de guía único para que hagas el seguimiento</span><span style="font-size: 13pt;"><span style="font-family: verdana, geneva;">.</span></span><span style="font-size: 13pt;"><span style="font-family: verdana, geneva;">Se hacen envíos con otros transportes, pero sin garantía de Modatex.</span></span>',
+              'config' => []
+            ],
+            [
+              'type' => 'section',
+              'title' => '3. Elegí el medio de pago',
+              'html' => '<span style="font-family: verdana, geneva; font-size: 13pt;">Podés&nbsp;elegir<strong>&nbsp;todos los medios de pago</strong>: depósito bancario, transferencia, o Modapago (tarjetas de crédito o débito, Pago Fácil, Rapipago, etc.)<strong>&nbsp;</strong></span><span style="font-family: verdana, geneva; font-size: 13pt;"><strong>Modapago</strong>&nbsp;es el sistema de pagos de Modatex, el más seguro y simple.&nbsp;</span>&nbsp;<a style="padding: 2px 5px; border: 2px solid #e40175; background-color: #efefef; color: #e40175; border-radius: 3px; font-weight: bold;" href="../../modapago">+Info Modapago</a>&nbsp;',
+              'config' => []
+            ],
+            [
+              'type' => 'section',
+              'title' => '4. Recibí la confirmación, aboná y listo!',
+              'html' => '<span style="font-family: verdana, geneva; font-size: 13pt;">Una vez que le mandaste el pedido a la marca, esta tiene que chequear que tenga todo lo que pediste.</span><span style="font-family: verdana, geneva; font-size: 13pt;">Luego de que la tienda <strong>confirma el stock</strong>, <strong>te envía el cupón de pago por mail.</strong></span><span style="font-family: verdana, geneva; font-size: 13pt;">Una vez abonado, la marca procede a llevar tu paquete a la oficina de envíos y <strong>te va a aparecer el número de guía en tu perfil de modatex.</strong></span><span style="font-family: verdana, geneva; font-size: 13pt;"><strong>Y listo!</strong> Sólo&nbsp;hay que esperar que llegue.</span>',
               'config' => []
             ],
           ]
