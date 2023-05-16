@@ -31,10 +31,11 @@ $router->group(['prefix' => 'auth'], function () use ($router) {
 $router->group(['middleware' => 'auth'], function () use ($router) {
 
     $router->get('home','HomeController@index');
+    $router->get('menu','HomeController@menuList');
+
     $router->get('productsVisitados','HomeController@productsVisitados');
     $router->get('sliders','HomeController@sliders');
     $router->get('states/get','HomeController@statesGet');
-    
 
     $router->post('preferences','PreferencesController@store');
     $router->get('preferences','PreferencesController@getPreferences');
@@ -45,11 +46,9 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
     $router->get('home','HomeController@index');
     $router->get('get_product_category/{category_id}','HomeController@get_product_category');
     
-     $router->get('store/get_categories','StoresController@getCategoriesStore'); 
+    $router->get('store/get_categories','StoresController@getCategoriesStore'); 
     $router->get('store/{store}','StoresController@getStore');
     $router->get('stores','StoresController@getStores'); 
-    
-
 
     $router->get('product/{product_id}','ProductsController@oneProduct');
     $router->get('products','ProductsController@getProducts');
@@ -118,7 +117,9 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
             $router->post('change_password','ClientController@change_password');
         });
     });
+    
     $router->get('descuentosExclusivos','CouponsController@descuentosExclusivos');
+    
     $router->group(['prefix' => 'checkout'], function() use ($router){
         $router->post('getEnvios','CheckoutController@getEnvios');
         $router->post('editClient','CheckoutController@editClient');
@@ -145,7 +146,6 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
         $router->post('notification_send','NotificationsUserAppController@notification_send');
         $router->post('getTokens','NotificationsUserAppController@getTokens');
         $router->get('get_notifications','NotificationsUserAppController@get_notifications');
-        
     });
     
 });
