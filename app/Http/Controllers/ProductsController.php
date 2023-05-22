@@ -225,31 +225,116 @@ class ProductsController extends Controller
       return response()->json($response);
     }
 
-    public function onGetSearch($data)
+    public function onGetSearch($request)
     {
      
-      $data['storeData'] = 1;
-      $data['inStock'] = 1;
-      $data['length'] = $data['offset'];
-
-      if($data['page'] == 1){
-        $data['page'] = 0;
-      }else{
-        $data['page'] = ($data['offset'] * $data['page']) + 1;
+      $page = 0 ;
+      if($request['page'] == 1){
+        $page = 0;
+      }
+      elseif($request['page'] == 2){
+        $page = $request['offset'] ;
+      }
+      else{
+        $page = ($request['offset'] * ($request['page'] - 1));
       }
 
-      $data['start'] = $data['page'];
-
-      $data['daysExpir'] = 365;
-      $data['order'] = 'date DESC';
-      $data['cacheTime'] = 15;
+      $data = [
+        // 'version'=> 252-0,
+        'start'=> $page,
+        'length'=> $request['offset'],
+        'storeData'=> 1,
+        'inStock'=> 1,
+        'daysExpir'=> 365,
+        'search'=> $request['search'],
+        'order'=> 'date DESC',
+        'sections'=> $request['sections'],
+        'cacheTime'=> 15,
+      ];
 
       $url = $this->url.Arr::query($data);
       $response = Http::acceptJson()->get($url);
       $data = $response->collect()->all();
       
-      return $this->arregloProduct($data['data'],['isModels' => false]);
+      if(isset($data['data'])){
+        return $this->arregloProduct($data['data'],['isModels' => false]);
+      }else{
+        return [];
+      }
 
+      // $url = $this->urlSearch.Arr::query($data);
+     
+      // $response = Http::acceptJson()->get($url);
+
+      // if($response->json()['status'] == 'error'){
+      //   return [];
+      // }
+      
+      // $data = $response->collect()->all();
+
+      // dd($data);
+      // $productos = collect($data['modelos']);
+
+      // $idsProductos = $productos->pluck('num');
+      // $localCds     = $productos->pluck('local_cd');
+
+      // $stores = Store::whereIn('LOCAL_CD', $localCds->all())->select('GROUP_CD','LOGO_FILE_NAME','LOCAL_NAME','LIMIT_PRICE','LOCAL_CD','GROUP_CD','MODAPOINT')->get();
+
+      // $talles = $productos->pluck('talles','num');
+
+      // $products_carro = $this->isProductCarro($idsProductos->all(), ['whereIn'=>true]);
+
+      // $products_carro = $products_carro->pluck('MODELO_NUM')->countBy();
+
+      // $arr = $productos->map(function ($product, $key) use ($stores, $products_carro) {
+      //   $colores = [];
+      //   foreach ($product['colores_reference'] as $key => $value) {
+      //     $colores[] = [
+      //       'code'  => $value,
+      //       'name'  => $product['colores'][$key], 
+      //       'order' => '',
+      //       'id'    => $product['colores_id'][$key]
+      //     ];
+      //   }
+
+      //   $store = $stores->where('LOCAL_CD',$product['local_cd'])->first(); 
+
+      //   $product['id'] = $product['num'];
+      //   $product['sizes'] = $product['talles'];
+      //   $product['price'] = isset($product['price_curr']) ? $product['price_curr']:$product['precio'];
+
+      //   $arregloImages = function($images){
+      //     return Arr::flatten($images)[0];
+      //   };
+
+      //   return [
+      //     "id"          => $product['num'],
+      //     "local_cd"       => $product['local_cd'],
+      //     "company"     => $store['GROUP_CD'],
+      //     "name"        => $product['descripcion'],
+      //     "category"    => isset($product['category_name']) ? $product['category_name']:null,
+      //     "category_id" => $product['category'],
+      //     "price"       => isset($product['price_curr']) ? $product['price_curr']:$product['precio'],
+      //     "prev_price"  => isset($product['price_prev']) ? $product['price_prev']:null,
+      //     "images"      => array_map($arregloImages, $product['images']),
+      //     "sizes"       => $product['talles'],
+      //     "colors"      => $colores,
+      //     "is_desc"     => $product['is_desc'],
+      //     // "models"      => $this->generateModels($product),
+      //     "isCart"      => Arr::exists($products_carro->all(), $product['num']),
+      //     "has_stock"   => $product['con_stock'] == "" ? true:$product['con_stock'],
+      //     "store" => [
+      //       'logo' => env('URL_IMAGE').'/common/img/logo/'.$store['LOGO_FILE_NAME'],
+      //       'name' => $store['LOCAL_NAME'],
+      //       'min'  => $store['LIMIT_PRICE'],
+      //       "id"   => $store['LOCAL_CD'],
+      //       "company"     => $store['GROUP_CD'],
+      //       'rep' => $store['MODAPOINT']
+      //     ]
+      //   ];
+      // });
+
+      // return $arr->all();
     }
 
 
