@@ -252,6 +252,11 @@ class ProductsController extends Controller
         'cacheTime'=> 15,
       ];
 
+      if($request['menu'] == 'get_new_entry_products'){
+        $data['betweenDates'] = '2023-05-22,2023-05-23';
+        $data['order'] = 'register DESC';
+      }
+
       $url = $this->url.Arr::query($data);
       $response = Http::acceptJson()->get($url);
       $data = $response->collect()->all();
