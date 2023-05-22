@@ -69,7 +69,9 @@ class ClientController extends Controller
         $response = $this->ApiRosa([
             'client_num' =>  Auth::user()->num, 
             'newpass'=> $request->newpass,
-            'oldpass'=> $request->oldpass ], 'changepass');
+            'oldpass'=> $request->oldpass,
+            'api_token' => Auth::user()->api_token
+        ], 'changepass');
 
         if($response->status == 200){
             return response()->json(['message'=> 'Contrasena cambiada con exito'], 200);

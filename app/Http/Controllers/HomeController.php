@@ -1311,7 +1311,9 @@ class HomeController extends Controller
               'type' => 'section',
               'title' => '1. Creá tu carrito da compras',
               'html' => '<span style="font-family: verdana, geneva; font-size: 16pt;"><span style="font-size: 13pt;">La compra<strong> es individual&nbsp;por tienda</strong>, buscá tu favorita!&nbsp;</span></span><span style="font-family: verdana, geneva; font-size: 16pt;"><span style="font-size: 13pt;">El <strong>sistema de reputación</strong>&nbsp;Modapoint te ayuda a elegir mejor.</span></span><span style="font-family: verdana, geneva; font-size: 16pt;">&nbsp;</span><a style="padding: 2px 5px; border: 2px solid #e40175; background-color: #efefef; color: #e40175; border-radius: 3px; font-weight: bold;" href="../../?page=81">Ver Modapoints</a><span style="font-size: 13pt;">Cada marca tiene su mínimo de compra.&nbsp;Llená tu carrito con prendas <strong>hasta superar el monto mínimo</strong>.</span><span style="font-size: 13pt;">Pst! De viernes a domingo, las marcas bajan el monto mínimo ¡Aprovechá!&nbsp;</span>&nbsp;<a style="padding: 2px 5px; border: 2px solid #e40175; background-color: #efefef; color: #e40175; border-radius: 3px; font-weight: bold;" href="../../montosminimos">Ver Montos Rebajados</a>',
-              'config' => []
+              'config' => [
+                
+              ]
             ],
             [
               'type' => 'section',
