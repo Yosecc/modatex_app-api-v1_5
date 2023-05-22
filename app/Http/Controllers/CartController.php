@@ -240,9 +240,10 @@ class CartController extends Controller
       }
       $p = new ProductsController();
       $productos = $p->whereInProducts($products_id);
-      
+      // dd($productos);
       $arregloProduct = function($product) use ($carts){
 
+        // dd($product);
         $combinaciones = [];
 
         foreach ($carts as $key => $cart) {
@@ -262,6 +263,7 @@ class CartController extends Controller
 
               // dd($cart);
               $combinaciones[] = [
+                
                 "sizes"           => $product['sizes'],
                 "colors"          => $product['colors'],
                 "colorActive"     => count($valuesColor) ? $valuesColor[0]['code']:null,
@@ -292,7 +294,8 @@ class CartController extends Controller
           "sizes"         => $product['sizes'],
           "colors"        => $product['colors'],
           "combinacion"   => $combinaciones,
-          "models"        => $product['models']
+          "models"        => $product['models'],
+          "code"           => $product['code'],
         ];
       
       };
