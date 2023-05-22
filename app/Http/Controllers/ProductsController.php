@@ -264,7 +264,7 @@ class ProductsController extends Controller
       $url = $this->url.Arr::query($data);
       $response = Http::acceptJson()->get($url);
       $data = $response->collect()->all();
-      dd($data);
+      // dd($data);
       if(isset($data['data'])){
         return $this->arregloProduct($data['data'],['isModels' => false]);
       }else{
