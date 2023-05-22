@@ -179,6 +179,7 @@ class ProductsController extends Controller
 
         return [
           "id"          => $product['id'],
+          "code" => isset($product['code']) ? $product['code'] : '',
           "local_cd"    => $product['store'],
           "company"     => $store['GROUP_CD'],
           "name"        => $product['name'],
@@ -263,7 +264,7 @@ class ProductsController extends Controller
       $url = $this->url.Arr::query($data);
       $response = Http::acceptJson()->get($url);
       $data = $response->collect()->all();
-      
+      dd($data);
       if(isset($data['data'])){
         return $this->arregloProduct($data['data'],['isModels' => false]);
       }else{
