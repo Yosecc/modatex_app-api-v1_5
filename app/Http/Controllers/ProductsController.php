@@ -2,20 +2,22 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Traits\ProductsTraits;
+use Auth;
+use Carbon\Carbon;
 use App\Models\Cart;
 use App\Models\Code;
-use App\Models\Prices;
-use App\Models\ProductFavorite;
-use App\Models\Products;
-use App\Models\ProductsDetail;
 use App\Models\Store;
-use Auth;
-use Illuminate\Http\Client\Pool;
-use Illuminate\Http\Request;
+use App\Models\Prices;
+use App\Models\Products;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
+use Illuminate\Http\Request;
+use App\Models\ProductsDetail;
+use App\Models\ProductFavorite;
+use Illuminate\Http\Client\Pool;
+use App\Http\Traits\ProductsTraits;
+use Illuminate\Support\Facades\Http;
+
 class ProductsController extends Controller
 {
 
@@ -251,12 +253,13 @@ class ProductsController extends Controller
         'sections'=> $request['sections'],
         'cacheTime'=> 15,
       ];
-
+      // dd($request);
       if($request['menu'] == 'get_new_entry_products'){
-        $data['betweenDates'] = '2023-05-22,2023-05-23';
+        $hoy = Carbon::now();
+        $data['betweenDates'] = $hoy->format('Y-m-d').','.$hoy->addDay()->format('Y-m-d');
         $data['order'] = 'register DESC';
       }
-
+      // dd($data);
       $url = $this->url.Arr::query($data);
       $response = Http::acceptJson()->get($url);
       $data = $response->collect()->all();
