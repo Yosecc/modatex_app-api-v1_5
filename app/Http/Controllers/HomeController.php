@@ -1288,7 +1288,7 @@ class HomeController extends Controller
         "name" => 'Notificaciones',
         "disabled" => false,
         "redirect"=> [
-          "route"=> "/notifications- ",
+          "route"=> "/notifications",
           "params"=> []
         ]
       ],
