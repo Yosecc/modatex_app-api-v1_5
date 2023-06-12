@@ -61,6 +61,25 @@ class StoresController extends Controller
 
     }
 
+    private function crearConsulta($data,$request)
+    {
+      if($request->search){
+        $data = $data->pluck('data')->collapse()->unique()->filter(fn ($store) => Str::is($request->search.'*',$store['name']) )
+        ;
+      }elseif($request->categorie == 'all'){
+
+       $data = $data->pluck('data')->collapse()->unique()->shuffle();
+
+      }else{
+        $data = $data->where('type', $request->categorie)
+              ->pluck('data')
+              ->collapse()
+              ;
+      }
+
+      return $data;
+    }
+
     public function getStoresRosa(Request $request)
     {
 
@@ -72,25 +91,12 @@ class StoresController extends Controller
       $nameChache = 'stores';
 
       if (Cache::has($nameChache) && !isset($request->reload)) {
-        $data = Cache::get($nameChache);
-
-        // dd($request->search);
-        if($request->search){
-          $data = $data->pluck('data')->collapse()->unique()->filter(fn ($store) => Str::is($request->search.'*',$store['name']) )
-          ;
-        }else{
-          $data = $data->where('type', $request->categorie)
-          ->pluck('data')
-          ->collapse()
-          ;
-          // dd($data);
-        }
-      
-        return response()->json(CollectionHelper::paginate($data, 16));
+        $data = Cache::get($nameChache);      
+        return response()->json(CollectionHelper::paginate($this->crearConsulta($data,$request), 16));
       }
 
       $urls = [];
-
+    
       foreach ($this->storesPlanes as $p => $plan) {
         foreach ($this->categories as $c => $categorie) {
           $urls[$categorie.$plan][] = $this->url.'json/cache_'.$categorie.$plan;
@@ -108,8 +114,6 @@ class StoresController extends Controller
         })->collapse()
       );
 
-     
-    
       $consultas = collect($consultas)->map(function($response, $key) use ($collection){
         $data = [
           'type' => $key,
@@ -118,8 +122,6 @@ class StoresController extends Controller
         ];
         return $data;
       });
-
-
 
       $categories = collect($this->categories)->map(function($categorie) use ($consultas){
         // dd($categorie);
@@ -154,17 +156,7 @@ class StoresController extends Controller
 
       $data = $categories;
 
-      if($request->search){
-        $data = $data->pluck('data')->collapse()->unique()->filter(fn ($store) => Str::is($request->search.'*',$store['name']) )
-        ;
-      }else{
-        $data = $data->where('type', $request->categorie)
-              ->pluck('data')
-              ->collapse()
-              ;
-      }
-      
-      return response()->json(CollectionHelper::paginate($data, 16));
+      return response()->json(CollectionHelper::paginate($this->crearConsulta($data,$request), 16));
     }
 
     public function getCategoriesStore(Request $request){
