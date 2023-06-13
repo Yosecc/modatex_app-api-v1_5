@@ -24,6 +24,8 @@ class StoresController extends Controller
 
     private $url = 'https://www.modatex.com.ar/modatexrosa3/';
 
+    private $urlStore = 'https://www.modatex.com.ar/?c=Store::';
+
     private $storesPlanes = [
         '_black.json',
         '_platinum.json',
@@ -64,20 +66,14 @@ class StoresController extends Controller
     private function crearConsulta($data,$request)
     {
       if($request->search){
-        $data = $data->pluck('data')->collapse()->unique()->filter(fn ($store) => Str::is($request->search.'*',$store['name']) )
-        ;
+        return $data->filter(fn ($store) => Str::is(Str::lower($request->search).'*',Str::lower($store['name'])) );
       }elseif($request->categorie == 'all'){
-
-       $data = $data->pluck('data')->collapse()->unique()->shuffle();
-
+        return $data->shuffle();
       }else{
-        $data = $data->where('type', $request->categorie)
-              ->pluck('data')
-              ->collapse()
-              ;
+        return $data->filter(fn ($store) => Str::is(Str::lower($request->categorie).'*',Str::lower($store['categorie'])) );
       }
 
-      return $data;
+      // return $data;
     }
 
     public function getStoresRosa(Request $request)
@@ -88,75 +84,110 @@ class StoresController extends Controller
           // 'plan'    => 'required',
       ]);
 
-      $nameChache = 'stores';
+      // $nameChache = 'stores';
 
-      if (Cache::has($nameChache) && !isset($request->reload)) {
-        $data = Cache::get($nameChache);      
-        return response()->json(CollectionHelper::paginate($this->crearConsulta($data,$request), 16));
-      }
+      $response = Http::accept('application/json')->get($this->urlStore.'all');
 
-      $urls = [];
-    
-      foreach ($this->storesPlanes as $p => $plan) {
-        foreach ($this->categories as $c => $categorie) {
-          $urls[$categorie.$plan][] = $this->url.'json/cache_'.$categorie.$plan;
+      $response = collect($response->collect()['data']);
+
+      $stores = Store::whereIn('LOCAL_CD',$response->pluck('id')->all())->get();
+
+      $response = $this->crearConsulta($response->map(function($tienda) use ($stores){
+        $store = $stores->where('LOCAL_CD', $tienda['id'])->first();
+        // dd($store);
+        $categorie = '';
+        if($store['USE_MAN'] == "Y"){
+          $categorie = 'man';
+        }elseif($store['USE_WOMAN'] == "Y"){
+          $categorie = 'woman';
+        }elseif($store['USE_CHILD'] == "Y"){
+          $categorie = 'kids';
+        }elseif($store['USE_ACCESORY'] == "Y"){
+          $categorie = 'accessories';
+        }elseif($store['USE_SPECIAL'] == "Y"){
+          $categorie = 'xl';
         }
-      }
-
-      $collection = collect($urls);
-
-      $consultas = Http::pool(fn (Pool $pool) => 
-        $collection->map(function($urls, $plan) use($pool){
-          foreach ($urls as $u => $url) {
-            $url = $pool->as($plan)->accept('application/json')->get($url);
-          }
-          return $urls;
-        })->collapse()
-      );
-
-      $consultas = collect($consultas)->map(function($response, $key) use ($collection){
-        $data = [
-          'type' => $key,
-          'data' => $response->json()['stores'],
-          'count' => count($response->json()['stores'])
-        ];
-        return $data;
-      });
-
-      $categories = collect($this->categories)->map(function($categorie) use ($consultas){
-        // dd($categorie);
-        $data = $consultas->filter(function($value, $key) use ($categorie) {
-          return Str::is($categorie.'*',$key);
-        })
-        ->map(function($value){
-          return collect($value['data'])->map(function($store){
-            return [
-              "logo" => env('URL_IMAGE').'/'. $store['profile']['logo'],
-              "name" => $store['cover']['title'],
-              "local_cd" => $store['local_cd'],
-              "min" => $store['profile']['min'],
-              "rep" => $store['profile']['modapoints'],
-              "vc" => $store['profile']['comp_sal_perc'],
-            ];
-          });
-        })
-        ->collapse()
-        ;
 
         return [
-          'type' => $categorie,
-          'data' => $data,
-          'count' => count($data)
+          "logo" => env('URL_IMAGE').'/common/img/logo/'. $tienda['logo'],
+          "name" => $tienda['name'],
+          "local_cd" => $tienda['id'],
+          "min" => $store ? $store['LIMIT_PRICE']: '',
+          "rep" => $store ? $store['MODAPOINT']-1: '',
+          "vc" => '',
+          "categorie" => $categorie
         ];
+      }),$request);
+      
+      return response()->json(CollectionHelper::paginate( $response, 16));
+      
+      
+      // if (Cache::has($nameChache) && !isset($request->reload)) {
+      //   $data = Cache::get($nameChache);      
+      //   return response()->json(CollectionHelper::paginate($this->crearConsulta($data,$request), 16));
+      // }
 
-      });
+      // $urls = [];
+    
+      // foreach ($this->storesPlanes as $p => $plan) {
+      //   foreach ($this->categories as $c => $categorie) {
+      //     $urls[$categorie.$plan][] = $this->url.'json/cache_'.$categorie.$plan;
+      //   }
+      // }
 
+      // $collection = collect($urls);
 
-      Cache::put($nameChache, $categories , $seconds = 10800);
+      // $consultas = Http::pool(fn (Pool $pool) => 
+      //   $collection->map(function($urls, $plan) use($pool){
+      //     foreach ($urls as $u => $url) {
+      //       $url = $pool->as($plan)->accept('application/json')->get($url);
+      //     }
+      //     return $urls;
+      //   })->collapse()
+      // );
 
-      $data = $categories;
+      // $consultas = collect($consultas)->map(function($response, $key) use ($collection){
+      //   $data = [
+      //     'type' => $key,
+      //     'data' => $response->json()['stores'],
+      //     'count' => count($response->json()['stores'])
+      //   ];
+      //   return $data;
+      // });
 
-      return response()->json(CollectionHelper::paginate($this->crearConsulta($data,$request), 16));
+      // $categories = collect($this->categories)->map(function($categorie) use ($consultas){
+      //   // dd($categorie);
+      //   $data = $consultas->filter(function($value, $key) use ($categorie) {
+      //     return Str::is($categorie.'*',$key);
+      //   })
+      //   ->map(function($value){
+      //     return collect($value['data'])->map(function($store){
+            // return [
+            //   "logo" => env('URL_IMAGE').'/'. $store['profile']['logo'],
+            //   "name" => $store['cover']['title'],
+            //   "local_cd" => $store['local_cd'],
+            //   "min" => $store['profile']['min'],
+            //   "rep" => $store['profile']['modapoints'],
+            //   "vc" => $store['profile']['comp_sal_perc'],
+            // ];
+      //     });
+      //   })
+      //   ->collapse()
+      //   ;
+
+      //   return [
+      //     'type' => $categorie,
+      //     'data' => $data,
+      //     'count' => count($data)
+      //   ];
+
+      // });
+
+      // Cache::put($nameChache, $categories , $seconds = 10800);
+
+      // $data = $categories;
+
+      // /return response()->json(CollectionHelper::paginate($this->crearConsulta($data,$request), 16));
     }
 
     public function getCategoriesStore(Request $request){
