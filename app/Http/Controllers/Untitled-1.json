@@ -1,0 +1,204 @@
+
+producto [{
+  "id": "1542280",
+  "local_cd": "2126",
+  "company": 2035,
+  "name": "Babucha antonia",
+  "category": "Calzas / Babuchas",
+  "category_id": "4",
+  "price": 4699,
+  "prev_price": 4700,
+  "images": [
+    "https://netivooregon.s3.amazonaws.com/attach/modelo/20230316/2035/th_l_92243214.webp?252-107037",
+    "https://netivooregon.s3.amazonaws.com/attach/modelo/20230316/2035/th_l_66179709.webp?252-107037",
+    "https://netivooregon.s3.amazonaws.com/attach/modelo/20230316/2035/th_l_52743390.webp?252-107037",
+    "https://netivooregon.s3.amazonaws.com/attach/modelo/20230316/2035/th_l_92565982.webp?252-107037",
+    "https://netivooregon.s3.amazonaws.com/attach/modelo/20230316/2035/th_l_92797194.webp?252-107037",
+    "https://netivooregon.s3.amazonaws.com/attach/modelo/20230316/2035/th_l_63741067.webp?252-107037",
+    "https://netivooregon.s3.amazonaws.com/attach/modelo/20230316/2035/th_l_11762777.webp?252-107037"
+  ],
+  "sizes": [
+    "S",
+    "M",
+    "L"
+  ],
+  "colors": [
+    {
+      "code": "#008040",
+      "name": "Verde",
+      "order": "18",
+      "id": "145"
+    },
+    {
+      "code": "#FFFFFF",
+      "name": "Blanco",
+      "order": "62",
+      "id": "165"
+    },
+    {
+      "code": "#5E2F0D",
+      "name": "Chocolate",
+      "order": "98",
+      "id": "500"
+    }
+  ],
+  "is_desc": "1",
+  "isCart": true,
+  "has_stock": true,
+  "models": [
+    {
+      "size": "S",
+      "size_id": 2,
+      "price": 4699,
+      "properties": [
+        {
+          "id": 4432555,
+          "product_id": 1542280,
+          "size_id": 2,
+          "color_id": 500,
+          "quantity": 100,
+          "MODA_NUM": 1002058861,
+          "price": "4699",
+          "size": null,
+          "color": null
+        },
+        {
+          "id": 4432558,
+          "product_id": 1542280,
+          "size_id": 2,
+          "color_id": 165,
+          "quantity": 100,
+          "MODA_NUM": 1002058864,
+          "price": "4699",
+          "size": null,
+          "color": null
+        },
+        {
+          "id": 4432563,
+          "product_id": 1542280,
+          "size_id": 2,
+          "color_id": 145,
+          "quantity": 100,
+          "MODA_NUM": 1002058869,
+          "price": "4699",
+          "size": null,
+          "color": null
+        }
+      ]
+    },
+    {
+      "size": "M",
+      "size_id": 5,
+      "price": 4699,
+      "properties": [
+        {
+          "id": 4432556,
+          "product_id": 1542280,
+          "size_id": 5,
+          "color_id": 500,
+          "quantity": 100,
+          "MODA_NUM": 1002058862,
+          "price": "4699",
+          "size": null,
+          "color": null
+        },
+        {
+          "id": 4432559,
+          "product_id": 1542280,
+          "size_id": 5,
+          "color_id": 165,
+          "quantity": 100,
+          "MODA_NUM": 1002058865,
+          "price": "4699",
+          "size": null,
+          "color": null
+        },
+        {
+          "id": 4432564,
+          "product_id": 1542280,
+          "size_id": 5,
+          "color_id": 145,
+          "quantity": 100,
+          "MODA_NUM": 1002058870,
+          "price": "4699",
+          "size": null,
+          "color": null
+        }
+      ]
+    },
+    {
+      "size": "L",
+      "size_id": 6,
+      "price": 4699,
+      "properties": [
+        {
+          "id": 4432557,
+          "product_id": 1542280,
+          "size_id": 6,
+          "color_id": 500,
+          "quantity": 100,
+          "MODA_NUM": 1002058863,
+          "price": "4699",
+          "size": null,
+          "color": null
+        },
+        {
+          "id": 4432560,
+          "product_id": 1542280,
+          "size_id": 6,
+          "color_id": 165,
+          "quantity": 100,
+          "MODA_NUM": 1002058866,
+          "price": "4699",
+          "size": null,
+          "color": null
+        },
+        {
+          "id": 4432565,
+          "product_id": 1542280,
+          "size_id": 6,
+          "color_id": 145,
+          "quantity": 100,
+          "MODA_NUM": 1002058871,
+          "price": "4699",
+          "size": null,
+          "color": null
+        }
+      ]
+    }
+  ],
+  "store": {
+    "logo": "https://netivooregon.s3.amazonaws.com/common/img/logo/paccaindumentaria_1599057245.webp",
+    "name": "PACCAINDUMENTARIA",
+    "min": "6000.00",
+    "id": 2126,
+    "company": 2035
+  }
+}]
+
+combinacion
+
+{
+  "sizes": [
+    "6",
+    "7",
+    "8",
+    "9",
+    "10"
+  ],
+  "colors": [
+    {
+      "code": "/common/img/surtidos.gif",
+      "name": "Surtidos",
+      "order": "65",
+      "id": "213"
+    }
+  ],
+  "colorActive": "/common/img/surtidos.gif",
+  "talleActive": "6",
+  "product_id": "1543336",
+  "cantidad": 1,
+  "combinacion_key": 0,
+  "descripcion": "Chomba talle esp. ml",
+  "price": "3900"
+}

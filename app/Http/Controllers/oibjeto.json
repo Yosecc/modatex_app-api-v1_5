@@ -1,0 +1,172 @@
+{
+    "name": "Hombre",
+    "type": "categorie",
+    "value": 3,
+    "product_paginate": 4,
+    "product_for_store": 1
+}, {
+    "name": "Hombre",
+    "type": "categorie",
+    "value": 3,
+    "product_paginate": 4,
+    "product_for_store": 1,
+    "config": {
+        "slider": true,
+        "is_title": false,
+        "is_card": false,
+    },
+}, {
+    "name": "Zapatos",
+    "type": "filter",
+    "value": "zapatos",
+    "params": {
+        "menu": "get_catalog_products",
+        "sections": [],
+        "search": "zapatos",
+        "page": 1,
+        "offset": 4
+    },
+},
+
+//PAgES
+
+{
+    "id": null,
+    "image_url": "",
+    "action": {
+        "redirect": {
+            "route": "/discount_especial",
+            "params": []
+        }
+    },
+    "data": {
+        "header": {
+            "title": "",
+            "subtitle": "",
+            "image": "",
+            "config": {
+                "isSubtitle": false,
+                "isTitle": false,
+            }
+        },
+        "body": [{
+                "type": "section",
+                "title": "",
+                "html": "",
+                "config": {
+                    "images": "auto|scroll",
+                    "card": true,
+                    "padding": ""
+                },
+                "marcas_ids": [],
+                "marcas": [{
+                    "logo": "",
+                    "name": "",
+                    "local_cd": "",
+                    "min": 10000
+                }, ],
+                "images": ["", ""],
+                "buttons": [{
+                    "title": "",
+                    "redirect": {
+                        "route": "/search",
+                        "params": {
+                            "params": {
+                                "search": "value",
+                                "sections": [3],
+                                "section": "ofertas"
+                            }
+                        }
+                    }
+                }, ],
+                "group_buttons": [{
+                    "type": "tag",
+                    "title": "TOPS",
+                    "redirect": {
+                        "route": "/search",
+                        "params": {
+                            "search": "top",
+                            "section": "ofertas"
+                        }
+                    }
+                }]
+            },
+            {
+                "type": "images",
+                "title": " Rebajas en primavera verano 2023",
+                "images": [{
+                    "url": "",
+                    "col": "3|1.5|1",
+                    "height": 500,
+                    "label_html": "",
+                    "redirect": {
+                        "route": "/search",
+                        "params": {
+                            "search": "blusa",
+                            "section": "ofertas"
+                        }
+                    }
+                }]
+            },
+        ]
+    }
+}
+
+
+//REDIRECTS 
+
+// '/categories'
+// '/notifications'
+// '/discount_especial'
+// '/home'
+// '/shopping_center'
+// '/search'
+// '/product'
+// '/store'
+// '/all_stores'
+// '/profile'
+
+{
+    "redirect": {
+        "route": "/categories",
+        "params": {
+            "search": "",
+            "section": "1"
+        }
+    }
+}
+
+{
+    "redirect": {
+        "route": "/notifications | /discount_especial | /home | /shopping_center | /all_stores | /profile",
+        "params": {}
+    }
+}
+
+{
+    "redirect": {
+        "route": "/search",
+        "params": {
+            "search": "remera",
+            "section": "[1,3,6,2,4]"
+        }
+    }
+}
+
+{
+    "redirect": {
+        "route": "/product",
+        "params": {
+            "product_id": 1000
+        }
+    }
+}
+
+{
+    "redirect": {
+        "route": "/store",
+        "params": {
+            "local_cd": 1000
+        }
+    }
+}

@@ -87,7 +87,10 @@ class StoresController extends Controller
       // $nameChache = 'stores';
 
       $response = Http::accept('application/json')->get($this->urlStore.'all');
+      if($response->json() == null){
+        return response()->json(CollectionHelper::paginate(collect([]), 16));
 
+      }
       $response = collect($response->collect()['data']);
 
       $stores = Store::whereIn('LOCAL_CD',$response->pluck('id')->all())->get();
