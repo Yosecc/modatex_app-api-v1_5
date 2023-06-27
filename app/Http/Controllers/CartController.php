@@ -201,6 +201,7 @@ class CartController extends Controller
         $conteo+=$value['CANTIDAD'];
         $cart_ids[] = $value['NUM'];
       }
+      
 
       return [
         "id"             => $store['LOCAL_CD'],
@@ -211,7 +212,8 @@ class CartController extends Controller
         "products_count" => $conteo, 
         "total"          => $suma, 
         "is_limit"       => $suma >= floatval($store['LIMIT_PRICE']),
-        'cart_ids'       => $cart_ids
+        'cart_ids'       => $cart_ids,
+        'rep' => $store['MODAPOINT']
       ];
 
     }
