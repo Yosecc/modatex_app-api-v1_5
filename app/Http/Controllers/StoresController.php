@@ -35,7 +35,7 @@ class StoresController extends Controller
 
     private $urlProduct = 'https://www.modatex.com.ar/modatexrosa3/?c=Products::get&';
 
-
+    private $urlPromos = 'https://www.modatex.com.ar/?c=Canpaigns::promos&store_id=';
     /*
     * @return Store Array
     * @return $store = Collection()   
@@ -191,6 +191,18 @@ class StoresController extends Controller
       // $data = $categories;
 
       // /return response()->json(CollectionHelper::paginate($this->crearConsulta($data,$request), 16));
+    }
+
+    public function getPromociones($local_cd)
+    {
+      if($local_cd){
+        
+        $response = Http::accept('application/json')->get($this->urlPromos.$local_cd);
+        $response = $response->json();
+
+        return response()->json($response);
+      }
+      return [];
     }
 
     public function getCategoriesStore(Request $request){
@@ -349,3 +361,4 @@ class StoresController extends Controller
     }
 
 }
+
