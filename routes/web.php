@@ -86,6 +86,7 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
     //ROSA
     $router->group(['prefix' => 'rosa'], function () use ($router) {
         $router->get('stores','StoresController@getStoresRosa');
+        $router->get('getPromociones/{local_cd}','StoresController@getPromociones');
         $router->get('products','ProductsController@getProductsRosa');
         $router->get('products_home','StoresController@productsHome');
         $router->get('search','ProductsController@getSearch');
