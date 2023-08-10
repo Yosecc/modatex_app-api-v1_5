@@ -402,6 +402,8 @@ class CartController extends Controller
       ])
       ->post($url);
 
+      // dd($response->body());
+
       $datos = [ 'cart' => $response->json() ];
 
 
@@ -418,8 +420,6 @@ class CartController extends Controller
 
       $cupones = new CouponsController();
       $datos['cupon'] =  $cupones->getCupones($request->local_cd) ? [$cupones->getCupones($request->local_cd)]: null ;
-
-
 
       return response()->json($datos);
 

@@ -65,39 +65,48 @@ class StoresController extends Controller
 
     private function crearConsulta($data,$request)
     {
-      if($request->search){
-        return $data->filter(fn ($store) => Str::is(Str::lower($request->search).'*',Str::lower($store['name'])) );
-      }elseif($request->categorie == 'all'){
-        return $data->shuffle();
-      }else{
-        return $data->filter(fn ($store) => Str::is(Str::lower($request->categorie).'*',Str::lower($store['categorie'])) );
+      
+      if(isset($request['search'])){
+        $data = $data->filter(fn ($store) => Str::is(Str::lower($request['search']).'*',Str::lower($store['name'])) );
       }
-
-      // return $data;
+      
+      if($request['categorie'] == 'all'){
+        $data = $data->shuffle();
+      }else{
+        $data = $data->filter(fn ($store) => Str::is(Str::lower($request['categorie']).'*',Str::lower($store['categorie'])) );
+      }
+     
+      if(isset($request['plan']) && $request['plan']!=''){
+        $data = $data->filter(fn ($store) => Str::lower($request['plan'])  == Str::lower($store['paquete']) );
+      }
+ 
+      return $data;
     }
 
     public function getStoresRosa(Request $request)
     {
-
       $this->validate($request, [
           'categorie' => 'required',
-          // 'plan'    => 'required',
       ]);
+      return response()->json(CollectionHelper::paginate(  $this->consultaStoresRosa($request->all()), $request->paginate ?? 16));
+    }
 
-      // $nameChache = 'stores';
-
+    public function consultaStoresRosa($request)
+    {
       $response = Http::accept('application/json')->get($this->urlStore.'all');
-      if($response->json() == null){
-        return response()->json(CollectionHelper::paginate(collect([]), 16));
 
+      if($response->json() == null){
+        return response()->json(CollectionHelper::paginate(collect([]), $request->paginate ?? 16 ));
       }
+      
       $response = collect($response->collect()['data']);
 
       $stores = Store::whereIn('LOCAL_CD',$response->pluck('id')->all())->get();
-
-      $response = $this->crearConsulta($response->map(function($tienda) use ($stores){
+      
+      return $this->crearConsulta($response->map(function($tienda) use ($stores){
+      
         $store = $stores->where('LOCAL_CD', $tienda['id'])->first();
-        // dd($store);
+
         $categorie = '';
         if($store['USE_MAN'] == "Y"){
           $categorie = 'man';
@@ -111,6 +120,17 @@ class StoresController extends Controller
           $categorie = 'xl';
         }
 
+        $predefSection = $this->categorieDefaultId($store);
+
+        $categorieR = [];
+        $paquete = '';
+        if(isset($tienda['sections'])){
+          foreach (json_decode($tienda['sections']) as $key => $value) {
+            $categorieR[] = $key;
+            $paquete = $value;
+          }
+        }
+
         return [
           "logo" => env('URL_IMAGE').'/common/img/logo/'. $tienda['logo'],
           "name" => $tienda['name'],
@@ -118,79 +138,13 @@ class StoresController extends Controller
           "min" => $store ? $store['LIMIT_PRICE']: '',
           "rep" => $store ? $store['MODAPOINT']-1: '',
           "vc" => '',
-          "categorie" => $categorie
+          "categorie" => $categorie,
+          "category_default" => $predefSection,
+          'categories_store' => $categorieR,
+          'paquete' => $paquete,
         ];
+
       }),$request);
-      
-      return response()->json(CollectionHelper::paginate( $response, 16));
-      
-      
-      // if (Cache::has($nameChache) && !isset($request->reload)) {
-      //   $data = Cache::get($nameChache);      
-      //   return response()->json(CollectionHelper::paginate($this->crearConsulta($data,$request), 16));
-      // }
-
-      // $urls = [];
-    
-      // foreach ($this->storesPlanes as $p => $plan) {
-      //   foreach ($this->categories as $c => $categorie) {
-      //     $urls[$categorie.$plan][] = $this->url.'json/cache_'.$categorie.$plan;
-      //   }
-      // }
-
-      // $collection = collect($urls);
-
-      // $consultas = Http::pool(fn (Pool $pool) => 
-      //   $collection->map(function($urls, $plan) use($pool){
-      //     foreach ($urls as $u => $url) {
-      //       $url = $pool->as($plan)->accept('application/json')->get($url);
-      //     }
-      //     return $urls;
-      //   })->collapse()
-      // );
-
-      // $consultas = collect($consultas)->map(function($response, $key) use ($collection){
-      //   $data = [
-      //     'type' => $key,
-      //     'data' => $response->json()['stores'],
-      //     'count' => count($response->json()['stores'])
-      //   ];
-      //   return $data;
-      // });
-
-      // $categories = collect($this->categories)->map(function($categorie) use ($consultas){
-      //   // dd($categorie);
-      //   $data = $consultas->filter(function($value, $key) use ($categorie) {
-      //     return Str::is($categorie.'*',$key);
-      //   })
-      //   ->map(function($value){
-      //     return collect($value['data'])->map(function($store){
-            // return [
-            //   "logo" => env('URL_IMAGE').'/'. $store['profile']['logo'],
-            //   "name" => $store['cover']['title'],
-            //   "local_cd" => $store['local_cd'],
-            //   "min" => $store['profile']['min'],
-            //   "rep" => $store['profile']['modapoints'],
-            //   "vc" => $store['profile']['comp_sal_perc'],
-            // ];
-      //     });
-      //   })
-      //   ->collapse()
-      //   ;
-
-      //   return [
-      //     'type' => $categorie,
-      //     'data' => $data,
-      //     'count' => count($data)
-      //   ];
-
-      // });
-
-      // Cache::put($nameChache, $categories , $seconds = 10800);
-
-      // $data = $categories;
-
-      // /return response()->json(CollectionHelper::paginate($this->crearConsulta($data,$request), 16));
     }
 
     public function getPromociones($local_cd)
@@ -217,6 +171,9 @@ class StoresController extends Controller
 
       $categories = [];
 
+      $predefSection = $this->categorieDefaultId($store);
+      // dd($categorias);
+
       foreach ($categorias as $c => $categoria) {
 
         if($categoria['descripcion'] == 'mujer'){
@@ -228,16 +185,18 @@ class StoresController extends Controller
         elseif($categoria['descripcion'] == 'Accesorios'){
           $categoria['clave'] =  'accessories';
         }
-        // elseif($categoria['descripcion'] == ''){
-        //   $categoria['clave'] =  'xl';
-        // }
-        // elseif($categoria['descripcion'] == ''){
-        //   $categoria['clave'] =  'kids';
-        // }
+        elseif($categoria['descripcion'] == "Talle especial"){
+          $categoria['clave'] =  'xl';
+        }
+        elseif($categoria['descripcion'] == 'chico'){
+          $categoria['clave'] =  'kids';
+        }
 
+        
 
         $response = Http::acceptJson()->get($this->urlProduct.'store='.$request->local_cd.'&sections='.$categoria['clave'].'&start=0&length=9999');
 
+          
         $idsSubscategories = [];
         foreach ($response->collect()->all()['data'] as $key => $value) {
           if(!in_array($value['category_id'], $idsSubscategories)){
@@ -257,8 +216,10 @@ class StoresController extends Controller
             'id' => $categoria['id'],
             'name' => $categoria['name'],
             'clave' => $categoria['clave'],
+            'is_default' => $predefSection == $categoria['id'] ? true: false
           ],
-          'subcategorias' => $subcategories
+          'subcategorias' => $subcategories,
+          
         ];
 
       }
@@ -358,6 +319,44 @@ class StoresController extends Controller
       $storesAll = collect(Arr::collapse($storesAll));
 
       return $storesAll;
+    }
+
+    public function categorieDefaultId($store)
+    {
+      /**
+         * Si PREDEF_SECTION != '' ??  Es es el ID por defecto. 
+         * Si PREDEF_SECTION == '' ??  Si subcaetgorias > 1 ? La prioridad es woman|talle especial|men|nino|accesorios : Es la posicion 0  
+         */
+        // dd($store);
+
+      $predefSection = 0;
+
+      if( $store && $store['PREDEF_SECTION'] != '')
+      {
+        $predefSection = intval($store['PREDEF_SECTION']);
+      }
+      elseif( $store && $store['PREDEF_SECTION'] == '')
+      {
+        $categorias = $this->categoriesCollection($store, null);
+       
+          if($categorias->count() > 1){
+            $predefSection = $categorias->where('descripcion' , 'mujer')->first();
+            if($predefSection){
+              $predefSection = $predefSection['id'];
+            }else{
+              $predefSection = $categorias->first();
+              if($predefSection){
+                $predefSection = $predefSection['id'];
+              }
+            }
+          }else{
+            $predefSection = $categorias->first();
+            if($predefSection){
+              $predefSection = $predefSection['id'];
+            }
+          }
+      }
+      return $predefSection;
     }
 
 }

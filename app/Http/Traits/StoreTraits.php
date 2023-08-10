@@ -89,7 +89,7 @@ trait StoreTraits {
       $categoria = new TipoModeloUno(['categorias' => $categorias_ids]);
       $categoria = $categoria->getCategory($params);
 
-      return $categoria;
+      return collect($categoria);
     }
 
     public function filterCategory($category_id){

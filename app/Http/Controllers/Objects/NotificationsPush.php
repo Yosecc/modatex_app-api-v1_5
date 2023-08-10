@@ -65,24 +65,24 @@ class NotificationsPush
             return $this->getErrors();
         }
 
-        $this->saveNotification();
+        // $this->saveNotification();
 
-        foreach ($this->tokens as $key => $token) {
+        // foreach ($this->tokens as $key => $token) {
             $response = Http::withHeaders([
                 'Authorization' => 'key='.$this->server_key,
             ])->acceptJson()->post($this->url, [
                 
                 "notification" => [
-                "title" => $this->notification['title'],
-                "body"  => $this->notification['body'],
-                "sound" => "default",
-                "image" => isset($this->notification['image']) ? $this->notification['image']:"",
+                    "title" => $this->notification['title'],
+                    "body"  => $this->notification['body'],
+                    "sound" => "default",
+                    "image" => isset($this->notification['image']) ? $this->notification['image']:"",
                 ],
                 "data"=> $this->request['data'],
                 "priority"=> "High",
-                "to"=> $token
+                "to"=> '/topics/Testing'
             ]);
-        }
+        // }
 
         return $response->status();
 
