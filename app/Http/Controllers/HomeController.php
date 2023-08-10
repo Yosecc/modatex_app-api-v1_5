@@ -168,7 +168,7 @@ class HomeController extends Controller
 
   public function onGetCategorieSearch($categorie_id, $config = [ 'product_paginate' => 16, 'product_for_store' => 3 ])
   {
-    
+    // dd('si');
     $nameChache = 'categorie_'.$categorie_id.'?product_for_store='.$config['product_for_store'];
     if (Cache::has($nameChache)) {
       $data = Cache::get($nameChache);
@@ -202,7 +202,7 @@ class HomeController extends Controller
       }
     }
 
-    // dd($stores);
+    
     $stores = collect($stores);
 
     $storesIds = $stores->pluck('local_cd');
@@ -214,6 +214,8 @@ class HomeController extends Controller
     }
 
     $rutas = collect($rutas);
+
+
 
     $response = Http::pool(fn (Pool $pool) => 
       $rutas->map(fn ($url) => 
@@ -234,11 +236,15 @@ class HomeController extends Controller
     $products = $pro->arregloProduct($products);
 
     $stores = $stores->map(function($store){
+    //  dd($store);
+    //   $storeq = new StoresController();
+    //   $predefSection = $storeq->categorieDefaultId($store->toArray());
       return [
         'local_cd' => $store['local_cd'],
         'logo'     => 'https://netivooregon.s3.amazonaws.com/'.$store['profile']['logo'],
         'min'      => $store['profile']['min'],
         'name'     => $store['cover']['title'],
+        // "category_default" => $predefSection
       ];
     });
 
@@ -247,12 +253,41 @@ class HomeController extends Controller
     return ['stores' => $stores, 'products' => CollectionHelper::paginate(collect($products), $config['product_paginate']) ];
   }
 
+  public function productsCategorie($config){
+    
+    $products = new ProductsController();
+    $storep = new StoresController();
+
+    return $storep->consultaStoresRosa($config['store'])
+    ->shuffle()
+    ->take($config['store']['limit'] ?? 3)
+    ->map(function($store) use($products, $config){
+      return $products->onGetSearch([
+        'start' => 0,
+        'length' => $config['products']['length'],
+        'store' => $store['local_cd'],
+        'years' => 1,
+        'order' => 'manually',
+        'no_product_id' => null,
+        'daysExpir' => 365,
+        // 'sections' => 'woman',
+      ]); 
+    })
+    ->collapse()
+    ;
+  }
+
   public function getBloques()
   {
 
-    $products = new ProductsController();
+    $nameChache = 'bloques';
+    if (Cache::has($nameChache)) {
+      return Cache::get($nameChache); 
+    }
 
-    return [
+    $products = new ProductsController();
+    
+    $data = [
       [
         'name' => 'Mujer',
         'type' => 'categorie',
@@ -262,19 +297,46 @@ class HomeController extends Controller
           'is_title' => false,
           'is_card' => false,
         ],
-        'products' => collect($this->onGetCategorieSearch(1, ['product_paginate' => 8, 'product_for_store' => 1])['products'])->all()['data'],
+        'products' => $this->productsCategorie([
+          'store' => [
+            'plan' => 'black',
+            'categorie' => 'woman',
+            'limit' => 6
+          ],
+          'products' => [
+            'length' => 1
+          ]
+        ])
       ],
       [
         'name' => 'Hombre',
         'type' => 'categorie',
         'value' => 3,
-        'products' => collect($this->onGetCategorieSearch(3, ['product_paginate' => 4, 'product_for_store' => 1])['products'])->all()['data']
+        'products' => $this->productsCategorie([
+          'store' => [
+            'plan' => 'black',
+            'categorie' => 'man',
+            'limit' => 6
+          ],
+          'products' => [
+            'length' => 1
+          ]
+        ])
       ],
       [
         'name' => 'Talle Especial',
         'type' => 'categorie',
         'value' => 6,
-        'products' => collect($this->onGetCategorieSearch(6, ['product_paginate' => 4, 'product_for_store' => 1])['products'])->all()['data'],
+        'products' => $this->productsCategorie([
+          'store' => [
+            'plan' => 'black',
+            'categorie' => 'xl',
+            'limit' => 6
+          ],
+          'products' => [
+            'length' => 1
+          ]
+        ]),
       ],
       [
         'type' => 'promotions',
@@ -287,26 +349,45 @@ class HomeController extends Controller
         'name' => 'Niños',
         'type' => 'categorie',
         'value' => 4,
-        'products' => collect($this->onGetCategorieSearch(4, ['product_paginate' => 4, 'product_for_store' => 1])['products'])->all()['data']
+        'products' => $this->productsCategorie([
+          'store' => [
+            'plan' => 'black',
+            'categorie' => 'kids',
+            'limit' => 6
+          ],
+          'products' => [
+            'length' => 1
+          ]
+        ]),
       ],
       [
         'name' => 'Accesorios',
         'type' => 'categorie',
         'value' => 2,
-        'products' => collect($this->onGetCategorieSearch(2, ['product_paginate' => 4, 'product_for_store' => 1])['products'])->all()['data'],
+        'products' => $this->productsCategorie([
+          'store' => [
+            'plan' => 'black',
+            'categorie' => 'accessories',
+            'limit' => 6
+          ],
+          'products' => [
+            'length' => 1
+          ]
+        ]),
       ],
       [
         'name' => 'Zapatos',
         'type' => 'filter',
         'value' => 'zapatos',
         'products' => $products->onGetSearch([
-          'menu' => 'get_catalog_products',
-          'date' => Carbon::now()->format('Y-m-d'),
-          'type' => 'search-box-input',
-          'sections' => [],
-          'search'=> 'zapatos',
-          'page' => 1,
-          'offset' => 4
+          'start' => 0,
+          'length' => 6,
+          'search' => 'zapatos',
+          'years' => 1,
+          'order' => 'manually',
+          'no_product_id' => null,
+          'daysExpir' => 365,
+          // 'sections' => 'woman',
         ])
       ],
       [
@@ -314,16 +395,22 @@ class HomeController extends Controller
         'type' => 'filter',
         'value' => 'remeras',
         'products' => $products->onGetSearch([
-          'menu' => 'get_catalog_products',
-          'date' => Carbon::now()->format('Y-m-d'),
-          'type' => 'search-box-input',
-          'sections' => [],
-          'search'=> 'remeras',
-          'page' => 1,
-          'offset' => 4
+          'start' => 0,
+          'length' => 6,
+          'search' => 'remeras',
+          'years' => 1,
+          'order' => 'manually',
+          'no_product_id' => null,
+          'daysExpir' => 365,
+          // 'sections' => 'woman',
         ])
       ],
     ];
+
+    Cache::put($nameChache, $data , $seconds = 10800);
+
+    return $data;
+
   }
 
   public function getPromociones()
@@ -1246,6 +1333,7 @@ class HomeController extends Controller
 
   public function menuList()
   {
+
     return [
       [
         "icon" => '~/assets/icons/home.png',
@@ -1360,6 +1448,7 @@ class HomeController extends Controller
       ],
       
     ];
+
   }
 
 }

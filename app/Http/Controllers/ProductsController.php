@@ -21,7 +21,7 @@ use Illuminate\Support\Facades\Http;
 class ProductsController extends Controller
 {
 
-    private  $url = 'https://www.modatex.com.ar/modatexrosa3/?c=Products::get&';
+    private $url = 'https://www.modatex.com.ar/modatexrosa3/?c=Products::get&';
     private $urlSearch = 'https://www.modatex.com.ar/app.proxy.php?';
     private $urlImage = 'https://netivooregon.s3.amazonaws.com/';
     private $page = 0;
@@ -76,29 +76,8 @@ class ProductsController extends Controller
     }
 
     public function getProductsRosa(Request $request)
-    {
-      $rr = $request->all();
-      if(isset($request->no_product_id)){
-        $rr['length'] = $rr['length'] + 1;
-      }
-      $url = $this->url.Arr::query($rr);
-      $response = Http::acceptJson()->get($url);
-
-      $data = $response->json()['data'];
-
-      $data = $this->arregloProduct($data);
-
-      $d = [];
-      if(isset($request->no_product_id)){
-        foreach ($data as $key => $value) {
-          if($value['id'] != $request->no_product_id){
-           $d[] = $value;
-          }
-        }
-        $data = $d;
-      }
-
-      return response()->json($data);
+    {     
+      return response()->json($this->onGetSearch($request->all()));
     }
 
     private function generateModels($product)
@@ -155,7 +134,23 @@ class ProductsController extends Controller
       $idsProductos = $productos->pluck('id');
       $localCds     = $productos->pluck('store');
       
-      $stores = Store::whereIn('LOCAL_CD', $localCds->all())->select('GROUP_CD','LOGO_FILE_NAME','LOCAL_NAME','LIMIT_PRICE','LOCAL_CD','GROUP_CD','MODAPOINT')->get();
+      $stores = Store::whereIn('LOCAL_CD', $localCds->all())->select(
+        'GROUP_CD',
+        'LOGO_FILE_NAME',
+        'LOCAL_NAME',
+        'LIMIT_PRICE',
+        'LOCAL_CD',
+        'GROUP_CD',
+        'MODAPOINT',
+        'PREDEF_SECTION',
+        'USE_DEPORTIVA',
+        'USE_LENCERIA',
+        'USE_MAN',
+        'USE_WOMAN',
+        'USE_CHILD',
+        'USE_ACCESORY',
+        'USE_SPECIAL')
+      ->get();
 
       $products_carro = $this->isProductCarro($idsProductos->all(), ['whereIn'=>true]);
 
@@ -175,6 +170,10 @@ class ProductsController extends Controller
         if(isset($config['isModels']) && $config['isModels']){
           $models = $this->generateModels($product);
         }
+
+        // dd($store->toArray());
+        $storeq = new StoresController();
+        $predefSection = $storeq->categorieDefaultId($store->toArray());
 
 
         return [
@@ -201,6 +200,7 @@ class ProductsController extends Controller
             "id"   => $store['LOCAL_CD'],
             "company"     => $store['GROUP_CD'],
             'rep' => $store['MODAPOINT'],
+            "category_default" => $predefSection
 
           ]
         ];
@@ -231,122 +231,36 @@ class ProductsController extends Controller
     public function onGetSearch($request)
     {
      
-      $page = 0 ;
-      if($request['page'] == 1){
-        $page = 0;
+      $rr = $request;
+     
+      if(isset($request->no_product_id)){
+        $rr['length'] = $rr['length'] + 1;
       }
-      elseif($request['page'] == 2){
-        $page = $request['offset'] ;
-      }
-      else{
-        $page = ($request['offset'] * ($request['page'] - 1));
-      }
-
-      $data = [
-        // 'version'=> 252-0,
-        'start'=> $page,
-        'length'=> $request['offset'],
-        'storeData'=> 1,
-        'inStock'=> 1,
-        'daysExpir'=> 365,
-        'search'=> $request['search'],
-        'order'=> 'date DESC',
-        'sections'=> $request['sections'],
-        'cacheTime'=> 15,
-      ];
-      // dd($request);
-      if($request['menu'] == 'get_new_entry_products'){
-        $hoy = Carbon::now();
-        $data['betweenDates'] = $hoy->format('Y-m-d').','.$hoy->addDay()->format('Y-m-d');
-        $data['order'] = 'register DESC';
-      }
-      // dd($data);
-      $url = $this->url.Arr::query($data);
+      
+      $url = $this->url.Arr::query($rr);
       $response = Http::acceptJson()->get($url);
-      $data = $response->collect()->all();
-      // dd($data);
-      if(isset($data['data'])){
-        return $this->arregloProduct($data['data'],['isModels' => false]);
-      }else{
+
+      if(!$response->json()){
         return [];
       }
 
-      // $url = $this->urlSearch.Arr::query($data);
-     
-      // $response = Http::acceptJson()->get($url);
+      $data = $response->json()['data'];
 
-      // if($response->json()['status'] == 'error'){
-      //   return [];
-      // }
-      
-      // $data = $response->collect()->all();
+      $data = $this->arregloProduct($data);
 
-      // dd($data);
-      // $productos = collect($data['modelos']);
+      $d = [];
+      if(isset($request->no_product_id)){
+        foreach ($data as $key => $value) {
+          if($value['id'] != $request->no_product_id){
+           $d[] = $value;
+          }
+        }
+        $data = $d;
+      }
 
-      // $idsProductos = $productos->pluck('num');
-      // $localCds     = $productos->pluck('local_cd');
+      return $data;
 
-      // $stores = Store::whereIn('LOCAL_CD', $localCds->all())->select('GROUP_CD','LOGO_FILE_NAME','LOCAL_NAME','LIMIT_PRICE','LOCAL_CD','GROUP_CD','MODAPOINT')->get();
-
-      // $talles = $productos->pluck('talles','num');
-
-      // $products_carro = $this->isProductCarro($idsProductos->all(), ['whereIn'=>true]);
-
-      // $products_carro = $products_carro->pluck('MODELO_NUM')->countBy();
-
-      // $arr = $productos->map(function ($product, $key) use ($stores, $products_carro) {
-      //   $colores = [];
-      //   foreach ($product['colores_reference'] as $key => $value) {
-      //     $colores[] = [
-      //       'code'  => $value,
-      //       'name'  => $product['colores'][$key], 
-      //       'order' => '',
-      //       'id'    => $product['colores_id'][$key]
-      //     ];
-      //   }
-
-      //   $store = $stores->where('LOCAL_CD',$product['local_cd'])->first(); 
-
-      //   $product['id'] = $product['num'];
-      //   $product['sizes'] = $product['talles'];
-      //   $product['price'] = isset($product['price_curr']) ? $product['price_curr']:$product['precio'];
-
-      //   $arregloImages = function($images){
-      //     return Arr::flatten($images)[0];
-      //   };
-
-      //   return [
-      //     "id"          => $product['num'],
-      //     "local_cd"       => $product['local_cd'],
-      //     "company"     => $store['GROUP_CD'],
-      //     "name"        => $product['descripcion'],
-      //     "category"    => isset($product['category_name']) ? $product['category_name']:null,
-      //     "category_id" => $product['category'],
-      //     "price"       => isset($product['price_curr']) ? $product['price_curr']:$product['precio'],
-      //     "prev_price"  => isset($product['price_prev']) ? $product['price_prev']:null,
-      //     "images"      => array_map($arregloImages, $product['images']),
-      //     "sizes"       => $product['talles'],
-      //     "colors"      => $colores,
-      //     "is_desc"     => $product['is_desc'],
-      //     // "models"      => $this->generateModels($product),
-      //     "isCart"      => Arr::exists($products_carro->all(), $product['num']),
-      //     "has_stock"   => $product['con_stock'] == "" ? true:$product['con_stock'],
-      //     "store" => [
-      //       'logo' => env('URL_IMAGE').'/common/img/logo/'.$store['LOGO_FILE_NAME'],
-      //       'name' => $store['LOCAL_NAME'],
-      //       'min'  => $store['LIMIT_PRICE'],
-      //       "id"   => $store['LOCAL_CD'],
-      //       "company"     => $store['GROUP_CD'],
-      //       'rep' => $store['MODAPOINT']
-      //     ]
-      //   ];
-      // });
-
-      // return $arr->all();
     }
-
-
 
     public function oneProduct($product_id)
     {

@@ -153,14 +153,14 @@
     }
 }
 
-{
-    "redirect": {
-        "route": "/product",
-        "params": {
-            "product_id": 1000
-        }
-    }
-}
+// {
+//     "redirect": {
+//         "route": "/product",
+//         "params": {
+//             "product_id": 1000
+//         }
+//     }
+// }
 
 {
     "redirect": {
