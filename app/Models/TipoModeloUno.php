@@ -62,6 +62,7 @@ class TipoModeloUno extends Model
 
     public function scopegetCategory($query, $params)
     {
+        // dd($this->modelCategory);
         $query = $query->Active()->whereIn('NUM',$this->modelCategory)->get();
         return $this->dataCategoriesArray($query,$params);
     }

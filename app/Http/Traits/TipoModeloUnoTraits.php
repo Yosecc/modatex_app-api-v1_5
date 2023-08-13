@@ -14,6 +14,7 @@ trait TipoModeloUnoTraits {
 	use HelpersTraits;
 	
   public function dataCategoryCollect($category){
+    
     return collect([
       'id'          => $category->NUM,
       'name'        => $category->TIPO_NAME,
@@ -24,11 +25,9 @@ trait TipoModeloUnoTraits {
   }
 
   public function dataCategoriesArray($categories, $params){
-    $func = function($category) use ($params) {
-      $category = $this->dataCategoryCollect($category, $params);
-      return $category;
-    };
-    return array_map($func, $categories->all());
+    return $categories->map(function($category) use($params){
+      return $this->dataCategoryCollect($category, $params);
+    });
   }
 
   public function dataSubcategory($subcategory){
@@ -41,11 +40,9 @@ trait TipoModeloUnoTraits {
   }
 
   public function dataSubcategories($subcategories){
-    $func = function($subcategory) {
-      $subcategory = $this->dataSubcategory($subcategory);
-      return $subcategory;
-    };
-    return array_map($func, $subcategories->all());
+    return $subcategories->map(function($subcategory){
+      return $this->dataSubcategory($subcategory);
+    });
   }
 	
 }

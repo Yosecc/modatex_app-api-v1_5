@@ -1356,7 +1356,7 @@ class HomeController extends Controller
       [
         "icon" => '~/assets/icons/icon_menu_0.png',
         "name" => 'Mis pedidos',
-        "disabled" => false,
+        "disabled" => true,
         "redirect"=> [
           "route"=> "/profile",
           "params"=> []
