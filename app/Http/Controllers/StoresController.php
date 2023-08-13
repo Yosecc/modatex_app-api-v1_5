@@ -37,51 +37,37 @@ class StoresController extends Controller
 
     private $urlPromos = 'https://www.modatex.com.ar/?c=Canpaigns::promos&store_id=';
     /*
+    * DEPRECADO
     * @return Store Array
     * @return $store = Collection()   
     */
-    public function getStores(Request $request){
+    // public function getStores(Request $request){
 
-        // $stores = Store::Active()->paginate();
-        $store = new Store($request->all());
-        $stores = $store->getStores($request->all());
+    //     // $stores = Store::Active()->paginate();
+    //     $store = new Store($request->all());
+    //     $stores = $store->getStores($request->all());
 
-        return response()->json($stores,200);
-    }
+    //     return response()->json($stores,200);
+    // }
 
     /*
+    * DEPRECADO
     * @params $store == LOCAL_NAME_KEYWORD value (slug)
     * @return Store Object
     * @return $store = Collection()   
     */
-    public function getStore($store, Request $request){
+    // public function getStore($store, Request $request){
 
-      $store = new Store(['store' => $store]);
-      $store = $store->getStore($request->all());
+    //   $store = new Store(['store' => $store]);
+    //   $store = $store->getStore($request->all());
 
-      return response()->json(['status'=>true,'store'=>$store],200);
+    //   return response()->json(['status'=>true,'store'=>$store],200);
 
-    }
+    // }
 
-    private function crearConsulta($data,$request)
-    {
-      
-      if(isset($request['search'])){
-        $data = $data->filter(fn ($store) => Str::is(Str::lower($request['search']).'*',Str::lower($store['name'])) );
-      }
-      
-      if($request['categorie'] == 'all'){
-        $data = $data->shuffle();
-      }else{
-        $data = $data->filter(fn ($store) => Str::is(Str::lower($request['categorie']).'*',Str::lower($store['categorie'])) );
-      }
-     
-      if(isset($request['plan']) && $request['plan']!=''){
-        $data = $data->filter(fn ($store) => Str::lower($request['plan'])  == Str::lower($store['paquete']) );
-      }
- 
-      return $data;
-    }
+    /**
+     * REQUEST STORE
+     */
 
     public function getStoresRosa(Request $request)
     {
@@ -91,10 +77,13 @@ class StoresController extends Controller
       return response()->json(CollectionHelper::paginate(  $this->consultaStoresRosa($request->all()), $request->paginate ?? 16));
     }
 
+    /**
+     * CONSULTA API MODATEX.COM.AR
+     */
     public function consultaStoresRosa($request)
     {
       $response = Http::accept('application/json')->get($this->urlStore.'all');
-
+      
       if($response->json() == null){
         return response()->json(CollectionHelper::paginate(collect([]), $request->paginate ?? 16 ));
       }
@@ -147,6 +136,35 @@ class StoresController extends Controller
       }),$request);
     }
 
+    /**
+     * COLLECT()
+     * FILTROS DE BUSQUEDA TIENDA
+     */
+    private function crearConsulta($data,$request)
+    {
+      
+      if(isset($request['search'])){
+        $data = $data->filter(fn ($store) => Str::is(Str::lower($request['search']).'*',Str::lower($store['name'])) );
+      }
+      
+      if($request['categorie'] == 'all'){
+        $data = $data->shuffle();
+      }else{
+        $data = $data->filter(fn ($store) => Str::is(Str::lower($request['categorie']).'*',Str::lower($store['categorie'])) );
+      }
+     
+      if(isset($request['plan']) && $request['plan']!=''){
+        $data = $data->filter(fn ($store) => Str::lower($request['plan'])  == Str::lower($store['paquete']) );
+      }
+ 
+      return $data;
+    }
+    
+    /**
+     * CONSULTA PROMOCIONES DE LA TIENDAS (PASTILLAS)
+     * MODATEX.COM.CAR
+     */
+
     public function getPromociones($local_cd)
     {
       if($local_cd){
@@ -159,75 +177,126 @@ class StoresController extends Controller
       return [];
     }
 
-    public function getCategoriesStore(Request $request){
+    /**
+     * CATEGORIAS Y SUBCATEGORIAS DE LA TIENDA
+     */
+
+    private function calculaNameCategoriaStore($categoria)
+    {
+      
+      switch ($categoria) {
+        case 'woman':
+          $categoria_name = 'Mujer';
+          break;
+        
+        case 'man':
+          $categoria_name = 'Hombre';
+          break;
+        
+        case 'accessories':
+          $categoria_name = 'Accesorios';
+          break;
+        
+        case 'xl':
+          $categoria_name = 'Talle Especial';
+          break;
+
+        case 'kids':
+          $categoria_name = 'Niños';
+          break;
+        
+        case 'ofertas':
+          $categoria_name = 'Ofertas';
+          break;
+
+        default:
+          $categoria_name = '';
+          break;
+      }
+
+      return $categoria_name;
+    }
+
+    public function getCategoriesStore(Request $request)
+    {
 
       $this->validate($request, [
           'local_cd' => 'required',
       ]);
-
+      
+      $response = Http::acceptJson()->get($this->url.'?c=Products::categories&store='.$request->local_cd.'&daysExpir=365');
       $store = Store::LOCAL_CD($request->local_cd)->first();
-
-      $categorias = $this->categoriesCollection($store, null);
-
-      $categories = [];
-
       $predefSection = $this->categorieDefaultId($store);
-      // dd($categorias);
 
-      foreach ($categorias as $c => $categoria) {
+      return $response->collect()->map(function($section) use ($predefSection){
+        return [
+          'categoria' => [
+            'id' => $section['section_id'],
+            'clave' => $section['section'],
+            'name' => $this->calculaNameCategoriaStore($section['section']),
+            'is_default' => $predefSection == $section['section_id'] ? true: false,
+          ],
+          'subcategorias' => collect($section['categories'])->map(function($categorie) use($section) {
+            return [
+              "id" =>  $categorie['category_code'],
+              "description" => $categorie['category_name'],
+              "name" => $categorie['category_name'],
+              "amount" => $categorie['amount'],
+              "category_id" =>  $section['section_id']
+            ];
+          })
+        ];
+      });
 
-        if($categoria['descripcion'] == 'mujer'){
-          $categoria['clave'] =  'woman';
-        }
-        elseif($categoria['descripcion'] == 'hombre'){
-          $categoria['clave'] =  'man';
-        }
-        elseif($categoria['descripcion'] == 'Accesorios'){
-          $categoria['clave'] =  'accessories';
-        }
-        elseif($categoria['descripcion'] == "Talle especial"){
-          $categoria['clave'] =  'xl';
-        }
-        elseif($categoria['descripcion'] == 'chico'){
-          $categoria['clave'] =  'kids';
-        }
+      // $store = Store::LOCAL_CD($request->local_cd)->first();
+
+      // $categorias = $this->categoriesCollection($store, null);
+
+      // $categories = [];
+
+      // $predefSection = $this->categorieDefaultId($store);
 
         
+      //
 
-        $response = Http::acceptJson()->get($this->urlProduct.'store='.$request->local_cd.'&sections='.$categoria['clave'].'&start=0&length=9999');
+      // dd($response->json());
 
+      // foreach ($categorias as $c => $categoria) {
+
+      
+
+      //   $d = $this->urlProduct.'store='.$request->local_cd.'&sections='.$categoria['clave'].'&start=0&length=9999';
+        
+      //   $response = Http::acceptJson()->get($d);
           
-        $idsSubscategories = [];
-        foreach ($response->collect()->all()['data'] as $key => $value) {
-          if(!in_array($value['category_id'], $idsSubscategories)){
-            $idsSubscategories[] = $value['category_id'];
-          }
-        }
+      //   $idsSubscategories = [];
+      //   foreach ($response->collect()->all()['data'] as $key => $value) {
+      //     if(!in_array($value['category_id'], $idsSubscategories)){
+      //       $idsSubscategories[] = $value['category_id'];
+      //     }
+      //   }
 
-        $subcategories = [];
-        foreach ($categoria['subcategories'] as $key => $sub) {
-          if(in_array($sub['id'], $idsSubscategories)){
-            $subcategories[] = $sub;
-          }
-        }
+      //   $subcategories = [];
+      //   foreach ($categoria['subcategories'] as $key => $sub) {
+      //     if(in_array($sub['id'], $idsSubscategories)){
+      //       $subcategories[] = $sub;
+      //     }
+      //   }
 
-        $categories[] = [
-          'categoria' => [
-            'id' => $categoria['id'],
-            'name' => $categoria['name'],
-            'clave' => $categoria['clave'],
-            'is_default' => $predefSection == $categoria['id'] ? true: false
-          ],
-          'subcategorias' => $subcategories,
-          
-        ];
+      //   $categories[] = [
+      //     'categoria' => [
+      //       'id' => $categoria['id'],
+      //       'name' => $categoria['name'],
+      //       'clave' => $categoria['clave'],
+      //       'is_default' => $predefSection == $categoria['id'] ? true: false
+      //     ],
+      //     'subcategorias' => $subcategories,
+      //   ];
 
-      }
+      // }
 
-
-      return $categories;
-     
-
+      // return $categories;
+    
     }
 
     public function productsHome(Request $request)

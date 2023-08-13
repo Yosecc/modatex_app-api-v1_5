@@ -79,16 +79,13 @@ trait StoreTraits {
 
     public function categoriesCollection($store, $params){
       $categorias_ids = [];
-
       foreach (TipoModeloUno::CATEGORIES as $key => $value) {
         if ($store[$value['name']] == 'Y') {
           $categorias_ids[] = $value['table_id'];
         }
       }
-
       $categoria = new TipoModeloUno(['categorias' => $categorias_ids]);
       $categoria = $categoria->getCategory($params);
-
       return collect($categoria);
     }
 
