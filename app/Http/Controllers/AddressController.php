@@ -11,23 +11,54 @@ class AddressController extends Controller
 {
 
     private $url = 'https://www.modatex.com.ar?c=Checkout::';
+    private $urlAddress = 'https://www.modatex.com.ar/?c=';
+
 
     private $token;
 
-    public function index(Request $request)
+    public function index()
     {
-        $d =  ClientLocal::where('CLIENT_NUM', Auth::user()->num)->whereIn('STAT_CD',[1000,2000])->orderBy('NUM', 'desc')->get();
-        $this->token = Auth::user()->api_token;
+        // try {
+            $this->token = Auth::user()->api_token;
 
-        $arreglo = function($data){
-            return $this->getData($data);
-        };
+            $response = Http::withHeaders([ 
+                            'x-api-key' => $this->token 
+                        ])
+                        // ->asForm()
+                        ->get($this->urlAddress.'Profile::addresses&app=1');
 
-        $d = array_map($arreglo, $d->all());
-        // dd($d);
+            dd($response->json());
 
-        return response()->json($d);
+            if($response->json()['status'] != 'success'){
+                throw new \Exception("No se encontraron resultados");
+            }
+
+            $data = $response->json()['data'];
+
+            return $data;
+
+        // } catch (\Exception $e) {
+        //     return null;
+        // }
     }
+
+    /**
+     * DEPRECADO
+     */
+    // public function index(Request $request)
+    // {
+    //     $d =  ClientLocal::where('CLIENT_NUM', Auth::user()->num)->whereIn('STAT_CD',[1000,2000])->orderBy('NUM', 'desc')->get();
+    //     $this->token = Auth::user()->api_token;
+
+    //     $arreglo = function($data){
+    //         return $this->getData($data);
+    //     };
+
+    //     $d = array_map($arreglo, $d->all());
+    //     // dd($d);
+
+    //     return response()->json($d);
+    // }
 
     public function update($adress, Request $request)
     {

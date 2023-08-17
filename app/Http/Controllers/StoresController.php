@@ -83,7 +83,7 @@ class StoresController extends Controller
     public function consultaStoresRosa($request)
     {
       $response = Http::accept('application/json')->get($this->urlStore.'all');
-      
+      // dd($response->json());
       if($response->json() == null){
         return response()->json(CollectionHelper::paginate(collect([]), $request->paginate ?? 16 ));
       }
@@ -131,6 +131,7 @@ class StoresController extends Controller
           "category_default" => $predefSection,
           'categories_store' => $categorieR,
           'paquete' => $paquete,
+          'cleaned' => $tienda['cleaned']
         ];
 
       }),$request);
@@ -144,7 +145,16 @@ class StoresController extends Controller
     {
       
       if(isset($request['search'])){
-        $data = $data->filter(fn ($store) => Str::is(Str::lower($request['search']).'*',Str::lower($store['name'])) );
+        $f = $data->filter(fn ($store) => 
+          Str::is(Str::lower($request['search']).'*',Str::lower($store['cleaned'])) 
+        );
+
+        if(!$f->count()){
+          $f = $data->filter(fn ($store) => 
+            Str::is(Str::lower($request['search']).'*',Str::lower($store['name'])) 
+          );
+        }
+        $data = $f;
       }
       
       if($request['categorie'] == 'all'){
