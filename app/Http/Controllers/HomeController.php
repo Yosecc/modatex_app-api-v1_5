@@ -26,6 +26,9 @@ class HomeController extends Controller
 {
   use StoreTraits, ProductsTraits, ClientTraits;
 
+  /**
+   * DEPRECADO
+   */
   public function index(Request $request){
 
     //dd(Cart::where('CLIENT_NUM',Auth::user()->num)->where('STAT_CD',1000)->orderBy('INSERT_DATE','desc')->get());
@@ -75,6 +78,9 @@ class HomeController extends Controller
     ],200);
   }  
 
+  /**
+   * GET SLIDERS
+   */
   public function  sliders(Request $request){
     $params = collect($request->all());
     $category_preferences = Auth::user()->preferences;
@@ -101,7 +107,7 @@ class HomeController extends Controller
     $slider = array_map($funcion, $slider);
     return response()->json($slider,200);
   } 
-  public  function proper_parse_str($str) {
+  private  function proper_parse_str($str) {
     # result array
     $arr = array();
 
@@ -133,6 +139,9 @@ class HomeController extends Controller
     return $arr;
   }
 
+  /**
+   * 
+   */
   public function get_product_category(Request $request, $category_id){
 
     $products = new Products($request->all());
@@ -141,6 +150,9 @@ class HomeController extends Controller
     return response()->json(['status' => true, 'products' => $products],200);
   }
 
+  /**
+   * GET PRODUCTOS VISITADOS
+   */
   public function productsVisitados(Request $request)
   {
     $products_id = Auth::user()->productsVisits()->limit(10)->orderBy('created_at','desc')->get()->pluck('NUM');
@@ -149,6 +161,9 @@ class HomeController extends Controller
     return response()->json($productos);
   }
 
+  /**
+   * GET BUSCADOR CATEGORIAS
+   */
   public function getCategorieSearch($categorie_id , Request $request)
   {
     
@@ -166,6 +181,9 @@ class HomeController extends Controller
 
   }
 
+  /**
+   * GET BUSCADOR CATEGORIAS
+   */
   public function onGetCategorieSearch($categorie_id, $config = [ 'product_paginate' => 16, 'product_for_store' => 3 ])
   {
     // dd('si');
@@ -253,6 +271,9 @@ class HomeController extends Controller
     return ['stores' => $stores, 'products' => CollectionHelper::paginate(collect($products), $config['product_paginate']) ];
   }
 
+  /**
+   * GET BUSCADOR PRODUCTOS SEGUN CATEGORIAS
+   */
   public function productsCategorie($config){
     
     $products = new ProductsController();
@@ -277,6 +298,9 @@ class HomeController extends Controller
     ;
   }
 
+  /**
+   * GET BLOQUES
+   */
   public function getBloques()
   {
 
@@ -413,6 +437,9 @@ class HomeController extends Controller
 
   }
 
+  /**
+   * GET PROMOCIONES
+   */
   public function getPromociones()
   {
     return [ 
@@ -1233,6 +1260,9 @@ class HomeController extends Controller
     ];
   }
 
+  /**
+   * GET CATEGORIAS
+   */
   public function getCategories()
   {
     return [
@@ -1325,12 +1355,18 @@ class HomeController extends Controller
     ];
   }
 
+  /**
+   * GET STATES
+   */
   public function statesGet()
   {
     return response()->json(States::select('NUM AS id','STATE_NAME AS name')
     ->where('STAT_CD',1000)->orderBy('name','asc')->get());
   }
 
+  /**
+   * GET MENU
+   */
   public function menuList()
   {
 

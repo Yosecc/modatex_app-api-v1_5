@@ -99,12 +99,14 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
     $router->get('/getComboDirecciones','AddressController@getComboDirecciones');
     
     $router->group(['prefix' => 'profile'], function () use ($router) {
+
         $router->group(['prefix' => 'direcciones'], function () use ($router) {
             $router->get('/','AddressController@index');
             $router->post('create','AddressController@create');
             $router->post('update/{adress}','AddressController@update');
             $router->post('change_principal_address','AddressController@changePrincipalAddress');
         });
+        
         $router->group(['prefix' => 'coupons'], function () use ($router) {
             $router->get('/','CouponsController@index');
             $router->get('redeem_coupon','CouponsController@redeemCoupon');
