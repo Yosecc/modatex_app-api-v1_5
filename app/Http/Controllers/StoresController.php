@@ -157,16 +157,24 @@ class StoresController extends Controller
         $data = $f;
       }
       
-      if($request['categorie'] == 'all'){
-        $data = $data->shuffle();
-      }else{
-        $data = $data->filter(fn ($store) => Str::is(Str::lower($request['categorie']).'*',Str::lower($store['categorie'])) );
+      if(isset($request['categorie'])){
+
+        if($request['categorie'] == 'all'){
+          $data = $data->shuffle();
+        }else{
+          $data = $data->filter(fn ($store) => Str::is(Str::lower($request['categorie']).'*',Str::lower($store['categorie'])) );
+        }
       }
      
       if(isset($request['plan']) && $request['plan']!=''){
         $data = $data->filter(fn ($store) => Str::lower($request['plan'])  == Str::lower($store['paquete']) );
       }
- 
+
+      if(isset($request['in'])){
+        
+        $data = $data->whereIn('local_cd', $request['in']);
+      }
+
       return $data;
     }
     
