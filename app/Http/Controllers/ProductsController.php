@@ -275,6 +275,13 @@ class ProductsController extends Controller
       return $data;
     }
 
+    public function inProducts(Request $request)
+    {
+
+      return response()->json($this->whereInProducts($request->data));
+
+    }
+
     public function whereInProducts($products_ids, $config = ['isModels'=> true])
     {
       if(count($products_ids) == 0){
@@ -289,6 +296,8 @@ class ProductsController extends Controller
           $urls[] = $this->url.Arr::query($request);
         }
       }
+
+      
       $collection = collect($urls);
 
       $consultas = Http::pool(fn (Pool $pool) => 
@@ -301,9 +310,17 @@ class ProductsController extends Controller
       for ($i=0; $i < count($urls) ; $i++) {
         $data = $consultas[$i]->collect()->all();
         if(count($consultas[$i]->collect()->all())){
-          $products[] = $this->arregloProduct($consultas[$i]->collect()->all(),$config)[0];
+          // dd($consultas[$i]->collect()->all());
+          try {
+            $products[] = $this->arregloProduct($consultas[$i]->collect()->all(),$config)[0];
+            //code...
+          } catch (\Throwable $th) {
+            //throw $th;
+          }
         }
       }
+
+      // dd($products);
 
       return collect($products)->all();
     }
