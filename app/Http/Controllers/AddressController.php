@@ -16,69 +16,63 @@ class AddressController extends Controller
 
     private $token;
 
+    /**
+     * GET DIRECCIONES
+     */
     public function index()
     {
-        // try {
+        try {
             $this->token = Auth::user()->api_token;
-
+            
             $response = Http::withHeaders([ 
-                            'x-api-key' => $this->token 
+                            'x-api-key' => $this->token,
+                            'Content-Type' => 'application/json'
                         ])
-                        // ->asForm()
                         ->get($this->urlAddress.'Profile::addresses&app=1');
 
-            dd($response->json());
-
-            if($response->json()['status'] != 'success'){
+            if(!$response->json()['DIRECCIONES']){
                 throw new \Exception("No se encontraron resultados");
             }
 
-            $data = $response->json()['data'];
+            $data = collect($response->json()['DIRECCIONES'])->map(function($direccion){
+                return [
+                    "direccion" => $direccion['GENERAL'],
+                    "localidad" => $direccion['GENERAL_TIT'],
+                    "codigo_postal" => "1609",
+                    "name" => $direccion['ALIAS'] == 0 ? '':$direccion['ALIAS'],
+                    "id" => $direccion['ID'],
+                    "default" =>  $direccion['SELECCIONADO'] ? true : false,
+                    "detalle" => ClientLocal::where('NUM', $direccion['ID'] )->first()
+                ];
+            });
 
-            return $data;
+            return response()->json($data);
 
-        // } catch (\Exception $e) {
-        //     return null;
-        // }
+        } catch (\Exception $e) {
+            return null;
+        }
     }
 
     /**
-     * DEPRECADO
+     * CREAR DIRECCIONES
      */
-    // public function index(Request $request)
-    // {
-    //     $d =  ClientLocal::where('CLIENT_NUM', Auth::user()->num)->whereIn('STAT_CD',[1000,2000])->orderBy('NUM', 'desc')->get();
-    //     $this->token = Auth::user()->api_token;
-
-    //     $arreglo = function($data){
-    //         return $this->getData($data);
-    //     };
-
-    //     $d = array_map($arreglo, $d->all());
-    //     // dd($d);
-
-    //     return response()->json($d);
-    // }
-
-    public function update($adress, Request $request)
-    {
-        $id = $adress;
-        $adress = ClientLocal::find($adress);
-
-        if(!$adress){
-            return response()->json(['status'=> false, 'message'=> 'Adress not found'], 401);
-        }
-
-        $adress = ClientLocal::where('NUM', $id)->update($request->all());
-        $adress = ClientLocal::find($id);
-
-        return response()->json($this->getData($adress));
-    }
-
     public function create(Request $request)
     {
         try {
-            // dd(ClientLocal::limit(1)->latest()->first());
+            // dd($request->all());
+
+            // $this->token = Auth::user()->api_token;
+            
+            // $response = Http::withHeaders([ 
+            //                 'x-api-key' => $this->token,
+            //                 'Content-Type' => 'application/json'
+            //             ])
+            //             ->post($this->urlAddress.'Profile::addresses&app=1', $request->all());
+
+            // if(!$response->json()['DIRECCIONES']){
+            //     throw new \Exception("No se encontraron resultados");
+            // }
+            
             $adress                = new ClientLocal();
             $adress->CLIENT_NUM    = Auth::user()->num;
             $adress->COUNTRY_NUM   = $request->COUNTRY_NUM;   
@@ -103,6 +97,25 @@ class AddressController extends Controller
             return response()->json($th->getMessage());
         }
     }
+
+   
+
+    public function update($adress, Request $request)
+    {
+        $id = $adress;
+        $adress = ClientLocal::find($adress);
+
+        if(!$adress){
+            return response()->json(['status'=> false, 'message'=> 'Adress not found'], 401);
+        }
+
+        $adress = ClientLocal::where('NUM', $id)->update($request->all());
+        $adress = ClientLocal::find($id);
+
+        return response()->json($this->getData($adress));
+    }
+
+    
 
     public function changePrincipalAddress(Request $request)
     {

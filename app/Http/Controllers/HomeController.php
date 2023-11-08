@@ -306,7 +306,7 @@ class HomeController extends Controller
 
     $nameChache = 'bloques';
     if (Cache::has($nameChache)) {
-      return Cache::get($nameChache); 
+      return Cache::get($nameChache);
     }
 
     $products = new ProductsController();
@@ -427,6 +427,24 @@ class HomeController extends Controller
           'no_product_id' => null,
           'daysExpir' => 365,
           // 'sections' => 'woman',
+        ])
+      ],
+      [
+        'name' => 'Productos destacados',
+        'type' => 'categorie',
+        'value' => 0,
+        'config' => [
+          'slider' => true,
+          'is_title' => false,
+          'is_card' => false,
+        ],
+        'products' => $products->destacados([
+          'start' => 0,
+          'length' => 6,
+          'storeData' => 1,
+          'inStock' => 1,
+          'daysExpir' => 365,
+          'order' => 'date DESC',
         ])
       ],
     ];
@@ -1325,7 +1343,7 @@ class HomeController extends Controller
         'top' =>  20
       ],
       [
-        'id' => 5,
+        'id' => 0,
         'name' => 'Zapatos',
         'type' =>  'search',
         'search' =>  'zapatos',
@@ -1339,7 +1357,7 @@ class HomeController extends Controller
         'top' =>  20
       ],
       [
-        'id' => 7,
+        'id' => 0,
         'name' => 'Remeras',
         'type' =>  'search',
         'search' =>  'remera',

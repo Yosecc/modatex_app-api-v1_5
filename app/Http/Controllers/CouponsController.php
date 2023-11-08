@@ -11,30 +11,44 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Carbon\Carbon;
 
+
 class CouponsController extends Controller
 {
   use StoreTraits;
   private $token;
   private $url = 'https://www.modatex.com.ar/main/home_db.php';
+  private $urlProfile = 'https://www.modatex.com.ar/?c=';
 
     public function index()
     {
-        $cupones = Coupons::where(function($query) {
-          $query->where('CLIENT_NUM',Auth::user()->num)
-                ->whereIn('STAT_CD',[1000,2000]);
-        })
-        // ->where('COUPON_STR' != 'PROMOEMOTV916')
-        ->orderBy('REGISTER_DATE','desc')
-        ->get();
+      $this->token = Auth::user()->api_token;
+      $response = Http::withHeaders([ 
+          'x-api-key' => $this->token,
+          'Content-Type' => 'application/json'
+      ])
+      ->get($this->urlProfile.'Profile::coupons&app=1');
 
-        $arreglo = function($cupon){
-          // dd($cupon->local_cd_valid);
-          $cupon->tiendas = $this->storeCupon($cupon);
-          return $cupon;
-        };
-        $cupones = array_map($arreglo, $cupones->all());
-        
-        return response()->json($cupones);
+      if(!$response->json()){
+        return response()->json([]);
+      }
+      $cTienda = new StoresController();
+      $cTienda = $cTienda->consultaStoresRosa([
+        'categorie' => 'all'
+      ]);
+      $data = collect($response->json())->map(function($cupon) use($cTienda) {
+        $t = [];
+        foreach ($cTienda->whereIn('local_cd', $cupon['DETALLE_TIENDAS']) as $key => $value) {
+         $t[] = $value;
+        }
+        return [
+          "num"=> $cupon['NUM'],
+          "coupon_price"=> $cupon['COUPON_PRICE'],
+          "coupon_name"=> $cupon['COUPON_NAME'],
+          "expire_date"=> $cupon['EXPIRE_DATE'],
+          "tiendas"=> $t
+        ];
+      });
+      return response()->json($data);
     }
 
     public function getCupones($local_cd)
@@ -114,87 +128,111 @@ class CouponsController extends Controller
 
     public function canjearCupon(Request $request)
     {
-      try {
-        
-        $this->validate($request, [
-          'code' => 'required',
-        ]);
-        $hoy = Carbon::now('America/Argentina/Buenos_Aires');
 
-        $cupon = ExclusiveDiscount::whereRaw('upper(code) = upper("'.$request->code.'")')
-                                  ->whereDate('begin_date','>=', $hoy)
-                                  ->whereDate('end_date','<=', $hoy)
-                                  ->latest('entry')
-                                  ->first();
-        // dd($cupon);
+      $this->token = Auth::user()->api_token;
+      $response = Http::withHeaders([ 
+          'x-api-key' => $this->token,
+          // 'Content-Type' => 'application/json'
+      ])
+      ->asForm()
+      ->post($this->urlProfile.'Profile::registerCoupon&app=1',[
+        'xCoupon' => $request->code
+      ]);
 
-        if(!$cupon){
-          throw new \Exception('Código de cupón inválido.'); 
-          return response()->json('Código de cupón inválido.', 422);
-        }
-        
-
-        if($cupon->expire_days){
-          $fechaVencimiento = Carbon::now()->addDays($cupon->expire_days);
-        }
-
-        if($cupon->expire_date){
-          $fechaVencimiento = $cupon->expire_date;
-        }
-
-        if(Carbon::create($hoy->year,$hoy->month, $hoy->day,0,0,0) > Carbon::parse($fechaVencimiento)){
-          throw new \Exception('cupón expirado'); 
-          return response()->json('cupón expirado', 422);
-        }
-
-        $cuponesClient =  Coupons::where('client_num',Auth::user()->num)->get();
-
-        $validate = $cuponesClient->where('coupon_str', $cupon->type)->first();
-        if($validate){
-          throw new \Exception('Ya canjeaste un cupón de este tipo.');
-          return response()->json('Ya canjeaste un cupón de este tipo.', 422);
-        }
-
-        if($cupon->total_quantity){
-          $cuponesCanjeadosDelMismoTipo = Coupons::where('coupon_str', 'like',$cupon->type)->count();
-          if($cuponesCanjeadosDelMismoTipo >= $cupon->total_quantity){
-            throw new \Exception('Cupones agotados.');
-            return response()->json('Cupones agotados.', 422);
-          }
-        }
-
-        $LOCAL_CD_VALID = '';
-
-        
-
-        if(!$cupon->local_cd || $cupon->local_cd == ''){
-          if ($cupon->positioning){
-            $positioning		= explode( '|', $cupon->positioning );
-            $stores = new StoresController();
-            $stores = $stores->searchStoresSegunPlanes($positioning);
-            
-            $LOCAL_CD_VALID = implode( '|', $stores->pluck('local_cd')->all() );
-          }
-        }else{
-          $LOCAL_CD_VALID 	= '|'.$cupon->local_cd.'|';
-        }
-
-        // dd( Carbon::parse($fechaVencimiento)->format('d/m/Y'));
-        $cuponNew = new Coupons();
-        $cuponNew->COUPON_STR = $cupon->type;
-        $cuponNew->COUPON_PRICE = $cupon->price;
-        $cuponNew->CLIENT_NUM = Auth::user()->num;
-        $cuponNew->COUPON_TYPE = 'N';
-        $cuponNew->EXPIRE_DATE = $fechaVencimiento;
-        $cuponNew->LOCAL_CD_VALID = $LOCAL_CD_VALID;
-        $cuponNew->MIN_MONEY = 0;
-        $cuponNew->save();
-
-        return response()->json('Felicitaciones, tu cupón fue agregado exitosamente.');
-      
-      } catch (\Exception $e) {
-        return response()->json($e->getMessage(), 422);
+      if(!$response->json()){
+        return response()->json([]);
       }
+
+      $data = $response->json();
+      
+      if($data['status'] == 'error'){
+        return response()->json($data['errors'],422);
+      }
+
+      return response()->json('Felicitaciones, tu cupón fue agregado exitosamente.');
+
+
+      // try {
+        
+      //   $this->validate($request, [
+      //     'code' => 'required',
+      //   ]);
+      //   $hoy = Carbon::now('America/Argentina/Buenos_Aires');
+
+      //   $cupon = ExclusiveDiscount::whereRaw('upper(code) = upper("'.$request->code.'")')
+      //                             ->whereDate('begin_date','>=', $hoy)
+      //                             ->whereDate('end_date','<=', $hoy)
+      //                             ->latest('entry')
+      //                             ->first();
+      //   // dd($cupon);
+
+      //   if(!$cupon){
+      //     throw new \Exception('Código de cupón inválido.'); 
+      //     return response()->json('Código de cupón inválido.', 422);
+      //   }
+        
+
+      //   if($cupon->expire_days){
+      //     $fechaVencimiento = Carbon::now()->addDays($cupon->expire_days);
+      //   }
+
+      //   if($cupon->expire_date){
+      //     $fechaVencimiento = $cupon->expire_date;
+      //   }
+
+      //   if(Carbon::create($hoy->year,$hoy->month, $hoy->day,0,0,0) > Carbon::parse($fechaVencimiento)){
+      //     throw new \Exception('cupón expirado'); 
+      //     return response()->json('cupón expirado', 422);
+      //   }
+
+      //   $cuponesClient =  Coupons::where('client_num',Auth::user()->num)->get();
+
+      //   $validate = $cuponesClient->where('coupon_str', $cupon->type)->first();
+      //   if($validate){
+      //     throw new \Exception('Ya canjeaste un cupón de este tipo.');
+      //     return response()->json('Ya canjeaste un cupón de este tipo.', 422);
+      //   }
+
+      //   if($cupon->total_quantity){
+      //     $cuponesCanjeadosDelMismoTipo = Coupons::where('coupon_str', 'like',$cupon->type)->count();
+      //     if($cuponesCanjeadosDelMismoTipo >= $cupon->total_quantity){
+      //       throw new \Exception('Cupones agotados.');
+      //       return response()->json('Cupones agotados.', 422);
+      //     }
+      //   }
+
+      //   $LOCAL_CD_VALID = '';
+
+        
+
+      //   if(!$cupon->local_cd || $cupon->local_cd == ''){
+      //     if ($cupon->positioning){
+      //       $positioning		= explode( '|', $cupon->positioning );
+      //       $stores = new StoresController();
+      //       $stores = $stores->searchStoresSegunPlanes($positioning);
+            
+      //       $LOCAL_CD_VALID = implode( '|', $stores->pluck('local_cd')->all() );
+      //     }
+      //   }else{
+      //     $LOCAL_CD_VALID 	= '|'.$cupon->local_cd.'|';
+      //   }
+
+      //   // dd( Carbon::parse($fechaVencimiento)->format('d/m/Y'));
+      //   $cuponNew = new Coupons();
+      //   $cuponNew->COUPON_STR = $cupon->type;
+      //   $cuponNew->COUPON_PRICE = $cupon->price;
+      //   $cuponNew->CLIENT_NUM = Auth::user()->num;
+      //   $cuponNew->COUPON_TYPE = 'N';
+      //   $cuponNew->EXPIRE_DATE = $fechaVencimiento;
+      //   $cuponNew->LOCAL_CD_VALID = $LOCAL_CD_VALID;
+      //   $cuponNew->MIN_MONEY = 0;
+      //   $cuponNew->save();
+
+      //   return response()->json('Felicitaciones, tu cupón fue agregado exitosamente.');
+      
+      // } catch (\Exception $e) {
+      //   return response()->json($e->getMessage(), 422);
+      // }
     }
 
     public function descuentosExclusivos(Request $request)

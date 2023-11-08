@@ -26,6 +26,7 @@ class ProductsController extends Controller
     private $urlImage = 'https://netivooregon.s3.amazonaws.com/';
     private $page = 0;
     private $categories = ['woman','man','xl','kids','accessories'];
+    private $urlBase = 'https://www.modatex.com.ar/modatexrosa3/?c=';
     /*
     * @params product_page is required
     * @return Products Array
@@ -310,5 +311,19 @@ class ProductsController extends Controller
       }
 
       return collect($products)->all();
+    }
+
+    public function destacados($request)
+    {
+
+      $url = $this->urlBase.'Highlights::get&'.Arr::query($request);
+      $response = Http::acceptJson()->get($url);
+
+      $data = $response->json()['data'];
+
+      $data = $this->arregloProduct($data);
+      
+      return $data;
+      
     }
 }
