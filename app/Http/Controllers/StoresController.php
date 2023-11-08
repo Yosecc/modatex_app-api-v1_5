@@ -20,7 +20,7 @@ class StoresController extends Controller
 {
     use StoreTraits;
 
-    private $categories = ['woman','man','xl','kids','accessories'];
+    private $categories = ['woman','man','xl','kids','accessories','deportiva','lenceria','home','shoes'];
 
     private $url = 'https://www.modatex.com.ar/modatexrosa3/';
 
@@ -107,6 +107,16 @@ class StoresController extends Controller
           $categorie = 'accessories';
         }elseif($store['USE_SPECIAL'] == "Y"){
           $categorie = 'xl';
+        }elseif($store['USE_SPECIAL'] == "Y"){
+          $categorie = 'xl';
+        }elseif($store['USE_DEPORTIVA'] == "Y"){
+          $categorie = 'deportiva';
+        }elseif($store['USE_LENCERIA'] == "Y"){
+          $categorie = 'lenceria';
+        }elseif($store['USE_SHOES'] == "Y"){
+          $categorie = 'shoes';
+        }elseif($store['USE_HOME'] == "Y"){
+          $categorie = 'home';
         }
 
         $predefSection = $this->categorieDefaultId($store);
@@ -225,6 +235,22 @@ class StoresController extends Controller
         
         case 'ofertas':
           $categoria_name = 'Ofertas';
+          break;
+        
+        case 'deportiva':
+          $categoria_name = 'Deportivo';
+          break;
+               
+        case 'lenceria':
+            $categoria_name = 'Lenceria';
+            break;
+
+        case 'shoes':
+          $categoria_name = 'Calzado';
+          break;
+
+        case 'home':
+          $categoria_name = 'Hogar';
           break;
 
         default:
