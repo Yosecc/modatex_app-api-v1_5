@@ -149,7 +149,12 @@ class ProductsController extends Controller
         'USE_WOMAN',
         'USE_CHILD',
         'USE_ACCESORY',
-        'USE_SPECIAL')
+        'USE_SPECIAL',
+        'USE_DEPORTIVA',
+        'USE_LENCERIA',
+        'USE_SHOES',
+        'USE_HOME',
+        )
       ->get();
 
       $products_carro = $this->isProductCarro($idsProductos->all(), ['whereIn'=>true]);
