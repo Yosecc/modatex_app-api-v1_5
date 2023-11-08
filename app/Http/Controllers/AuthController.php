@@ -47,7 +47,7 @@ class AuthController extends Controller
 
             if ($client) {
 
-              // if(in_array($client->email, ['tiendas@modatex.com.ar'])){
+              // if(in_array($client->email, ['yosec.cervino@gmail.com'])){
               //   return response()->json(['status'=>true,'client'=> $client],200);
               // }
               
@@ -84,8 +84,6 @@ class AuthController extends Controller
               if($client->api_token != $login->token){
                 return response()->json(['status'=>false,'message'=>'Ha ocurrido un error. La clave token no coincide, comuniquese con el administrador.'],401);
               }
-
-              
               
               return response()->json(['status'=>true,'client'=> $client],200);
 
@@ -139,6 +137,11 @@ class AuthController extends Controller
         try {
 
             $jwt = JWT::encode($payload, env('KEY_JWT'), 'HS256');
+
+            // dd([
+            //   'data' => $jwt,
+            //   'action' => $action
+            // ]);
             
             $response = Http::asForm()
                 ->post($this->url, [

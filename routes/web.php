@@ -90,6 +90,8 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
         $router->get('products','ProductsController@getProductsRosa');
         $router->get('products_home','StoresController@productsHome');
         $router->get('search','ProductsController@getSearch');
+        
+        $router->post('inProducts','ProductsController@inProducts');
     });
     //
     $router->group(['prefix' => 'ventas'], function () use ($router) {
@@ -149,6 +151,10 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
         $router->post('notification_send','NotificationsUserAppController@notification_send');
         $router->post('getTokens','NotificationsUserAppController@getTokens');
         $router->get('get_notifications','NotificationsUserAppController@get_notifications');
+    });
+
+    $router->group(['prefix' => 'cms'], function() use ($router){
+        $router->get('get/{id}','cmsController@get');
     });
     
 });

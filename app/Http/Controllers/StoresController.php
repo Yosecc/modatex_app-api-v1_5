@@ -107,6 +107,14 @@ class StoresController extends Controller
           $categorie = 'accessories';
         }elseif($store['USE_SPECIAL'] == "Y"){
           $categorie = 'xl';
+        }elseif($store['USE_DEPORTIVA'] == "Y"){
+          $categorie = 'deportive';
+        }elseif($store['USE_LENCERIA'] == "Y"){
+          $categorie = 'lenceria';
+        }elseif($store['USE_SHOES'] == "Y"){
+          $categorie = 'shoes';
+        }elseif($store['USE_HOME'] == "Y"){
+          $categorie = 'home';
         }
 
         $predefSection = $this->categorieDefaultId($store);
@@ -156,6 +164,7 @@ class StoresController extends Controller
         }
         $data = $f;
       }
+
       
       if(isset($request['categorie'])){
 
@@ -165,6 +174,8 @@ class StoresController extends Controller
           $data = $data->filter(fn ($store) => Str::is(Str::lower($request['categorie']).'*',Str::lower($store['categorie'])) );
         }
       }
+
+      
      
       if(isset($request['plan']) && $request['plan']!=''){
         $data = $data->filter(fn ($store) => Str::lower($request['plan'])  == Str::lower($store['paquete']) );
@@ -173,6 +184,10 @@ class StoresController extends Controller
       if(isset($request['in'])){
         
         $data = $data->whereIn('local_cd', $request['in']);
+      }
+
+      if(isset($request['local_cd'])){
+        $data = $data->where('local_cd',$request['local_cd'] );
       }
 
       return $data;
