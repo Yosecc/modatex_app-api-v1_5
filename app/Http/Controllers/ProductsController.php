@@ -25,7 +25,7 @@ class ProductsController extends Controller
     private $urlSearch = 'https://www.modatex.com.ar/app.proxy.php?';
     private $urlImage = 'https://netivooregon.s3.amazonaws.com/';
     private $page = 0;
-    private $categories = ['woman','man','xl','kids','accessories'];
+    private $categories = ['woman','man','xl','kids','accessories','deportiva','lenceria','home','shoes'];
     private $urlBase = 'https://www.modatex.com.ar/modatexrosa3/?c=';
     /*
     * @params product_page is required
@@ -150,7 +150,12 @@ class ProductsController extends Controller
         'USE_WOMAN',
         'USE_CHILD',
         'USE_ACCESORY',
-        'USE_SPECIAL')
+        'USE_SPECIAL',
+        'USE_DEPORTIVA',
+        'USE_LENCERIA',
+        'USE_SHOES',
+        'USE_HOME',
+        )
       ->get();
 
       $products_carro = $this->isProductCarro($idsProductos->all(), ['whereIn'=>true]);
