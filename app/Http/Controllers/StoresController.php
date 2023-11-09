@@ -20,7 +20,7 @@ class StoresController extends Controller
 {
     use StoreTraits;
 
-    private $categories = ['woman','man','xl','kids','accessories','deportiva','lenceria','home','shoes'];
+    private $categories = ['woman','man','xl','kids','accessories','sportive','lingerie','home','shoes'];
 
     private $url = 'https://www.modatex.com.ar/modatexrosa3/';
 
@@ -108,9 +108,9 @@ class StoresController extends Controller
         }elseif($store['USE_SPECIAL'] == "Y"){
           $categorie = 'xl';
         }elseif($store['USE_DEPORTIVA'] == "Y"){
-          $categorie = 'deportive';
+          $categorie = 'sportive';
         }elseif($store['USE_LENCERIA'] == "Y"){
-          $categorie = 'lenceria';
+          $categorie = 'lingerie';
         }elseif($store['USE_SHOES'] == "Y"){
           $categorie = 'shoes';
         }elseif($store['USE_HOME'] == "Y"){
@@ -242,11 +242,11 @@ class StoresController extends Controller
           $categoria_name = 'Ofertas';
           break;
         
-        case 'deportiva':
+        case 'sportive':
           $categoria_name = 'Deportivo';
           break;
                
-        case 'lenceria':
+        case 'lingerie':
             $categoria_name = 'Lenceria';
             break;
 
