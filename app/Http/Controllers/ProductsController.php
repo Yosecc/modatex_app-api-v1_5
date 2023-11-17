@@ -62,7 +62,7 @@ class ProductsController extends Controller
         ]);
 
         $product = ProductFavorite::where('MODELO_NUM',$request->MODELO_NUM)
-                                    ->where('CLIENT_NUM',Auth::user()->num)
+                                    ->where('CLIENT_NUM',Auth::user()->num).
                                     ->first();
         if (!$product) {
             $product             = new ProductFavorite();
