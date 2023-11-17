@@ -13,6 +13,9 @@ use Illuminate\Support\Facades\Validator;
 
 class NotificationsUserAppController extends Controller
 {
+    private $token;
+    private  $url = 'https://www.modatex.com.ar/modatexrosa3/helpersNotifications_app_endpoint.php';
+
     public function notification_send(Request $request)
     {
         $this->validate($request, [
@@ -62,31 +65,47 @@ class NotificationsUserAppController extends Controller
 
     public function get_notifications()
     {
-        $noti = NotificationsApp::
-                    where(function ($query) {
-                        $query->where('type', 'LIKE', '%massive_msg.Mensaje%')
-                              ->orWhere('client_num', Auth::user()->num);
-                    })
-                    ;
-        if($noti->count()){
-            $notificationsIds = $noti->pluck('num');  
-            $links = Links::whereIn('section_id', $notificationsIds->toArray() )->get();
+        $this->token = Auth::user()->api_token;
+      
+        $response = Http::withHeaders([
+            'x-api-key' => $this->token,
+        ])
+        // ->asForm()
+        ->acceptJson()
+        ->post($this->url);
+    }
 
-            $noti = $noti->map(function($item) use ($links) {
-                $redirect = $links->where('section_id', $item['num'])->first();
-                return [
-                    'body' => html_entity_decode($item['msg']),
-                    'title' => html_entity_decode($item['title']),
-                    'id' => $item['num'],
-                    'created_at' => $item['created_at'],
-                    'image' => 'https://netivooregon.s3.amazonaws.com/'.$item['img'],
-                    'redirect' =>  $redirect ? json_decode($redirect->data_json) : NULL,
-                ];
-            });
+    /**
+     * DEPRECADO
+     */
 
-        }
+    // public function get_notifications()
+    // {
+    //     $noti = NotificationsApp::
+    //                 where(function ($query) {
+    //                     $query->where('type', 'LIKE', '%massive_msg.Mensaje%')
+    //                           ->orWhere('client_num', Auth::user()->num);
+    //                 })
+    //                 ;
+    //     if($noti->count()){
+    //         $notificationsIds = $noti->pluck('num');  
+    //         $links = Links::whereIn('section_id', $notificationsIds->toArray() )->get();
+
+    //         $noti = $noti->map(function($item) use ($links) {
+    //             $redirect = $links->where('section_id', $item['num'])->first();
+    //             return [
+    //                 'body' => html_entity_decode($item['msg']),
+    //                 'title' => html_entity_decode($item['title']),
+    //                 'id' => $item['num'],
+    //                 'created_at' => $item['created_at'],
+    //                 'image' => 'https://netivooregon.s3.amazonaws.com/'.$item['img'],
+    //                 'redirect' =>  $redirect ? json_decode($redirect->data_json) : NULL,
+    //             ];
+    //         });
+
+    //     }
          
 
-        return response()->json($noti);
-    }
+    //     return response()->json($noti);
+    // }
 }
