@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Objects\NotificationsPush;
 use App\Models\NotificationsApp;
+use App\Models\Links;
 use App\Models\NotificationsUserApp;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -61,10 +62,31 @@ class NotificationsUserAppController extends Controller
 
     public function get_notifications()
     {
-        $notificaciones = NotificationsApp::where('client_num',Auth::user()->num)
-                            ->orderBy('num','desc')->get();
-        
+        $noti = NotificationsApp::
+                    where(function ($query) {
+                        $query->where('type', 'LIKE', '%massive_msg.Mensaje%')
+                              ->orWhere('client_num', Auth::user()->num);
+                    })
+                    ;
+        if($noti->count()){
+            $notificationsIds = $noti->pluck('num');  
+            $links = Links::whereIn('section_id', $notificationsIds->toArray() )->get();
 
-        return response()->json($notificaciones->makeHidden(['client_num']));
+            $noti = $noti->map(function($item) use ($links) {
+                $redirect = $links->where('section_id', $item['num'])->first();
+                return [
+                    'body' => html_entity_decode($item['msg']),
+                    'title' => html_entity_decode($item['title']),
+                    'id' => $item['num'],
+                    'created_at' => $item['created_at'],
+                    'image' => 'https://netivooregon.s3.amazonaws.com/'.$item['img'],
+                    'redirect' =>  $redirect ? json_decode($redirect->data_json) : NULL,
+                ];
+            });
+
+        }
+         
+
+        return response()->json($noti);
     }
 }
