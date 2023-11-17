@@ -66,12 +66,12 @@ class NotificationsPush
         }
 
         // $this->saveNotification();
-
+        $this->request['data']['image'] = isset($this->notification['image']) ? $this->notification['image']:"";
         // foreach ($this->tokens as $key => $token) {
             $response = Http::withHeaders([
                 'Authorization' => 'key='.$this->server_key,
             ])->acceptJson()->post($this->url, [
-                
+               
                 "notification" => [
                     "title" => $this->notification['title'],
                     "body"  => $this->notification['body'],
