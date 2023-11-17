@@ -11,8 +11,8 @@ class cmsController extends Controller
     {   
         $cms = PagesCms::find($id);
         $cms = [
-            'title' => $cms->title,  
-            'data_json' => json_decode($cms->data_json),  
+            'name' =>utf8_decode($cms->title),  
+            'editor' => utf8_decode($cms->data_json),  
         ];
         
         return response()->json($cms);
