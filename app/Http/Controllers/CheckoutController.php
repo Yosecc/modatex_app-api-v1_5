@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Http;
 
 class CheckoutController extends Controller
 {
-    private $url = 'https://www.modatex.com.ar/modatexrosa3/?c=';
+    private $url = 'https://www.modatex.com.ar/?c=';
     private $token;
 
     private $envios = [[
@@ -439,6 +439,7 @@ class CheckoutController extends Controller
     public function selectMethodPayment(Request $request)
     {
         try {   
+            // dd($this->generateUrl(['controller' => 'Checkout','method' => 'payment_select']));
             $this->token = Auth::user()->api_token;
              $response = Http::withHeaders([
               'x-api-key' => $this->token,
@@ -490,26 +491,48 @@ class CheckoutController extends Controller
 
     public function confirmarCompra(Request $request)
     {
+        //
+        // // return $this->token;
+        // return response()->json(['message'=>$this->token],422);
         try {   
+            // dd($this->generateUrl(['controller' => 'Checkout','method' => 'confirm_purchase']));
             $this->token = Auth::user()->api_token;
              $response = Http::withHeaders([
               'x-api-key' => $this->token,
             ])
             ->asForm()
-            ->post($this->generateUrl(['controller' => 'Checkout','method' => 'confirm_purchase']), 
+            // ->acceptJson()
+            ->post($this->generateUrl(['controller' => 'Checkout','method' => 'buy']), 
                 $request->all());
-
-
-            if($response->json()['status'] != 'success'){
+            
+            if(isset($response->json()['status']) && $response->json()['status'] != 'success'){
                 throw new \Exception("No se encontraron resultados");
+            }
+
+            if(!isset($response->json()['status'])){
+                throw new \Exception($response->json());
+
             }
               
               try {
-                
-                $notification = new NotificationsPush(['notification'=>[
-                  'title' => 'Gracias por tu compra',
-                  "body" => 'Su compra ha sido procesada con éxito. Pronto nos comunicaremos'
-                ]]);
+                if(isset($response->json()['data'])){
+
+                    $notification = new NotificationsPush(
+                        [
+                            'notification' => [
+                                'title' => 'Gracias por tu compra',
+                                "body" => 'Su compra ha sido procesada con éxito. Pronto nos comunicaremos'
+                            ],
+                            'data' => [
+                                'redirect' => [
+                                    'route' => '/order',
+                                    'params' => [
+                                        'id' => $response->json()['data']['purchase_id']
+                                    ]
+                                ]
+                            ]
+                    ]);
+                }
                 $notification->sendUserNotification(Auth::user()->num);
 
               } catch (\Exception $e) {

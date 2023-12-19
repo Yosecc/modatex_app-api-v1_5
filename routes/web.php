@@ -40,6 +40,11 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
     $router->post('preferences','PreferencesController@store');
     $router->get('preferences','PreferencesController@getPreferences');
 
+    
+
+    $router->post('likeStore','VisitsController@likeStore');
+
+    
     $router->post('store_visits','VisitsController@StoreVisits');
     $router->post('product_visits','VisitsController@ProductVisits');
 

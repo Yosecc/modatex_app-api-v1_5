@@ -6,8 +6,11 @@ use Illuminate\Http\Request;
 use App\Models\StoresVisits;
 use App\Models\ProductVisits;
 use Auth;
+use Illuminate\Support\Facades\Http;
+
 class VisitsController extends Controller
 {
+    private $token;
     public function StoreVisits(Request $request)
     {
         $this->validate($request, [
@@ -56,5 +59,16 @@ class VisitsController extends Controller
             }
         }
         return response()->json(['status' => true ], 200);
+    }
+
+    public function likeStore(Request $request)
+    {
+        $response = Http::withHeaders([
+            'x-api-key' => Auth::user()->api_token,
+        ])
+        ->asForm()
+        ->get('https://www.modatex.com.ar/modatexrosa3/?c=Favorites::toggle&store_id='.$request->store_id.'&company_id='.$request->company_id.'&_='.\Carbon\Carbon::now()->timestamp);
+            // dd($response->json());
+        return response()->json($response->json());
     }
 }

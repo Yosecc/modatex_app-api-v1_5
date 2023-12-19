@@ -481,8 +481,14 @@ class HomeController extends Controller
           'inStock' => 1,
           'daysExpir' => 365,
           'order' => 'date DESC',
+          'version' => \Carbon\Carbon::now()->timestamp
         ])
       ],
+      // [
+      //   'name' => 'modal',
+      //   'type' => 'modal',
+      //   'editores' => [utf8_decode('{"time":1699560659858,"blocks":[{"id":"UdS0qmWFpd","type":"Portadas","data":{"marcas":[{"id":1880,"name":"BLANCO YABELL","name_id":"BLANCOYABELL","logo":"https://netivooregon.s3.amazonaws.com/common/img/logo/blancoyabell_1554825423.webp","cleaned":"blancoyabell","col":4,"offset":0,"portada_url":"https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/yabell-covernuevo-m1.jpg?N6","isViewLogo":false},{"id":2573,"name":"BLANCO PALACE","name_id":"BLANCOPALACE","logo":"https://netivooregon.s3.amazonaws.com/common/img/logo/blancopalace_1682446532.webp","cleaned":"blancopalace","col":4,"offset":0,"portada_url":"https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/blancopalace-covernuevo.jpg?n2","isViewLogo":false},{"id":2330,"name":"VIA BLANCO","name_id":"VIABLANCO","logo":"https://netivooregon.s3.amazonaws.com/common/img/logo/viablanco_1622660862.webp","cleaned":"viablanco","col":4,"offset":0,"portada_url":"https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/viablanco-covernuevo.jpg?5","isViewLogo":false},{"id":2565,"name":"Somio Sweet Home","name_id":"SOMIOSWEETHOME","logo":"https://netivooregon.s3.amazonaws.com/common/img/logo/somiosweethome_1680008658.webp","cleaned":"somiosweethome","col":4,"offset":0,"portada_url":"https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/somio-covernuevo.jpg","isViewLogo":false},{"id":1626,"name":"NEW PORT","name_id":"NEWPORT","logo":"https://netivooregon.s3.amazonaws.com/common/img/logo/newport_1618851261.webp","cleaned":"newport","col":4,"offset":0,"portada_url":"https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/newport-covernuevo.jpg?n5","isViewLogo":false},{"id":2031,"name":"ALIPAPA","name_id":"ALIPAPA","logo":"https://netivooregon.s3.amazonaws.com/common/img/logo/alipapa_1633544236.webp","cleaned":"alipapa","col":4,"offset":0,"portada_url":"https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/altocabildo-covernuevo.jpg","isViewLogo":false}]},"tunes":{"categoriaTune":{"ocultarApp":false,"ocultarWeb":false},"configTune":{"expandir":false,"margin":{"top":{"value":0,"placeholder":"Arriba","clave":"top"},"right":{"value":0,"placeholder":"Derecha","clave":"right"},"bottom":{"value":0,"placeholder":"Abajo","clave":"bottom"},"left":{"value":0,"placeholder":"Izquierda","clave":"left"}}}}}],"version":"2.28.2"}')]
+      // ]
     ];
 
     Cache::put($nameChache, $data , $seconds = 10800);
@@ -691,9 +697,9 @@ class HomeController extends Controller
         ]
       ],
       [
-        "icon" => '~/assets/icons/icon_menu_0.png',
+        "icon" => '~/assets/icons/icon_menu_099.png',
         "name" => 'Mis pedidos',
-        "disabled" => true,
+        "disabled" => false,
         "redirect"=> [
           "route"=> "/profile",
           "params"=> []
@@ -706,6 +712,63 @@ class HomeController extends Controller
         "redirect"=> [
           "route"=> "/notifications",
           "params"=> []
+        ]
+      ],
+      [
+        "icon" => '~/assets/icons/new.png',
+        "name" => 'Nuevos Ingresos',
+        "disabled" => false,
+        "childrens" => [
+          [
+            "icon" => '~/assets/icons/past.png',
+            "name" => "Hoy",
+            "redirect" => [
+              "route" => "/search",
+              "params" => [
+                "betweenDates" => \Carbon\Carbon::now()->format('Y-m-d').','.\Carbon\Carbon::now()->addDays(1)->format('Y-m-d'),
+              ]
+            ]
+          ],
+          [
+            "icon" => '~/assets/icons/past.png',
+            "name" => "Ayer",
+            "redirect" => [
+              "route" => "/search",
+              "params" => [
+                "betweenDates" => \Carbon\Carbon::now()->subDays(1)->format('Y-m-d').','.\Carbon\Carbon::now()->format('Y-m-d'),
+              ]
+            ]
+          ],
+          [
+            "icon" => '~/assets/icons/past.png',
+            "name" => "Antes de Ayer",
+            "redirect" => [
+              "route" => "/search",
+              "params" => [
+                "betweenDates" => \Carbon\Carbon::now()->subDays(2)->format('Y-m-d').','.\Carbon\Carbon::now()->subDays(1)->format('Y-m-d'),
+              ]
+            ]
+          ],
+          [
+            "icon" => '~/assets/icons/past.png',
+            "name" => "Hace 3 dias",
+            "redirect" => [
+              "route" => "/search",
+              "params" => [
+                "betweenDates" => \Carbon\Carbon::now()->subDays(3)->format('Y-m-d').','.\Carbon\Carbon::now()->subDays(2)->format('Y-m-d'),
+              ]
+            ]
+          ],
+          [
+            "icon" => '~/assets/icons/past.png',
+            "name" => "Hace 4 dias",
+            "redirect" => [
+              "route" => "/search",
+              "params" => [
+                "betweenDates" => \Carbon\Carbon::now()->subDays(4)->format('Y-m-d').','.\Carbon\Carbon::now()->subDays(3)->format('Y-m-d'),
+              ]
+            ]
+          ],
         ]
       ],
     ];
