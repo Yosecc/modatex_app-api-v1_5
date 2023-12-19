@@ -134,22 +134,25 @@ class CartController extends Controller
                   ->where('LOCAL.LOGO_FILE_NAME','!=','')
                   ->where('LOCAL.LOGO_FILE_NAME','!=',NULL)
                   ->where('CART.PRICE', '>', 0)
-
                   ->get();
 
-        // dd($carts);
 
-        $stores_ids = array_unique(Arr::pluck($carts->all(), ['LOCAL_CD']));
-
-        $stores = Store::whereIn('LOCAL_CD',$stores_ids)->where('STAT_CD', 1000)->get();
+        $stores = new StoresController();
+        $stores = $stores->consultaStoresRosa([
+          'in' =>  array_unique(Arr::pluck($carts->all(), ['LOCAL_CD']))
+        ]);
 
         if($stores){
 
           $stores = $stores->map(fn ($store)=>
              $this->arregloCart($store,$carts)
           );
+          $blocks = [[
+            "type" => "text",
+            "text" => '<p style="font-weight: 600; text-align:center" >Hoy tu compra suma una chance para el sorteo de <br> <br> <span style="background-color: #4CAF50;color: white;padding: 2px 7px;border-radius: 8px;margin: 0 3px;font-size: 16px;">$1.000.000</span> <br> <br> <span style="font-size: 12px">Los pedidos de más de $30.000 tienen doble chance! </span></p>'
+          ]];
           // dd($stores);  
-          return response()->json(['stores' => $stores]);
+          return response()->json(['stores' => $stores->values()->toArray(), 'blocks' => $blocks ]);
         }
 
         return response()->json(['message' => 'No se encontraron carros abiertos' ], 422);
@@ -168,9 +171,11 @@ class CartController extends Controller
                   ->where('CART.PRICE', '>', 0)
                   ->get();
 
-      $stores_ids = array_unique(Arr::pluck($carts->all(), ['LOCAL_CD']));
+      $stores = new StoresController();
+      $stores = $stores->consultaStoresRosa([
+        'in' =>  array_unique(Arr::pluck($carts->all(), ['LOCAL_CD']))
+      ]);
 
-      $stores = Store::whereIn('LOCAL_CD',$stores_ids)->where('STAT_CD', 1000)->get();
       if($stores){
 
         $stores = $stores->map(fn ($store)=>
@@ -190,30 +195,35 @@ class CartController extends Controller
     
     private function arregloCart($store, $carts)
     {
-      $products = $carts->where('LOCAL_CD',$store['LOCAL_CD']);
+      
+      $products = $carts->where('LOCAL_CD',$store['local_cd']);
       $suma = 0;
       $cart_ids = [];
       $conteo = 0;
-
-        //    dd($products->all() );
+          //  dd($products->all() );
       foreach ($products->all() as $key => $value) {
         $suma += (floatval($value['PRICE']) * $value['CANTIDAD']);
         $conteo+=$value['CANTIDAD'];
         $cart_ids[] = $value['NUM'];
       }
       
-
       return [
-        "id"             => $store['LOCAL_CD'],
-        "company"        => $store['GROUP_CD'],
-        "name"           => $store['LOCAL_NAME'],
-        "limit_price"    => floatval($store['LIMIT_PRICE']),
-        "logo"           => env('URL_IMAGE').'/common/img/logo/'.$store['LOGO_FILE_NAME'],
+        "id"             => $store['local_cd'],
+        "company"        => null,
+        "name"           => $store['name'],
+        "limit_price"    => intval($store['min']),
+        "logo"           => $store['logo'],
         "products_count" => $conteo, 
         "total"          => $suma, 
-        "is_limit"       => $suma >= floatval($store['LIMIT_PRICE']),
+        "is_limit"       => $suma >= $store['min'],
         'cart_ids'       => $cart_ids,
-        'rep' => $store['MODAPOINT']
+        'rep'            => $store['rep'],
+        "vc"             => $store['vc'],
+        "categorie"      => $store['categorie'], 
+        "category_default" => $store['category_default'],
+        "categories_store" => $store['categories_store'],
+        "paquete"          => $store['paquete'], 
+        "cleaned"          => $store['cleaned'], 
       ];
 
     }

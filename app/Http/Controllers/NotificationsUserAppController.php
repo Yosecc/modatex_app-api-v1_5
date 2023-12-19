@@ -9,12 +9,13 @@ use App\Models\NotificationsUserApp;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Http;
 
 
 class NotificationsUserAppController extends Controller
 {
     private $token;
-    private  $url = 'https://www.modatex.com.ar/modatexrosa3/helpersNotifications_app_endpoint.php';
+    private  $url = 'https://www.modatex.com.ar/modatexrosa3/helpers/Notifications_app_endpoint.php';
 
     public function notification_send(Request $request)
     {
@@ -66,13 +67,31 @@ class NotificationsUserAppController extends Controller
     public function get_notifications()
     {
         $this->token = Auth::user()->api_token;
-      
-        $response = Http::withHeaders([
+        // dd(Auth::user()->num);
+        $array = array(
+            "redirect" => array(
+                "route" => "order",
+                "params" => array(
+                    "id" => Auth::user()->num
+                )
+            )
+        );
+        // dd($this->url, $this->token);
+        $response = Http::
+        withHeaders([
             'x-api-key' => $this->token,
         ])
-        // ->asForm()
         ->acceptJson()
-        ->post($this->url);
+        ->post('https://www.modatex.com.ar/modatexrosa3/helpers/Notifications_app_endpoint.php',
+            $array
+        ); 
+
+        return response()->json($response->collect()->map(function($not){
+            $not['redirect'] = json_decode($not['redirect'])->redirect;
+            return $not;
+        }));
+
+        // dd($response->status(s),$response->json());
     }
 
     /**

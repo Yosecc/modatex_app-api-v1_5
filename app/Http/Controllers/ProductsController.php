@@ -62,7 +62,7 @@ class ProductsController extends Controller
         ]);
 
         $product = ProductFavorite::where('MODELO_NUM',$request->MODELO_NUM)
-                                    ->where('CLIENT_NUM',Auth::user()->num).
+                                    ->where('CLIENT_NUM',Auth::user()->num)
                                     ->first();
         if (!$product) {
             $product             = new ProductFavorite();
@@ -83,46 +83,83 @@ class ProductsController extends Controller
 
     private function generateModels($product)
     {
+      // dd($product);
+      
+      $response = Http::withHeaders([
+        'x-api-key' => Auth::user()->api_token,
+      ])
+      ->acceptJson()
+      ->post('https://www.modatex.com.ar?c=Cart::product&store_id='.$product['store'].'&company_id='.$product['company'].'&product_id='.$product['id'].'&_='.\Carbon\Carbon::now()->timestamp,[]);
 
-      if(!isset($product['price'])){
+      if(!$response->json()){
         return [];
       }
+      
+      $producC = $response->collect();
+      // dd($producC, $product);
+      
+      $product_id = $product['id'];
+      $models = collect($producC['models'])->map(function($model) use ($product_id){
+        // dd($model);
+        return [
+          "size"=>  $model['size'],
+          "size_id"=>  $model['size_id'],
+          "price"=>  $model['price'],
+          // 'has_stock' => $model['has_stock'],
+          "properties" => collect($model['properties'])->map(function($pro) use ($product_id, $model){
+            return [
+              "id" => $pro['detail_id'],
+              "product_id" => $product_id,
+              "size_id" => $model['size_id'],
+              "color_id" => $pro['color_id'],
+              "quantity" => $pro['stock'],
+              "MODA_NUM" => null,
+              "price" => (isset($pro['amount']) && $pro['amount']!=0) ? $pro['amount'] : ($model['price'] ? $model['price'] : 0),
+              "size" => null,
+              "color" => $pro['color_code']
+            ];
+          }),
+        ];
+      });
+      // dd($models);
+      // $models = Code::
+      //           select('CODE_NAME as size','NUM as size_id')
+      //           ->where('STAT_CD',1000)
+      //           ->whereIn('CODE_NAME',$product['sizes'])->get();
 
-      $models = Code::
-                select('CODE_NAME as size','NUM as size_id')
-                ->where('STAT_CD',1000)
-                ->whereIn('CODE_NAME',$product['sizes'])->get();
+               
 
-                // dd($models);
-
-      $detalle = ProductsDetail::
-      select('NUM as id','PARENT_NUM as product_id','SIZE_NUM as size_id','COLOR_NUM as color_id','QUANTITY as quantity','MODA_NUM')
-                              ->where('PARENT_NUM',$product['id'])
-                              ->where('STAT_CD',1000)
-                              ->get();
+      // $detalle = ProductsDetail::
+      // select('NUM as id','PARENT_NUM as product_id','SIZE_NUM as size_id','COLOR_NUM as color_id','QUANTITY as quantity','MODA_NUM')
+      //                         ->where('PARENT_NUM',$product['id'])
+      //                         ->where('STAT_CD',1000)
+      //                         ->get();
                               
 
-      $detalle = collect($detalle)->all();
+      // $detalle = collect($detalle)->all();
 
-      foreach ($models as $key => $code) {
-        // dd($code);
-        $filtered = Arr::where($detalle, function ($value, $key) use ($code) {
-          return $value['size_id'] == $code['size_id'];
-        });
+      // foreach ($models as $key => $code) {
+      //   // dd($code);
+      //   $filtered = Arr::where($detalle, function ($value, $key) use ($code) {
+      //     return $value['size_id'] == $code['size_id'];
+      //   });
 
-        [$keys, $values] = Arr::divide(collect($filtered)->all());
+      //   [$keys, $values] = Arr::divide(collect($filtered)->all());
 
-        // dd($values);
+      //   // dd($values);
 
-        foreach ($values as $key => $val) {
-          $price = Prices::select('venta_precio','PARENT_NUM')->where('STAT_CD',1000)->where('PARENT_NUM', $val['MODA_NUM'])->first();
-          $val['price'] = $price->venta_precio;
-        }
+      //   foreach ($values as $key => $val) {
+      //     $price = Prices::select('venta_precio','PARENT_NUM')
+      //             ->where('STAT_CD',1000)
+      //             ->where('PARENT_NUM', $val['MODA_NUM'])
+      //             ->first();
+      //     $val['price'] = $price->venta_precio;
+      //   }
 
-        $code['price'] = isset($product['price']) ? $product['price'] : $product['id'];
-        $code['properties'] = $values;
-      }
-
+      //   $code['price'] = isset($product['price']) ? $product['price'] : $product['id'];
+      //   $code['properties'] = $values;
+      // }
+      // dd($models);
       return $models;
     }
 
@@ -270,12 +307,14 @@ class ProductsController extends Controller
 
     public function oneProduct($product_id)
     {
+     
       $request = [];
       $request['product_id'] = $product_id;
       $url = $this->url.Arr::query($request);
+
       $response = Http::acceptJson()->get($url);
       $data = $response->collect()->all();
-      
+      // dd($url,$data);
       $data = $this->arregloProduct($data,['isModels' => true]);
       return $data;
     }

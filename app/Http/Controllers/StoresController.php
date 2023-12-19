@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Store;
+use App\Models\Favorite;
 use App\Models\Products;
 use App\Http\Traits\HelpersTraits;
 use App\Http\Traits\StoreTraits;
@@ -13,6 +14,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Cache;
 use App\Helpers\General\CollectionHelper;
+use Auth;
 
 
 use Illuminate\Http\Client\Pool;
@@ -82,19 +84,26 @@ class StoresController extends Controller
      */
     public function consultaStoresRosa($request)
     {
+
       $response = Http::accept('application/json')->get($this->urlStore.'all');
-      // dd($response->json());
+      
+
       if($response->json() == null){
         return response()->json(CollectionHelper::paginate(collect([]), $request->paginate ?? 16 ));
       }
       
       $response = collect($response->collect()['data']);
-
       $stores = Store::whereIn('LOCAL_CD',$response->pluck('id')->all())->get();
+      $favoritos = Favorite::whereIn('LOCAL_CD',$response->pluck('id')->all())->where('STAT_CD','1000')->where('CLIENT_NUM',Auth::user()->num)->get();
       
-      return $this->crearConsulta($response->map(function($tienda) use ($stores){
       
+      // dd('$favoritos');
+      return $this->crearConsulta($response->map(function($tienda) use ($stores,$favoritos){
         $store = $stores->where('LOCAL_CD', $tienda['id'])->first();
+        // dd();
+        // if($tienda['id'] == 1008){
+        //   dd($store);
+        // }
 
         $categorie = '';
         if($store['USE_MAN'] == "Y"){
@@ -132,14 +141,17 @@ class StoresController extends Controller
           "logo" => env('URL_IMAGE').'/common/img/logo/'. $tienda['logo'],
           "name" => $tienda['name'],
           "local_cd" => $tienda['id'],
+          "company_id" => $store['GROUP_CD'],
           "min" => $store ? $store['LIMIT_PRICE']: '',
-          "rep" => $store ? $store['MODAPOINT']-1: '',
+          "rep" => $store ? $store['MODAPOINT']: '',
           "vc" => '',
           "categorie" => $categorie,
           "category_default" => $predefSection,
           'categories_store' => $categorieR,
           'paquete' => $paquete,
-          'cleaned' => $tienda['cleaned']
+          'cleaned' => $tienda['cleaned'],
+          'favorite' => $favoritos->where('LOCAL_CD',$tienda['id'])->count() ? true : false ,
+          // 'favorite_count' => $favoritos->where('LOCAL_CD',$tienda['id'])->count() `
         ];
 
       }),$request);
