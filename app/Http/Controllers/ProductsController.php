@@ -163,6 +163,32 @@ class ProductsController extends Controller
       return $models;
     }
 
+    public function arregloProduct2($data)
+    {
+      $producto = collect($data);
+      $producto = $producto->first();
+      
+      $store = Http::acceptJson()->get("https://www.modatex.com.ar/?c=Store::_get&store_ref={$producto['store']}");
+      $store = $store->collect()->all();
+      $store = $store['data'];
+
+      $storeq = new StoresController();
+      $predefSection = $storeq->categorieDefaultId($store);
+
+      $producto['store'] = [
+        'logo' => env('URL_IMAGE').'/common/img/logo/'.$store['LOGO_FILE_NAME'],
+        'name' => $store['LOCAL_NAME'],
+        'min'  => $store['LIMIT_PRICE'],
+        "id"   => $store['LOCAL_CD'],
+        "company"     => $store['GROUP_CD'],
+        'rep' => $store['stats']['points'],
+        'vc' => $store['stats']['completed_sales_perc'],
+        "category_default" => $predefSection
+      ];
+
+      dd($producto);
+    }
+
     public function arregloProduct($data, $config = ['isModels' => false])
     {
       $productos = collect($data);
@@ -171,7 +197,8 @@ class ProductsController extends Controller
       // dd(Prices::limit(5)->get());
       $idsProductos = $productos->pluck('id');
       $localCds     = $productos->pluck('store');
-      
+
+
       $stores = Store::whereIn('LOCAL_CD', $localCds->all())->select(
         'GROUP_CD',
         'LOGO_FILE_NAME',
@@ -221,7 +248,7 @@ class ProductsController extends Controller
 
         return [
           "id"          => $product['id'],
-          "code" => isset($product['code']) ? $product['code'] : '',
+          "code"        => isset($product['code']) ? $product['code'] : '',
           "local_cd"    => $product['store'],
           "company"     => $store['GROUP_CD'],
           "name"        => $product['name'],
@@ -312,10 +339,13 @@ class ProductsController extends Controller
       $request['product_id'] = $product_id;
       $url = $this->url.Arr::query($request);
 
+      // $url = 'https://www.modatex.com.ar/?c=Cart::product&'.Arr::query($request);
+      // dd($url);
       $response = Http::acceptJson()->get($url);
       $data = $response->collect()->all();
-      // dd($url,$data);
-      $data = $this->arregloProduct($data,['isModels' => true]);
+      
+      // $data = $this->arregloProduct($data,['isModels' => true]);
+      $data = $this->arregloProduct2($data);
       return $data;
     }
 

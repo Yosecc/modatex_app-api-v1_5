@@ -147,7 +147,11 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
         $router->post('confirmarCompra','CheckoutController@confirmarCompra');
         $router->post('couponUnselectAll','CheckoutController@couponUnselectAll');
         $router->post('couponSelect','CheckoutController@couponSelect');
-            
+        $router->post('getMetodos','CheckoutController@getMetodos');
+        $router->post('shippingSelectAddress','CheckoutController@shippingSelectAddress');
+        $router->post('getMetodosPagos','CheckoutController@getMetodosPagos');
+        $router->post('getHorarios','CheckoutController@getHorarios');
+        
 
     });
 

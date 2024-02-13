@@ -277,6 +277,7 @@ class CartController extends Controller
               $combinaciones[] = [
                 
                 "sizes"           => $product['sizes'],
+                
                 "colors"          => $product['colors'],
                 "colorActive"     => count($valuesColor) ? $valuesColor[0]['code']:null,
                 "talleActive"     => count($valuesSize) ? $valuesSize[0]['size']:null,
@@ -304,6 +305,7 @@ class CartController extends Controller
             "logo"        => $product['store']['logo'],
           ],
           "sizes"         => $product['sizes'],
+          "has_stock"       => $product['has_stock'],
           "colors"        => $product['colors'],
           "combinacion"   => $combinaciones,
           "models"        => $product['models'],
