@@ -63,12 +63,31 @@ class VisitsController extends Controller
 
     public function likeStore(Request $request)
     {
+        // dd(Auth::user()->api_token);
+        // $response = Http::withHeaders([
+        //     'x-api-key' => Auth::user()->api_token,
+        // ])
+        // ->asForm()
+        // ->get('https://www.modatex.com.ar/modatexrosa3/?c=Favorites::toggle&store_id='.$request->store_id.'&company_id='.$request->company_id.'&_='.\Carbon\Carbon::now()->timestamp);
+
+
+
+        // $response = Http::withHeaders([
+        //     'x-api-key' => Auth::user()->api_token,
+        // ])
+        // ->asForm()
+        // // ->acceptJson()
+        // ->get('https://www.modatex.com.ar/modatexrosa3/?c=Checkout::shipping_method&group_id=abyjtwl0');
+        // dd($response->body());
+
         $response = Http::withHeaders([
             'x-api-key' => Auth::user()->api_token,
         ])
         ->asForm()
-        ->get('https://www.modatex.com.ar/modatexrosa3/?c=Favorites::toggle&store_id='.$request->store_id.'&company_id='.$request->company_id.'&_='.\Carbon\Carbon::now()->timestamp);
-            // dd($response->json());
+        ->acceptJson()
+        ->get('https://www.modatex.com.ar?c=Favorites::added');
+        // dd($response->json());
+
         return response()->json($response->json());
     }
 }

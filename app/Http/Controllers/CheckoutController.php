@@ -13,92 +13,83 @@ class CheckoutController extends Controller
     private $url = 'https://www.modatex.com.ar/?c=';
     private $token;
 
-    private $envios = [[
+    private $metdosPagos = [
+            [
+                'id'=> 1,
+                'name'=> 'Tarjeta de Crédito / Débito',
+                'modapago'=> true,
+                'descripcion'=> 'Selecciona esta opción si deseas abonar con tarjeta de crédito. Fácil, seguro y rápido.',
+                'logos'=> ['~/assets/visa.jpg', '~/assets/master.jpg', '~/assets/american.jpg', '~/assets/cencosud.jpg', '~/assets/argencard.jpg'],
+                'active'=> false,
+                'detalle'=> 'Luego de recibir este pedido, la tienda te enviará por mail dentro de las 48 hs, el cupón para pagar esta compra con tu tarjeta.',
+                'method'=> 'card'
+            ],
+            [
+                'id' => 2,
+                'name' => 'Efectivo',
+                'modapago' => true,
+                'descripcion' => 'Si quieres obtener un cupón de pago para abonar en efectivo, selecciona esta opción.',
+                'logos' => ['~/assets/pagofacil.jpg', '~/assets/rapipagos.jpg'],
+                'active' => false,
+                'detalle' => 'Luego de recibir este pedido, la tienda te enviará por mail dentro de las 48 hs, el cupón para pagar esta compra en los puntos de Pago Fácil, Rapipagos o Cobro Express.',
+                'method' => 'cash'
+            ],
+            [
+                'id' =>  3,
+                'name' =>  'Transferencia o depósito bancario',
+                'modapago' =>  false,
+                'descripcion' =>  'Seleccionando aquí, podrás realizar una transferencia o depósito bancario.',
+                'logos' =>  ['~/assets/santanderrio.png', '~/assets/bancocomafi.jpg'],
+                'active' =>  false,
+                'detalle' =>  'Luego de recibir este pedido, la tienda te enviará por mail dentro de las 48 hs, los datos bancarios.',
+                'method' =>  'bank'
+            ],
+        ];
+
+    private $envios = [
+            'post_office'=>[
                 'id'           =>  1,
                 'title'        => 'Envío a sucursal',
-                'precios'      =>  ['Desde $740 a todo el país'],
-                'description'  => 'Seleccionando esta opción te enviamos el pedido a la sucursal próxima que elijas en 4 a 7 días.',
-                'description2' =>  'Esta tienda agregará un costo adicional de $70 por traslado hasta el transporte.',
                 'active'       => false,
                 'color'        => '#239B56',
                 'icon'         => 'res://sucursal',
-                'agregados'    =>[
-                    // [
-                    //     'concepto' => 'Costo de traslado',
-                    //     'value' => 70
-                    // ]
-                ],
+                'agregados'    => [],
                 'method'       => 'post_office',
                 'isFree'       => false
             ],
-            [
-                'id'           =>  2,
+            'home_delivery'=>[
+                'id'           => 2,
                 'title'        => 'Envío a domicilio',
-                'precios'      =>  ['$380 en CABA','$480 en GBA','Desde $1140 al resto del país'],
-                'description'  => 'Te enviamos el pedido a tu domicilio por moto de 48 a 72 horas, de 8:00hs a 20:00hs y, por Correo Argentino y OCA de 5 a 9 días hábiles.',
-                'description2' =>  'Esta tienda agregará un costo adicional de $70 por traslado hasta el transporte.',
-                'active'       =>  false,
-                'color'        =>  '#CA6F1E',
-                'icon'         =>  'res://enviocasa',
-                'agregados'    => [
-                    // [
-                    //     "concepto"=> 'Costo de traslado',
-                    //     "value"=> 70
-                    // ]
-                ],
+                'active'       => false,
+                'color'        => '#CA6F1E',
+                'icon'         => 'res://enviocasa',
+                'agregados'    => [],
                 'method'       => 'home_delivery',
-                'isFree'       =>  false
+                'isFree'       => false
             ],
-            [
-                'id'               => 3,
-                'title'            =>'Transporte tradicional',
-                'precios'          => ['$150 por costo de traslado hasta el transporte elegido. Luego pagás el resto en destino.'],
-                'description'      => 'Elegí el transporte que llega a tu ciudad.',
-                'description2'     =>'Esta tienda agregará un costo adicional de $70 por manipulación y embalaje.',
-                'active'           => false,
-                'color'            => '#1976D2',
-                'icon'             => 'res://envio',
-                'agregados'        =>[
-                    // [
-                    //     'concepto' => 'Envío',
-                    //     'value'    => 150
-                    // ],
-                    // [
-                    //     'concepto' => 'Manipulación y embalaje',
-                    //     'value'    => 70
-                    // ],
-                ],
-                'method'           => 'transport',
-                'isFree'           => false
+            'transport'=>[
+                'id'           => 3,
+                'title'        =>'Transporte tradicional',
+                'active'       => false,
+                'color'        => '#1976D2',
+                'icon'         => 'res://envio',
+                'agregados'    => [],
+                'method'       => 'transport',
+                'isFree'       => false
             ],
-            [
-                'id'               => 4,
-                'title'            =>'INTEGRALPACK',
-                'precios'          => ['$850 por costo de servicio.'],
-                'description'      =>'Envíos a terminal de omnibus en 48 a 72 horas. Buscá si llegamos a tu ciudad!',
-                'description2'     => 'Esta tienda agregará un costo adicional de $70 por traslado hasta el transporte.',
-                'active'           => false,
-                'color'            => '#CDDC39',
-                'icon'             => 'res://integralpack',
-                'agregados'        =>[
-                    // [
-                    //     'concepto' => 'Envío',
-                    //     'value'    => 850
-                    // ],
-                    // [
-                    //     'concepto' => 'Costo de traslado',
-                    //     'value'    => 70
-                    // ],
-                ],
-                'method'           => 'integral_pack',
-                'isFree'           => false
+            'integral_pack'=>[
+                'id'           => 4,
+                'title'        =>'INTEGRALPACK',
+                'active'       => false,
+                'color'        => '#CDDC39',
+                'icon'         => 'res://integralpack',
+                'agregados'    => [],
+                'method'       => 'integral_pack',
+                'isFree'       => false
             ],
-            [
+            'store_pickup'=>[
                 'id'           => 5,
                 'title'        =>'Retiro por depósito',
-                'precios'      => [],
-                'description'  =>'Retira la compra en el depósito.',
-                'description2' => 'El horario de atención para el retiro de los paquetes en el depósito de Flores, CABA es de Lunes a Viernes de 8:00hs a 15:00hs.',
                 'active'       => false,
                 'color'        => '#5E35B1',
                 'icon'         => 'res://enviostore',
@@ -119,49 +110,394 @@ class CheckoutController extends Controller
             ->post($this->generateUrl(['controller' => 'Checkout','method' => 'shipping_prices']), 
                 $request->all());
 
-
             if($response->json()['status'] != 'success'){
                 throw new \Exception("No se encontraron resultados");
             }
 
+            // dd($this->generateUrl(['controller' => 'Checkout','method' => 'shipping_prices']), $response->json());
+
+            $reques = Request::create('/dummy', 'GET', ['local_cd' => $request->local_cd]);
+            $d = $this->getMetodos($reques);
+            $metodos = json_decode($d->getContent(),true);
+            
+            $metodosAll = collect($metodos['data']);
+
             $envios = $this->envios;
             $datos = [];
+            $shippingPricesData = $response->json()['data'];
 
+            // dd($metodosAll,$shippingPricesData );
             
-            foreach ($response->json()['data'] as $key => $envio) {
-                $indice = array_search($envio['method'], array_column($envios, 'method'));
-                $data = $envios[$indice];
+            foreach ( $metodosAll as $key => $envio) {
+                
+               
+                $data = $envios[$key];
 
-                $data['isFree'] = $envio['is_free'];
+                $data['isFree'] = isset($shippingPricesData[$key]) ? $shippingPricesData[$key]['is_free'] : $data['isFree'];
 
                 $precios = [];
-                if(isset($envio['extra_charges']) ){
+                if(isset($shippingPricesData[$key]['extra_charges']) ){
 
                     $precios[] =
                         [
-                            'value' => $envio['extra_charges']['cost'],
-                            'concepto' => $envio['extra_charges']['descrip']
+                            'value' => $shippingPricesData[$key]['extra_charges']['cost'],
+                            'concepto' => $shippingPricesData[$key]['extra_charges']['descrip']
                         ];
                 }
 
-                if(isset($envio['curr'])){
+                if(isset($shippingPricesData[$key]['curr'])){
                     $precios[] = [
-                        'value' => $envio['curr'],
+                        'value' => $shippingPricesData[$key]['curr'],
                         'concepto' =>  'Envío'
                     ];
                 }
 
                 $data['agregados'] = $precios;
+                $data['body'] = collect($envio['descrip_parsed']);
+
+                $texts = [];
+
+                // 
+                if(isset($envio['price']['is_free']) && $envio['price']['is_free']){
+
+                    $precios = [];
+
+                    if(isset($envio['price']['curr_ca'])){
+                        $texts[] = [
+                            'type' => 'text',
+                            'text' => 'undefined',
+                            'children' => [
+                                [
+                                    'type' => 'text',
+                                    'text' => '$'.$envio['price']['curr_ca'],
+                                    'textDecoration' => 'line-through',
+                                    'color' => '#f44336',
+                                    'fontWeight' => '600'
+                                ],
+                                [
+                                    'type' => 'text',
+                                    'text' => 'Sin costo de envío',
+                                    'backgroundColor' => '#4caf50',
+                                    'color' => 'white',
+                                    'padding' => '5 12',
+                                    'borderRadius' => 12,
+                                    'fontWeight' => '600'
+                                ],
+                                [
+                                    'type' => 'text',
+                                    'text' => ' a todo el país',
+                                    'fontWeight' => '600'
+                                ],
+                            ]
+                        ];
+                    }
+
+                    if(isset($envio['price']['curr_caba'])){
+                        $texts[] = [
+                            'type' => 'text',
+                            'text' => 'undefined',
+                            'children' => [
+                                [
+                                    'type' => 'text',
+                                    'text' => '$'.$envio['price']['curr_caba'],
+                                    'textDecoration' => 'line-through',
+                                    'color' => '#f44336',
+                                    'fontWeight' => '600'
+                                ],
+                                [
+                                    'type' => 'text',
+                                    'text' => 'Sin costo de envío',
+                                    'backgroundColor' => '#4caf50',
+                                    'color' => 'white',
+                                    'padding' => '5 12',
+                                    'borderRadius' => 12,
+                                    'fontWeight' => '600'
+                                ],
+                                [
+                                    'type' => 'text',
+                                    'text' => ' en CABA',
+                                    'fontWeight' => '600'
+                                ],
+                            ]
+                        ];
+                    }
+
+                    if(isset($envio['price']['curr_gba'])){
+                        $texts[] = [
+                            'type' => 'text',
+                            'text' => 'undefined',
+                            'children' => [
+                                [
+                                    'type' => 'text',
+                                    'text' => '$'.$envio['price']['curr_gba'],
+                                    'textDecoration' => 'line-through',
+                                    'color' => '#f44336',
+                                    'fontWeight' => '600'
+                                ],
+                                [
+                                    'type' => 'text',
+                                    'text' => 'Sin costo de envío',
+                                    'backgroundColor' => '#4caf50',
+                                    'color' => 'white',
+                                    'padding' => '5 12',
+                                    'borderRadius' => 12,
+                                    'fontWeight' => '600'
+                                ],
+                                [
+                                    'type' => 'text',
+                                    'text' => ' en GBA',
+                                    'fontWeight' => '600'
+                                ],
+                            ]
+                        ];
+                    }
+
+                    if(isset($envio['price']['curr_other'])){
+                        $texts[] = [
+                            'type' => 'text',
+                            'text' => 'Desde $'.$envio['price']['curr_other'].' al resto del país',
+                            'fontWeight' => '600'
+                        ];
+                    }
+
+                    if(isset($envio['price']['curr'])){
+                        $texts[] = [
+                            'type' => 'text',
+                            'text' => 'undefined',
+                            'children' => [
+                                [
+                                    'type' => 'text',
+                                    'text' => '$'.$envio['price']['curr'],
+                                    'textDecoration' => 'line-through',
+                                    'color' => '#f44336',
+                                    'fontWeight' => '600'
+                                ],
+                                [
+                                    'type' => 'text',
+                                    'text' => 'Sin costo de traslado',
+                                    'backgroundColor' => '#4caf50',
+                                    'color' => 'white',
+                                    'padding' => '5 12',
+                                    'borderRadius' => 12,
+                                    'fontWeight' => '600'
+                                ],
+                            ]
+                        ];
+                    }   
+                }else{
+                    // dd($envio['price']);
+                    if(isset($envio['price']['curr_ca'])){
+                        $texts[] = [
+                            'type' => 'text',
+                            'text' => 'undefined',
+                            'children' => [
+                                [
+                                    'type' => 'image',
+                                    'src' => '~/assets/icons/ca_logo.png',
+                                    'width' => 40,
+                                    'height' => 'auto',
+                                ],
+                                [
+                                    'type' => 'text',
+                                    'text' => '$'.$envio['price']['curr_ca'],
+                                    'backgroundColor' => '#ff5722',
+                                    'color' => 'white',
+                                    'padding' => '5 12',
+                                    'borderRadius' => 12,
+                                    'fontWeight' => '600'
+                                ],
+                                [
+                                    'type' => 'text',
+                                    'text' => ' a todo el país',
+                                    'fontWeight' => '600'
+                                ],
+                            ]
+                        ];
+                    }
+                    if(isset($envio['price']['curr_oca'])){
+                        $texts[] = [
+                            'type' => 'text',
+                            'text' => 'undefined',
+                            'children' => [
+                                [
+                                    'type' => 'image',
+                                    'src' => '~/assets/icons/oca_logo.png',
+                                    'width' => 40,
+                                    'height' => 'auto',
+                                ],
+                                [
+                                    'type' => 'text',
+                                    'text' => '$'.$envio['price']['curr_oca'],
+                                    'backgroundColor' => '#ff5722',
+                                    'color' => 'white',
+                                    'padding' => '5 12',
+                                    'borderRadius' => 12,
+                                    'fontWeight' => '600'
+                                ],
+                                [
+                                    'type' => 'text',
+                                    'text' => ' a todo el país',
+                                    'fontWeight' => '600'
+                                ],
+                            ]
+                        ];
+                    }
+                    if(isset($envio['price']['curr_caba'])){
+                        $texts[] = [
+                            'type' => 'text',
+                            'text' => 'undefined',
+                            'children' => [
+                                [
+                                    'type' => 'text',
+                                    'text' => '$'.$envio['price']['curr_caba'],
+                                    'backgroundColor' => '#ff5722',
+                                    'color' => 'white',
+                                    'padding' => '5 12',
+                                    'borderRadius' => 12,
+                                    'fontWeight' => '600'
+                                ],
+                                [
+                                    'type' => 'text',
+                                    'text' => ' en CABA',
+                                    'fontWeight' => '600'
+                                ],
+                            ]
+                        ];
+                    }
+                    if(isset($envio['price']['curr_gba'])){
+                        $texts[] = [
+                            'type' => 'text',
+                            'text' => 'undefined',
+                            'children' => [
+                                [
+                                    'type' => 'text',
+                                    'text' => '$'.$envio['price']['curr_gba'],
+                                    'backgroundColor' => '#ff5722',
+                                    'color' => 'white',
+                                    'padding' => '5 12',
+                                    'borderRadius' => 12,
+                                    'fontWeight' => '600'
+                                ],
+                                [
+                                    'type' => 'text',
+                                    'text' => ' en GBA',
+                                    'fontWeight' => '600'
+                                ],
+                            ]
+                        ];
+                    }
+                    if(isset($envio['price']['curr_other_oca'])){
+                        $texts[] = [
+                            'type' => 'text',
+                            'text' => 'undefined',
+                            'children' => [
+                                [
+                                    'type' => 'image',
+                                    'src' => '~/assets/icons/oca_logo.png',
+                                    'width' => 40,
+                                    'height' => 'auto',
+                                ],
+                                [
+                                    'type' => 'text',
+                                    'text' => '$'.$envio['price']['curr_other_oca'],
+                                    'backgroundColor' => '#ff5722',
+                                    'color' => 'white',
+                                    'padding' => '5 12',
+                                    'borderRadius' => 12,
+                                    'fontWeight' => '600'
+                                ],
+                                [
+                                    'type' => 'text',
+                                    'text' => ' al resto del país',
+                                    'fontWeight' => '600'
+                                ],
+                            ]
+                        ];
+                    }
+                    if(isset($envio['price']['curr_other_ca'])){
+                        $texts[] = [
+                            'type' => 'text',
+                            'text' => 'undefined',
+                            'children' => [
+                                [
+                                    'type' => 'image',
+                                    'src' => '~/assets/icons/ca_logo.png',
+                                    'width' => 40,
+                                    'height' => 'auto',
+                                ],
+                                [
+                                    'type' => 'text',
+                                    'text' => '$'.$envio['price']['curr_other_ca'],
+                                    'backgroundColor' => '#ff5722',
+                                    'color' => 'white',
+                                    'padding' => '5 12',
+                                    'borderRadius' => 12,
+                                    'fontWeight' => '600'
+                                ],
+                                [
+                                    'type' => 'text',
+                                    'text' => ' al resto del país',
+                                    'fontWeight' => '600'
+                                ],
+                            ]
+                        ];
+                    }
+                    if(isset($envio['price']['curr'])){
+                        $t = '';
+
+                        if($envio['price']['method'] == 'transport'){
+                            $t = ' por costo de traslado hasta el transporte elegido.';
+                        }elseif($envio['price']['method'] == 'integral_pack'){
+                            $t = ' por costo de servicio.';
+                        }
+                        $texts[] = [
+                            'type' => 'text',
+                            'text' => 'undefined',
+                            'children' => [
+                                [
+                                    'type' => 'text',
+                                    'text' => '$'.$envio['price']['curr'],
+                                    'backgroundColor' => '#ff5722',
+                                    'color' => 'white',
+                                    'padding' => '5 12',
+                                    'borderRadius' => 12,
+                                    'fontWeight' => '600'
+                                ],
+                                [
+                                    'type' => 'text',
+                                    'text' => $t,
+                                    'fontWeight' => '600'
+                                ],
+                            ]
+                        ];
+                    }
+                }
+
+                $data['body'] = $data['body']->concat($texts);
+
+                if(isset($envio['extra_charge'])){
+
+                    $envio['extra_charge_parsed'] = collect($envio['extra_charge_parsed'])->reject(function ($element) {
+                        return $element['text'] === '';
+                    })->map(function ($element) use($envio) {
+                        $element['html'] = $envio['extra_charge'];
+                        return $element;
+                    });
+
+                    $data['body'] = $data['body']->concat($envio['extra_charge_parsed']);
+                }
+
+                $data['body'] = $data['body']->reject(function ($element) {
+                    return $element['text'] === '';
+                });
 
                 $datos[] = $data;
             }
 
-            array_push($datos, $envios[array_search('store_pickup', array_column($envios, 'method'))]);
-
             return response()->json($datos);
 
         } catch (\Exception $e) {
-                return response()->json(['message'=>$e->getMessage()],422);
+            return response()->json(['message'=>$e->getMessage()],422);
         }
     }
 
@@ -281,7 +617,7 @@ class CheckoutController extends Controller
         ]);
 
         $this->token = Auth::user()->api_token;
-
+    
         try {
             $response = Http::withHeaders([
               'x-api-key' => $this->token,
@@ -290,17 +626,18 @@ class CheckoutController extends Controller
             ->post($this->generateUrl(['controller' => 'Checkout','method' => 'shipping_edit']), 
                 $request->all());
 
+                // dd($response->body());
             $response = $response->json();
-
+                // dd();
             if($response['status'] != 'success'){
-                throw new \Exception("No se encontraron resultados");
+                throw new \Exception(json_encode($response));
                 // throw new \Exception($response->json());
             }
 
               return response()->json($response['data']);
             
         } catch (\Exception $e) {
-            return response()->json(['message'=>$e->getMessage()],422);
+            return response()->json($e->getMessage(),422);
         }
     }
 
@@ -470,14 +807,12 @@ class CheckoutController extends Controller
             ->post($this->generateUrl(['controller' => 'Checkout','method' => 'summary']), 
                 $request->all());
 
-            // dd($response->json());
-
              if($response->json()['status'] == 'error'){
-                throw new \Exception($response->json()['message']);
+                throw new \Exception(json_encode($response->json()));
             }
 
             if($response->json()['status'] != 'success'){
-                throw new \Exception("No se encontraron resultados");
+                throw new \Exception("{ message: 'No se encontraron resultados' }");
             }
             if(isset($response->json()['data'])){
               return response()->json($response->json()['data']);
@@ -485,7 +820,7 @@ class CheckoutController extends Controller
             return response()->json($response->json()['data']);
 
         } catch (\Exception $e) {
-                return response()->json(['message'=>$e->getMessage()],422);
+                return response()->json($e->getMessage(),422);
         }
     }
 
@@ -593,6 +928,72 @@ class CheckoutController extends Controller
         } catch (\Exception $e) {
             return response()->json(['message'=>$e->getMessage()],422);
         }
+    }
+
+    public function getMetodos(Request $request)
+    {
+        try {
+             $localCd = $request->input('local_cd');
+
+            $this->token = Auth::user()->api_token;
+            $response = Http::withHeaders([
+             'x-api-key' => $this->token,
+           ])
+           ->asForm()
+           ->post($this->generateUrl(['controller' => 'Shipping','method' => 'all_methods']).'&store_id='.$localCd);
+
+           return response()->json($response->json());
+        } catch (\Throwable $th) {
+            return response()->json($th->getMessage(),422);
+        }
+    }
+
+    public function getMetodosPagos(Request $request)
+    {
+        return response()->json($this->metdosPagos);
+    }
+
+    public function shippingSelectAddress(Request $request)
+    {
+        try {
+
+            $this->token = Auth::user()->api_token;
+           $response = Http::withHeaders([
+            'x-api-key' => $this->token,
+          ])
+          ->asForm()
+          ->post($this->generateUrl(['controller' => 'Checkout','method' => 'shipping_select_address']), $request->all());
+
+       //    dd();
+          return response()->json($response->json());
+       } catch (\Throwable $th) {
+           return response()->json($th->getMessage(),422);
+       }
+    }
+
+    public function getHorarios()
+    {
+        try {
+
+            $this->token = Auth::user()->api_token;
+           $response = Http::withHeaders([
+            'x-api-key' => $this->token,
+          ])
+        //   ->asForm()
+          ->post($this->generateUrl(['controller' => 'DropOffTime','method' => 'get']),[]);
+
+            $horarios = $response->collect();
+            // dd($horarios['data']);
+            $horarios = collect($horarios['data'])->map(function($horario){
+                return [
+                    'id' => $horario['id'],
+                    'name' => $horario['start']." ".$horario['end']." - ".$horario['disclaimer'],
+                ];
+            });
+          return response()->json($horarios);
+       } catch (\Throwable $th) {
+           return response()->json($th->getMessage(),422);
+       }
     }
 
     private function generateUrl($data)

@@ -76,6 +76,12 @@ class StoresController extends Controller
       $this->validate($request, [
           'categorie' => 'required',
       ]);
+
+      if(isset($request->no_paginate) && $request->no_paginate == true){
+        // $response = Http::accept('application/json')->get($this->urlStore.'all');
+        return response()->json($this->consultaStoresRosa($request->all()));
+      }
+
       return response()->json(CollectionHelper::paginate(  $this->consultaStoresRosa($request->all()), $request->paginate ?? 16));
     }
 
@@ -86,12 +92,11 @@ class StoresController extends Controller
     {
 
       $response = Http::accept('application/json')->get($this->urlStore.'all');
-      
 
       if($response->json() == null){
         return response()->json(CollectionHelper::paginate(collect([]), $request->paginate ?? 16 ));
       }
-      
+      // dd($response->collect()['data']);
       $response = collect($response->collect()['data']);
       $stores = Store::whereIn('LOCAL_CD',$response->pluck('id')->all())->get();
       $favoritos = Favorite::whereIn('LOCAL_CD',$response->pluck('id')->all())->where('STAT_CD','1000')->where('CLIENT_NUM',Auth::user()->num)->get();
@@ -100,10 +105,6 @@ class StoresController extends Controller
       // dd('$favoritos');
       return $this->crearConsulta($response->map(function($tienda) use ($stores,$favoritos){
         $store = $stores->where('LOCAL_CD', $tienda['id'])->first();
-        // dd();
-        // if($tienda['id'] == 1008){
-        //   dd($store);
-        // }
 
         $categorie = '';
         if($store['USE_MAN'] == "Y"){

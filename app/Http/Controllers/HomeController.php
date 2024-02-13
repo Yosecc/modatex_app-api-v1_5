@@ -7,6 +7,7 @@ use App\Models\Cart;
 use App\Models\Store;
 use App\Models\Slider;
 use App\Models\States;
+use App\Models\Favorite;
 use App\Models\PagesCms;
 use App\Models\Products;
 use Illuminate\Support\Arr;
@@ -340,6 +341,9 @@ class HomeController extends Controller
   public function getBloques()
   {
 
+   
+    $pagesMenuCMS = PagesCms::whereIn('id',[458,459,460])->get();
+
     $nameChache = 'bloques';
     if (Cache::has($nameChache)) {
       return Cache::get($nameChache);
@@ -484,11 +488,69 @@ class HomeController extends Controller
           'version' => \Carbon\Carbon::now()->timestamp
         ])
       ],
+      [
+        'name' => 'Ingresos de Hoy',
+        'type' => 'search',
+        'value' => '',
+        "redirect" => [
+          "route" => "/search",
+          "params" => [
+            "betweenDates" => \Carbon\Carbon::now()->format('Y-m-d').','.\Carbon\Carbon::now()->addDays(1)->format('Y-m-d'),
+            "order" => 'register DESC',
+            "search" => ''
+          ]
+        ],
+        'config' => [
+          'slider' => false,
+          'is_title' => false,
+          'is_card' => false,
+        ],
+        'products' => $products->onGetSearch([
+          'start' => 0,
+          'length' => 36,
+          'search' => '',
+          'years' => 1,
+          'order' => 'register DESC',
+          'no_product_id' => null,
+          'daysExpir' => 365,
+          'storeData' => 1,
+          'inStock'=> 1,
+          'cacheTime' => 1200,
+          'sections' => 'woman,man,xl,kids,accessories',
+          "betweenDates" => \Carbon\Carbon::now()->format('Y-m-d').','.\Carbon\Carbon::now()->addDays(1)->format('Y-m-d'),
+        ])
+      ],
       // [
       //   'name' => 'modal',
       //   'type' => 'modal',
       //   'editores' => [utf8_decode('{"time":1699560659858,"blocks":[{"id":"UdS0qmWFpd","type":"Portadas","data":{"marcas":[{"id":1880,"name":"BLANCO YABELL","name_id":"BLANCOYABELL","logo":"https://netivooregon.s3.amazonaws.com/common/img/logo/blancoyabell_1554825423.webp","cleaned":"blancoyabell","col":4,"offset":0,"portada_url":"https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/yabell-covernuevo-m1.jpg?N6","isViewLogo":false},{"id":2573,"name":"BLANCO PALACE","name_id":"BLANCOPALACE","logo":"https://netivooregon.s3.amazonaws.com/common/img/logo/blancopalace_1682446532.webp","cleaned":"blancopalace","col":4,"offset":0,"portada_url":"https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/blancopalace-covernuevo.jpg?n2","isViewLogo":false},{"id":2330,"name":"VIA BLANCO","name_id":"VIABLANCO","logo":"https://netivooregon.s3.amazonaws.com/common/img/logo/viablanco_1622660862.webp","cleaned":"viablanco","col":4,"offset":0,"portada_url":"https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/viablanco-covernuevo.jpg?5","isViewLogo":false},{"id":2565,"name":"Somio Sweet Home","name_id":"SOMIOSWEETHOME","logo":"https://netivooregon.s3.amazonaws.com/common/img/logo/somiosweethome_1680008658.webp","cleaned":"somiosweethome","col":4,"offset":0,"portada_url":"https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/somio-covernuevo.jpg","isViewLogo":false},{"id":1626,"name":"NEW PORT","name_id":"NEWPORT","logo":"https://netivooregon.s3.amazonaws.com/common/img/logo/newport_1618851261.webp","cleaned":"newport","col":4,"offset":0,"portada_url":"https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/newport-covernuevo.jpg?n5","isViewLogo":false},{"id":2031,"name":"ALIPAPA","name_id":"ALIPAPA","logo":"https://netivooregon.s3.amazonaws.com/common/img/logo/alipapa_1633544236.webp","cleaned":"alipapa","col":4,"offset":0,"portada_url":"https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/altocabildo-covernuevo.jpg","isViewLogo":false}]},"tunes":{"categoriaTune":{"ocultarApp":false,"ocultarWeb":false},"configTune":{"expandir":false,"margin":{"top":{"value":0,"placeholder":"Arriba","clave":"top"},"right":{"value":0,"placeholder":"Derecha","clave":"right"},"bottom":{"value":0,"placeholder":"Abajo","clave":"bottom"},"left":{"value":0,"placeholder":"Izquierda","clave":"left"}}}}}],"version":"2.28.2"}')]
-      // ]
+      // ],
+      [
+        'name' => 'Categorías',
+        'type' => 'box_categories',
+        'categories' => $this->getCategories()
+      ],
+      [
+        'name' => '¿Necesitas ayuda?',
+        'type' => 'card_list_redirect',
+        'items' => [
+          [
+            'name' => '¿Cómo comprar?',
+            'editor' => utf8_decode($pagesMenuCMS->where('id',458)->first()->data_json),
+            // 'redirect' => []
+          ],
+          [
+            'name' => 'Formas de pago',
+            'editor' => utf8_decode($pagesMenuCMS->where('id',460)->first()->data_json),
+            // 'redirect' => []
+          ],
+          [
+            'name' => 'Envíos a todo el país',
+            'editor' => utf8_decode($pagesMenuCMS->where('id',459)->first()->data_json),
+            // 'redirect' => []
+          ],
+        ]
+      ]
     ];
 
     Cache::put($nameChache, $data , $seconds = 10800);
@@ -726,6 +788,8 @@ class HomeController extends Controller
               "route" => "/search",
               "params" => [
                 "betweenDates" => \Carbon\Carbon::now()->format('Y-m-d').','.\Carbon\Carbon::now()->addDays(1)->format('Y-m-d'),
+                "order" => 'register DESC',
+                "search" => ''
               ]
             ]
           ],
@@ -736,6 +800,8 @@ class HomeController extends Controller
               "route" => "/search",
               "params" => [
                 "betweenDates" => \Carbon\Carbon::now()->subDays(1)->format('Y-m-d').','.\Carbon\Carbon::now()->format('Y-m-d'),
+                "order" => 'register DESC',
+                "search" => ''
               ]
             ]
           ],
@@ -746,6 +812,9 @@ class HomeController extends Controller
               "route" => "/search",
               "params" => [
                 "betweenDates" => \Carbon\Carbon::now()->subDays(2)->format('Y-m-d').','.\Carbon\Carbon::now()->subDays(1)->format('Y-m-d'),
+                "order" => 'register DESC',
+                "search" => ''
+
               ]
             ]
           ],
@@ -756,6 +825,9 @@ class HomeController extends Controller
               "route" => "/search",
               "params" => [
                 "betweenDates" => \Carbon\Carbon::now()->subDays(3)->format('Y-m-d').','.\Carbon\Carbon::now()->subDays(2)->format('Y-m-d'),
+                "order" => 'register DESC',
+                "search" => ''
+
               ]
             ]
           ],
@@ -766,15 +838,87 @@ class HomeController extends Controller
               "route" => "/search",
               "params" => [
                 "betweenDates" => \Carbon\Carbon::now()->subDays(4)->format('Y-m-d').','.\Carbon\Carbon::now()->subDays(3)->format('Y-m-d'),
+                "order" => 'register DESC',
+                "search" => ''
+
               ]
             ]
           ],
         ]
       ],
+      // [
+      //   "icon" => 'res://heart_solid_2',
+      //   "name" => 'Mis marcas favoritas',
+      //   "disabled" => false,
+      //   "editor" => $this->getMarcasFavoritas()
+      // ]
     ];
 
     return array_merge($itemsMenu, $pagesMenu->toArray());
 
+  }
+
+  private function getMarcasFavoritas()
+  {
+
+    $favoritos = Favorite::where('STAT_CD','1000')->where('CLIENT_NUM',Auth::user()->num)->where('LOCAL_CD','!=','')->get();
+    $response = Http::accept('application/json')->get('https://www.modatex.com.ar/?c=Store::all');
+    $tiendas = collect($response->collect()['data']);
+    $idsFavoritos = $favoritos->pluck('LOCAL_CD');
+
+    $blocks = [];
+
+    $marcasBlock = $tiendas->whereIn('id', $idsFavoritos->toArray())->map(function($tienda){
+      // $tienda['sections'] = json_decode($tienda['sections']);
+      $tienda['logo'] =  env('URL_IMAGE').'/common/img/logo/'. $tienda['logo'];
+      $tienda['col'] = 2;
+      $tienda['offset'] = 0;
+      return $tienda;
+    });
+
+    // dd($marcasBlock);
+
+
+    $blocks[] = $this->constructorBloque([
+      'type' => 'Marcas',
+      'data' => ['marcas' => $marcasBlock ]
+    ]);
+
+    return json_encode($this->constructorObjectPage($blocks)) ;
+
+  }
+
+  private function constructorBloque($params)
+  {
+    return [
+      "id" => 'GuUPhCjs1F',
+      "type" => $params['type'],
+      "data" => $params['data'],
+      "tunes" => [
+        "categoriaTune"=>[
+            "ocultarApp" => false,
+            "ocultarWeb" => false
+        ],
+        "configTune"=>[
+            "expandir" => false,
+            "margin"=>[
+                "top" => [ "value" => 0,"placeholder" => "Arriba","clave" => "top"],
+                "right" => [ "value" => 0,"placeholder" => "Derecha","clave" => "right"],
+                "bottom" => [ "value" => 0,"placeholder" => "Abajo","clave" => "bottom"],
+                "left" => [ "value" => 0,"placeholder" => "Izquierda","clave" => "left"]
+            ]
+        ]
+      ]
+    ];
+  }
+
+  private function constructorObjectPage($blocks)
+  {
+    return [
+      "time" => \Carbon\Carbon::now()->timestamp,
+      "blocks" => $blocks,
+      "version" => "1.0.0"
+    ];
   }
 
 }

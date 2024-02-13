@@ -34,6 +34,7 @@ class AddressController extends Controller
                 throw new \Exception("No se encontraron resultados");
             }
 
+            
             $data = collect($response->json()['DIRECCIONES'])->map(function($direccion){
                 return [
                     "direccion" => $direccion['GENERAL'],
@@ -42,7 +43,8 @@ class AddressController extends Controller
                     "name" => $direccion['ALIAS'] == 0 ? '':$direccion['ALIAS'],
                     "id" => $direccion['ID'],
                     "default" =>  $direccion['SELECCIONADO'] ? true : false,
-                    "detalle" => ClientLocal::where('NUM', $direccion['ID'] )->first()
+                    "detalle" => ClientLocal::where('NUM', $direccion['ID'] )->first(),
+                    
                 ];
             });
 
@@ -156,12 +158,16 @@ class AddressController extends Controller
 
         $transportes = $this->getTransportes($request->group_id);
 
+        $horarios = new CheckoutController();
+        $horarios = $horarios->getHorarios();    
+
         return [
             'states'      => $states,
             'gba'         => $gba,
             'caba'        => $caba,
             'integral'    => $integral ,
-            'transportes' => $transportes
+            'transportes' => $transportes,
+            "horarios" => json_decode($horarios->getContent())
         ];
     }
 
