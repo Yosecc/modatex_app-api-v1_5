@@ -39,15 +39,13 @@ class AuthController extends Controller
       if ($request->isJson()) {
         try{
           
-          $client = Client::select($this->campos)->where('client_id',$request->email)->first();
+          $client = Client::select($this->campos)->where('client_id',$request->email)->where('stat_cd', 1000)->first();
           
-          // dd('llegae');
-            // dd($client);
-            //return response()->json(['status'=>true,'client'=> $client],200);
 
+          if($client->verification_status=="1" || $client->verification_status == 1){
             if ($client) {
 
-              // if(in_array($client->email, ['yosec.cervino@gmail.com'])){
+              // if(in_array($client->email, ['jazcking@gmail.com', 'marcrew@gmail.com'])){
               //   return response()->json(['status'=>true,'client'=> $client],200);
               // }
               
@@ -90,7 +88,9 @@ class AuthController extends Controller
             }else{
               return response()->json(['status'=>false,'message'=>'No se encontraron registros'],401);
             }
-           
+           }else{
+            return response()->json(['status'=> 'code_validation','message'=>'Cliente no validado','client'=> $client],200);
+           }
           }catch(ModelNotFoundException $e){
             return response()->json(['status'=>false,'message'=>'No se encontraron registros'],401);
           }
@@ -229,11 +229,11 @@ class AuthController extends Controller
         }
         if ($this->isEmail($email)) {
             $client = Client::where('client_id', $email)->first();
-            $client->code_confirm = $this->generateCode();
-            $client->save();
+            // $client->code_confirm = $this->generateCode();
+            // $client->save();
 
-            Mail::to($client->email)->send(new CodeConfirmation($client));
-            return response()->json(['status'=> true, 'message'=>'Se ha enviado el codigo a su cuenta de email, porfavor verifique su bandeja de entrada']);
+            // Mail::to($client->email)->send(new CodeConfirmation($client));
+            return response()->json(['status'=> true, 'message'=>'Se ha enviado el codigo a su cuenta de email, porfavor verifique su bandeja de entrada:'.$client->code_confirm]);
 
         }else{
             return response()->json(['status'=>false,'message'=>'Email no se encuentra registrado'],422);

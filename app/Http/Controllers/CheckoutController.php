@@ -55,7 +55,8 @@ class CheckoutController extends Controller
                 'icon'         => 'res://sucursal',
                 'agregados'    => [],
                 'method'       => 'post_office',
-                'isFree'       => false
+                'isFree'       => false,
+                'active'     => false
             ],
             'home_delivery'=>[
                 'id'           => 2,
@@ -65,7 +66,8 @@ class CheckoutController extends Controller
                 'icon'         => 'res://enviocasa',
                 'agregados'    => [],
                 'method'       => 'home_delivery',
-                'isFree'       => false
+                'isFree'       => false,
+                'active'     => false
             ],
             'transport'=>[
                 'id'           => 3,
@@ -75,7 +77,8 @@ class CheckoutController extends Controller
                 'icon'         => 'res://envio',
                 'agregados'    => [],
                 'method'       => 'transport',
-                'isFree'       => false
+                'isFree'       => false,
+                'active'     => false
             ],
             'integral_pack'=>[
                 'id'           => 4,
@@ -85,7 +88,8 @@ class CheckoutController extends Controller
                 'icon'         => 'res://integralpack',
                 'agregados'    => [],
                 'method'       => 'integral_pack',
-                'isFree'       => false
+                'isFree'       => false,
+                'active'     => false
             ],
             'store_pickup'=>[
                 'id'           => 5,
@@ -95,9 +99,11 @@ class CheckoutController extends Controller
                 'icon'         => 'res://enviostore',
                 'agregados'    => [],
                 'method'       => 'store_pickup',
-                'isFree'       => false
+                'isFree'       => false,
+                'active'     => false
             ]];
 
+    
     public function getEnvios(Request $request)
     {
         try {   
@@ -494,6 +500,26 @@ class CheckoutController extends Controller
                 $datos[] = $data;
             }
 
+            $response = Http::withHeaders([
+                'x-api-key' => $this->token,
+              ])
+              ->asForm()
+              ->post($this->generateUrl(['controller' => 'Checkout','method' => 'shipping_method']), 
+                  $request->all());
+
+            $seleccion = $response->collect();
+
+            if(isset($seleccion['data'])){
+                $datos = collect($datos)->map(function($dato) use ($seleccion){
+                    if(isset($seleccion['data']['shipping_method'])){
+                        if($dato['method'] == $seleccion['data']['shipping_method']){
+                            $dato['active'] = true;
+                        }
+                    }
+                     return $dato;
+                });
+            }
+            
             return response()->json($datos);
 
         } catch (\Exception $e) {
@@ -852,23 +878,23 @@ class CheckoutController extends Controller
               try {
                 if(isset($response->json()['data'])){
 
-                    $notification = new NotificationsPush(
-                        [
-                            'notification' => [
-                                'title' => 'Gracias por tu compra',
-                                "body" => 'Su compra ha sido procesada con éxito. Pronto nos comunicaremos'
-                            ],
-                            'data' => [
-                                'redirect' => [
-                                    'route' => '/order',
-                                    'params' => [
-                                        'id' => $response->json()['data']['purchase_id']
-                                    ]
-                                ]
-                            ]
-                    ]);
+                //     $notification = new NotificationsPush(
+                //         [
+                //             'notification' => [
+                //                 'title' => 'Gracias por tu compra',
+                //                 "body" => 'Su compra ha sido procesada con éxito. Pronto nos comunicaremos'
+                //             ],
+                //             'data' => [
+                //                 'redirect' => [
+                //                     'route' => '/order',
+                //                     'params' => [
+                //                         'id' => $response->json()['data']['purchase_id']
+                //                     ]
+                //                 ]
+                //             ]
+                //     ]);
                 }
-                $notification->sendUserNotification(Auth::user()->num);
+                // $notification->sendUserNotification(Auth::user()->num);
 
               } catch (\Exception $e) {
                 

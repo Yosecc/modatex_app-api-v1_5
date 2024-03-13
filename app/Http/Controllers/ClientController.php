@@ -9,17 +9,18 @@ use Auth;
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 use Illuminate\Support\Facades\Http;
-
+use Illuminate\Support\Facades\Validator;
 class ClientController extends Controller
 {
     private $url = 'https://www.modatex.com.ar/ntadministrator/router/Router.php/user';
+    private $urlProfile = 'https://www.modatex.com.ar/?c=';
+
 
     public function index(Request $request){
         // dd();
       $client = Client::find(Auth::user()->num);
       // $client = Client::find(1026071);
       
-
       return response()->json($client);
     }
 
@@ -79,5 +80,45 @@ class ClientController extends Controller
             return response()->json(['message'=> 'Ocurrió un error intente más tarde'], 422);
         }
 
+    }
+
+    public function update(Request $request){
+        // return $request->all();
+
+        $validator = Validator::make($request->all(), [
+            "firstName" => "required",
+            "lastName" => "required",
+            "dni" => "required",
+            "gender" => "required",
+            "areaCode" => "required",
+            "mobilePhone" => "required"
+        ]);
+ 
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 422);
+        }
+
+        $response = Http::withHeaders([ 
+            'x-api-key' => Auth::user()->api_token,
+            'Content-Type' => 'application/x-www-form-urlencoded'
+        ])
+        ->asForm()
+        ->post($this->urlProfile.'Profile::usrDataUpdate',[
+            'firstName' => $request->firstName,
+            'lastName' => $request->lastName,
+            'dni' => $request->dni,
+            "gender" => $request->gender,
+            "areaCode" => $request->areaCode,
+            "mobilePhone" => $request->mobilePhone
+        ]);
+        $response = $response->collect();
+
+        if($response['status'] == 'error'){
+            return response()->json($response->all(), 422);
+        }
+
+        $response['data'] = Client::find(Auth::user()->num);
+        
+        return response()->json($response);
     }
 }

@@ -11,6 +11,7 @@ use App\Models\Favorite;
 use App\Models\PagesCms;
 use App\Models\Products;
 use Illuminate\Support\Arr;
+use App\Models\StoresVisits;
 use Illuminate\Http\Request;
 use App\Models\ProductVisits;
 use App\Http\Traits\StoreTraits;
@@ -20,9 +21,11 @@ use App\Http\Traits\ProductsTraits;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Cache;
+use App\Http\Controllers\Objects\Marca;
 use App\Helpers\General\CollectionHelper;
 use App\Models\TipoModeloUno as Category;
 use App\Http\Controllers\ProductsController;
+
 
 class HomeController extends Controller
 {
@@ -341,221 +344,12 @@ class HomeController extends Controller
   public function getBloques()
   {
 
-   
-    $pagesMenuCMS = PagesCms::whereIn('id',[458,459,460])->get();
+    // return $this->generarCacheBloquesHome();
+    // Cache::put($nameChache, $data , $seconds = 10800);
 
-    $nameChache = 'bloques';
-    if (Cache::has($nameChache)) {
-      return Cache::get($nameChache);
-    }
+    // return response()->json(['bloques' => Cache::get('bloqueshome'), 'imagenes' => Cache::get('bloqueshomeImagenes')]);
 
-    $products = new ProductsController();
-    
-    $data = [
-      [
-        'name' => 'Mujer',
-        'type' => 'categorie',
-        'value' => 1,
-        'config' => [
-          'slider' => true,
-          'is_title' => false,
-          'is_card' => false,
-        ],
-        'products' => $this->productsCategorie([
-          'store' => [
-            'plan' => 'black',
-            'categorie' => 'woman',
-            'limit' => 6
-          ],
-          'products' => [
-            'length' => 1
-          ]
-        ])
-      ],
-      [
-        'name' => 'Hombre',
-        'type' => 'categorie',
-        'value' => 3,
-        'products' => $this->productsCategorie([
-          'store' => [
-            'plan' => 'black',
-            'categorie' => 'man',
-            'limit' => 6
-          ],
-          'products' => [
-            'length' => 1
-          ]
-        ])
-      ],
-      [
-        'name' => 'Talle Especial',
-        'type' => 'categorie',
-        'value' => 6,
-        'products' => $this->productsCategorie([
-          'store' => [
-            'plan' => 'black',
-            'categorie' => 'xl',
-            'limit' => 6
-          ],
-          'products' => [
-            'length' => 1
-          ]
-        ]),
-      ],
-      // [
-      //   'type' => 'promotions',
-      //   'value' => 'valor de busqueda',
-      //   'promotions' => [
-      //     $this->getPromociones()[array_search(3, array_column($this->getPromociones(), 'id'))]
-      //   ]
-      // ],
-      [
-        'name' => 'Niños',
-        'type' => 'categorie',
-        'value' => 4,
-        'products' => $this->productsCategorie([
-          'store' => [
-            'plan' => 'black',
-            'categorie' => 'kids',
-            'limit' => 6
-          ],
-          'products' => [
-            'length' => 1
-          ]
-        ]),
-      ],
-      [
-        'name' => 'Accesorios',
-        'type' => 'categorie',
-        'value' => 2,
-        'products' => $this->productsCategorie([
-          'store' => [
-            'plan' => 'black',
-            'categorie' => 'accessories',
-            'limit' => 6
-          ],
-          'products' => [
-            'length' => 1
-          ]
-        ]),
-      ],
-      [
-        'name' => 'Zapatos',
-        'type' => 'filter',
-        'value' => 'zapatos',
-        'products' => $products->onGetSearch([
-          'start' => 0,
-          'length' => 6,
-          'search' => 'zapatos',
-          'years' => 1,
-          'order' => 'manually',
-          'no_product_id' => null,
-          'daysExpir' => 365,
-          // 'sections' => 'woman',
-        ])
-      ],
-      [
-        'name' => 'Remeras',
-        'type' => 'filter',
-        'value' => 'remeras',
-        'products' => $products->onGetSearch([
-          'start' => 0,
-          'length' => 6,
-          'search' => 'remeras',
-          'years' => 1,
-          'order' => 'manually',
-          'no_product_id' => null,
-          'daysExpir' => 365,
-          // 'sections' => 'woman',
-        ])
-      ],
-      [
-        'name' => 'Productos destacados',
-        'type' => 'categorie',
-        'value' => 0,
-        'config' => [
-          'slider' => true,
-          'is_title' => false,
-          'is_card' => false,
-        ],
-        'products' => $products->destacados([
-          'start' => 0,
-          'length' => 6,
-          'storeData' => 1,
-          'inStock' => 1,
-          'daysExpir' => 365,
-          'order' => 'date DESC',
-          'version' => \Carbon\Carbon::now()->timestamp
-        ])
-      ],
-      [
-        'name' => 'Ingresos de Hoy',
-        'type' => 'search',
-        'value' => '',
-        "redirect" => [
-          "route" => "/search",
-          "params" => [
-            "betweenDates" => \Carbon\Carbon::now()->format('Y-m-d').','.\Carbon\Carbon::now()->addDays(1)->format('Y-m-d'),
-            "order" => 'register DESC',
-            "search" => ''
-          ]
-        ],
-        'config' => [
-          'slider' => false,
-          'is_title' => false,
-          'is_card' => false,
-        ],
-        'products' => $products->onGetSearch([
-          'start' => 0,
-          'length' => 36,
-          'search' => '',
-          'years' => 1,
-          'order' => 'register DESC',
-          'no_product_id' => null,
-          'daysExpir' => 365,
-          'storeData' => 1,
-          'inStock'=> 1,
-          'cacheTime' => 1200,
-          'sections' => 'woman,man,xl,kids,accessories',
-          "betweenDates" => \Carbon\Carbon::now()->format('Y-m-d').','.\Carbon\Carbon::now()->addDays(1)->format('Y-m-d'),
-        ])
-      ],
-      // [
-      //   'name' => 'modal',
-      //   'type' => 'modal',
-      //   'editores' => [utf8_decode('{"time":1699560659858,"blocks":[{"id":"UdS0qmWFpd","type":"Portadas","data":{"marcas":[{"id":1880,"name":"BLANCO YABELL","name_id":"BLANCOYABELL","logo":"https://netivooregon.s3.amazonaws.com/common/img/logo/blancoyabell_1554825423.webp","cleaned":"blancoyabell","col":4,"offset":0,"portada_url":"https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/yabell-covernuevo-m1.jpg?N6","isViewLogo":false},{"id":2573,"name":"BLANCO PALACE","name_id":"BLANCOPALACE","logo":"https://netivooregon.s3.amazonaws.com/common/img/logo/blancopalace_1682446532.webp","cleaned":"blancopalace","col":4,"offset":0,"portada_url":"https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/blancopalace-covernuevo.jpg?n2","isViewLogo":false},{"id":2330,"name":"VIA BLANCO","name_id":"VIABLANCO","logo":"https://netivooregon.s3.amazonaws.com/common/img/logo/viablanco_1622660862.webp","cleaned":"viablanco","col":4,"offset":0,"portada_url":"https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/viablanco-covernuevo.jpg?5","isViewLogo":false},{"id":2565,"name":"Somio Sweet Home","name_id":"SOMIOSWEETHOME","logo":"https://netivooregon.s3.amazonaws.com/common/img/logo/somiosweethome_1680008658.webp","cleaned":"somiosweethome","col":4,"offset":0,"portada_url":"https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/somio-covernuevo.jpg","isViewLogo":false},{"id":1626,"name":"NEW PORT","name_id":"NEWPORT","logo":"https://netivooregon.s3.amazonaws.com/common/img/logo/newport_1618851261.webp","cleaned":"newport","col":4,"offset":0,"portada_url":"https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/newport-covernuevo.jpg?n5","isViewLogo":false},{"id":2031,"name":"ALIPAPA","name_id":"ALIPAPA","logo":"https://netivooregon.s3.amazonaws.com/common/img/logo/alipapa_1633544236.webp","cleaned":"alipapa","col":4,"offset":0,"portada_url":"https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/altocabildo-covernuevo.jpg","isViewLogo":false}]},"tunes":{"categoriaTune":{"ocultarApp":false,"ocultarWeb":false},"configTune":{"expandir":false,"margin":{"top":{"value":0,"placeholder":"Arriba","clave":"top"},"right":{"value":0,"placeholder":"Derecha","clave":"right"},"bottom":{"value":0,"placeholder":"Abajo","clave":"bottom"},"left":{"value":0,"placeholder":"Izquierda","clave":"left"}}}}}],"version":"2.28.2"}')]
-      // ],
-      [
-        'name' => 'Categorías',
-        'type' => 'box_categories',
-        'categories' => $this->getCategories()
-      ],
-      [
-        'name' => '¿Necesitas ayuda?',
-        'type' => 'card_list_redirect',
-        'items' => [
-          [
-            'name' => '¿Cómo comprar?',
-            'editor' => utf8_decode($pagesMenuCMS->where('id',458)->first()->data_json),
-            // 'redirect' => []
-          ],
-          [
-            'name' => 'Formas de pago',
-            'editor' => utf8_decode($pagesMenuCMS->where('id',460)->first()->data_json),
-            // 'redirect' => []
-          ],
-          [
-            'name' => 'Envíos a todo el país',
-            'editor' => utf8_decode($pagesMenuCMS->where('id',459)->first()->data_json),
-            // 'redirect' => []
-          ],
-        ]
-      ]
-    ];
-
-    Cache::put($nameChache, $data , $seconds = 10800);
-
-    return $data;
+    return Cache::get('bloqueshome');
 
   }
 
@@ -739,6 +533,7 @@ class HomeController extends Controller
       ];
     });
 
+
     $itemsMenu = [
       [
         "icon" => '~/assets/icons/home.png',
@@ -846,12 +641,23 @@ class HomeController extends Controller
           ],
         ]
       ],
-      // [
-      //   "icon" => 'res://heart_solid_2',
-      //   "name" => 'Mis marcas favoritas',
-      //   "disabled" => false,
-      //   "editor" => $this->getMarcasFavoritas()
-      // ]
+      [
+        "icon" => 'res://heart_gray',
+        "name" => 'Mis marcas favoritas',
+        "disabled" => false,
+        "editor" => $this->getMarcasFavoritas()
+      ],
+      [
+        "icon" => 'res://history',
+        "name" => 'Historial',
+        "disabled" => false,
+        "redirect"=> [
+          "route"=> "/search",
+          "products" => collect(Cache::get('visitados'.Auth::user()->num))->values()->all(),
+          "params"=> [],
+
+        ]
+      ],
     ];
 
     return array_merge($itemsMenu, $pagesMenu->toArray());
@@ -861,28 +667,35 @@ class HomeController extends Controller
   private function getMarcasFavoritas()
   {
 
-    $favoritos = Favorite::where('STAT_CD','1000')->where('CLIENT_NUM',Auth::user()->num)->where('LOCAL_CD','!=','')->get();
-    $response = Http::accept('application/json')->get('https://www.modatex.com.ar/?c=Store::all');
-    $tiendas = collect($response->collect()['data']);
-    $idsFavoritos = $favoritos->pluck('LOCAL_CD');
-
-    $blocks = [];
-
-    $marcasBlock = $tiendas->whereIn('id', $idsFavoritos->toArray())->map(function($tienda){
-      // $tienda['sections'] = json_decode($tienda['sections']);
-      $tienda['logo'] =  env('URL_IMAGE').'/common/img/logo/'. $tienda['logo'];
-      $tienda['col'] = 2;
-      $tienda['offset'] = 0;
-      return $tienda;
-    });
-
-    // dd($marcasBlock);
+        $response = Http::withHeaders([
+            'x-api-key' => Auth::user()->api_token,
+        ])
+        ->asForm()
+        ->acceptJson()
+        ->get('https://www.modatex.com.ar?c=Favorites::added');
 
 
-    $blocks[] = $this->constructorBloque([
-      'type' => 'Marcas',
-      'data' => ['marcas' => $marcasBlock ]
-    ]);
+        if(!isset($response->collect()['data']))
+        {
+          return [];
+        }
+
+        $tiendas = collect($response->collect()['data']);
+
+        $blocks = [];
+
+        $marcasBlock = $tiendas->map(function($tienda){
+          // $tienda['sections'] = json_decode($tienda['sections']);
+          $tienda['logo'] =  env('URL_IMAGE').'/common/img/logo/'. $tienda['logo'];
+          $tienda['col'] = 2;
+          $tienda['offset'] = 0;
+          return $tienda;
+        });
+
+        $blocks[] = $this->constructorBloque([
+          'type' => 'Marcas',
+          'data' => ['marcas' => $marcasBlock ]
+        ]);
 
     return json_encode($this->constructorObjectPage($blocks)) ;
 
@@ -919,6 +732,306 @@ class HomeController extends Controller
       "blocks" => $blocks,
       "version" => "1.0.0"
     ];
+  }
+
+
+  public function generarCacheMarcas()
+  {
+
+   
+    $response = Http::accept('application/json')->get('https://www.modatex.com.ar/?c=Store::all');
+
+    if(isset($response->json()['data'])){
+      Cache::put('stores',$response->json()['data']);
+    }
+
+
+    $storesCache = Cache::get('stores');
+
+    if($storesCache){
+      $enlaces = collect($storesCache)->map(function($store){
+          $store['enlace'] = "https://www.modatex.com.ar/?c=Store::_get&store_ref={$store['id']}";
+          return $store;
+      })->pluck('enlace');
+
+      $consultas = Http::pool(fn (Pool $pool) => 
+        $enlaces->map(fn ($url) => 
+            $pool->accept('application/json')->get($url)
+        )
+      );
+
+      $respuestas = collect($consultas)->map(function($consulta){
+        return $consulta->collect()['data'];
+      });
+
+      $stores = collect($storesCache)->map(function($store) use ($respuestas){
+        $store['more'] = $respuestas->where('LOCAL_CD',$store['id'])->first();
+        $store = new Marca($store);
+        return $store->getMarca();
+      });
+
+      Cache::put('stores',$stores);
+
+      return $stores;
+    }
+    
+  }
+
+  public function generarCacheBloquesHome()
+  {
+
+    $this->generarCacheMarcas();
+
+    $products = new ProductsController();
+    
+    $pagesMenuCMS = PagesCms::whereIn('id',[460,458,459, 470])->get();
+
+    $productoMujer = $products->onGetSearch([
+                      'start' => 0,
+                      'length' => 6,
+                      'storeData' => 1,
+                      'inStock' => 1,
+                      'daysExpir' => 365,
+                      'order' => 'date DESC',
+                      'sections' => 'woman',
+                      'cacheTime' => 1200
+    ]);
+
+    $productoHombre = $products->onGetSearch([
+      'start' => 0,
+      'length' => 10,
+      'storeData' => 1,
+      'inStock' => 1,
+      'daysExpir' => 365,
+      'order' => 'date DESC',
+      'sections' => 'man',
+      'cacheTime' => 1200
+    ]);
+
+    $productoXL = $products->onGetSearch([
+      'start' => 0,
+      'length' => 10,
+      'storeData' => 1,
+      'inStock' => 1,
+      'daysExpir' => 365,
+      'order' => 'date DESC',
+      'sections' => 'xl',
+      'cacheTime' => 1200
+    ]);
+
+    $productoNino = $products->onGetSearch([
+      'start' => 0,
+      'length' => 10,
+      'storeData' => 1,
+      'inStock' => 1,
+      'daysExpir' => 365,
+      'order' => 'date DESC',
+      'sections' => 'kids',
+      'cacheTime' => 1200
+    ]);
+
+    $productoaccessories = $products->onGetSearch([
+      'start' => 0,
+      'length' => 10,
+      'storeData' => 1,
+      'inStock' => 1,
+      'daysExpir' => 365,
+      'order' => 'date DESC',
+      'sections' => 'accessories',
+      'cacheTime' => 1200
+    ]);
+
+    $productoZapatos = $products->onGetSearch([
+      'start' => 0,
+      'length' => 10,
+      'search' => 'zapatos',
+      'years' => 1,
+      'order' => 'manually',
+      'no_product_id' => null,
+      'daysExpir' => 365,
+      // 'sections' => 'woman',
+    ]);
+
+    $productoRemeras = $products->onGetSearch([
+      'start' => 0,
+      'length' => 10,
+      'search' => 'remeras',
+      'years' => 1,
+      'order' => 'manually',
+      'no_product_id' => null,
+      'daysExpir' => 365,
+      // 'sections' => 'woman',
+    ]);
+
+    $productoDetacados = $products->destacados([
+      'start' => 0,
+      'length' => 10,
+      'storeData' => 1,
+      'inStock' => 1,
+      'daysExpir' => 365,
+      'order' => 'date DESC',
+      'version' => \Carbon\Carbon::now()->timestamp
+    ]);
+
+    $productoHoy = $products->onGetSearch([
+      'start' => 0,
+      'length' => 28,
+      'search' => '',
+      'years' => 1,
+      'order' => 'register DESC',
+      'no_product_id' => null,
+      'daysExpir' => 365,
+      'storeData' => 1,
+      'inStock'=> 1,
+      'cacheTime' => 1200,
+      'sections' => 'woman,man,xl,kids,accessories',
+      "betweenDates" => \Carbon\Carbon::now()->format('Y-m-d').','.\Carbon\Carbon::now()->addDays(1)->format('Y-m-d'),
+    ]);
+
+    try {
+      $imagenes = $productoMujer->pluck('images')->map(function($images){ return collect($images)->first();});
+      $imagenes = $imagenes->merge($productoHombre->pluck('images')->map(function($images){ return collect($images)->first();}));
+      $imagenes = $imagenes->merge($productoXL->pluck('images')->map(function($images){ return collect($images)->first();}));
+      $imagenes = $imagenes->merge($productoNino->pluck('images')->map(function($images){ return collect($images)->first();}));
+      $imagenes = $imagenes->merge($productoaccessories->pluck('images')->map(function($images){ return collect($images)->first();}));
+      $imagenes = $imagenes->merge($productoZapatos->pluck('images')->map(function($images){ return collect($images)->first();}));
+      $imagenes = $imagenes->merge($productoRemeras->pluck('images')->map(function($images){ return collect($images)->first();}));
+      $imagenes = $imagenes->merge($productoDetacados->pluck('images')->map(function($images){ return collect($images)->first();}));
+      $imagenes = $imagenes->merge($productoHoy->pluck('images')->map(function($images){ return collect($images)->first();}));
+
+      Cache::put('bloqueshomeImagenes',$imagenes);
+    } catch (\Throwable $th) {
+      //throw $th;
+    }
+    $data = [
+                [
+                  'name' => 'Mujer',
+                  'type' => 'filter',
+                  'value' => 'Mujer',
+                  'config' => [
+                    'slider' => true,
+                    'is_title' => false,
+                    'is_card' => false,
+                  ],
+                  'products' => $productoMujer
+                ],
+                [
+                  'name' => 'Hombre',
+                  'type' => 'filter',
+                  'value' => 'Hombre',
+                  'products' => $productoHombre
+                ],
+                [
+                  'name' => 'Talle Especial',
+                  'type' => 'filter',
+                  'value' => 'Talle Especial',
+                  'products' => $productoXL
+                ],
+                // [
+                //   'type' => 'promotions',
+                //   'value' => 'valor de busqueda',
+                //   'promotions' => [
+                //     $this->getPromociones()[array_search(3, array_column($this->getPromociones(), 'id'))]
+                //   ]
+                // ],
+                [
+                  'name' => 'Niños',
+                  'type' => 'filter',
+                  'value' => 'Niños',
+                  'products' => $productoNino,
+                ],
+                [
+                  'name' => 'Accesorios',
+                  'type' => 'categorie',
+                  'value' => 'Accesorios',
+                  'products' => $productoaccessories
+                  ,
+                ],
+                [
+                  'name' => 'Zapatos',
+                  'type' => 'filter',
+                  'value' => 'zapatos',
+                  'products' => $productoZapatos
+                ],
+                [
+                  'name' => 'Remeras',
+                  'type' => 'filter',
+                  'value' => 'remeras',
+                  'products' => $productoRemeras
+                ],
+                [
+                  'name' => 'Productos destacados',
+                  'type' => 'categorie',
+                  'value' => 0,
+                  'config' => [
+                    'slider' => true,
+                    'is_title' => false,
+                    'is_card' => false,
+                  ],
+                  'products' => $productoDetacados
+                ],
+                [
+                  'name' => 'Ingresos de Hoy',
+                  'type' => 'search',
+                  'value' => '',
+                  "redirect" => [
+                    "route" => "/search",
+                    "params" => [
+                      "betweenDates" => \Carbon\Carbon::now()->format('Y-m-d').','.\Carbon\Carbon::now()->addDays(1)->format('Y-m-d'),
+                      "order" => 'register DESC',
+                      "search" => ''
+                    ]
+                  ],
+                  'config' => [
+                    'slider' => false,
+                    'is_title' => false,
+                    'is_card' => false,
+                  ],
+                  'products' => $productoHoy
+                ],
+                // [
+                //   'name' => 'modal',
+                //   'type' => 'modal',
+                //   'editores' => [utf8_decode('{"time":1699560659858,"blocks":[{"id":"UdS0qmWFpd","type":"Portadas","data":{"marcas":[{"id":1880,"name":"BLANCO YABELL","name_id":"BLANCOYABELL","logo":"https://netivooregon.s3.amazonaws.com/common/img/logo/blancoyabell_1554825423.webp","cleaned":"blancoyabell","col":4,"offset":0,"portada_url":"https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/yabell-covernuevo-m1.jpg?N6","isViewLogo":false},{"id":2573,"name":"BLANCO PALACE","name_id":"BLANCOPALACE","logo":"https://netivooregon.s3.amazonaws.com/common/img/logo/blancopalace_1682446532.webp","cleaned":"blancopalace","col":4,"offset":0,"portada_url":"https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/blancopalace-covernuevo.jpg?n2","isViewLogo":false},{"id":2330,"name":"VIA BLANCO","name_id":"VIABLANCO","logo":"https://netivooregon.s3.amazonaws.com/common/img/logo/viablanco_1622660862.webp","cleaned":"viablanco","col":4,"offset":0,"portada_url":"https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/viablanco-covernuevo.jpg?5","isViewLogo":false},{"id":2565,"name":"Somio Sweet Home","name_id":"SOMIOSWEETHOME","logo":"https://netivooregon.s3.amazonaws.com/common/img/logo/somiosweethome_1680008658.webp","cleaned":"somiosweethome","col":4,"offset":0,"portada_url":"https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/somio-covernuevo.jpg","isViewLogo":false},{"id":1626,"name":"NEW PORT","name_id":"NEWPORT","logo":"https://netivooregon.s3.amazonaws.com/common/img/logo/newport_1618851261.webp","cleaned":"newport","col":4,"offset":0,"portada_url":"https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/newport-covernuevo.jpg?n5","isViewLogo":false},{"id":2031,"name":"ALIPAPA","name_id":"ALIPAPA","logo":"https://netivooregon.s3.amazonaws.com/common/img/logo/alipapa_1633544236.webp","cleaned":"alipapa","col":4,"offset":0,"portada_url":"https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/altocabildo-covernuevo.jpg","isViewLogo":false}]},"tunes":{"categoriaTune":{"ocultarApp":false,"ocultarWeb":false},"configTune":{"expandir":false,"margin":{"top":{"value":0,"placeholder":"Arriba","clave":"top"},"right":{"value":0,"placeholder":"Derecha","clave":"right"},"bottom":{"value":0,"placeholder":"Abajo","clave":"bottom"},"left":{"value":0,"placeholder":"Izquierda","clave":"left"}}}}}],"version":"2.28.2"}')]
+                // ],
+                [
+                  'name' => 'Categorías',
+                  'type' => 'box_categories',
+                  'categories' => $this->getCategories()
+                ],
+                [
+                  'name' => '¿Necesitas ayuda?',
+                  'type' => 'card_list_redirect',
+                  'items' => [
+                    [
+                      'name' => '¿Cómo comprar?',
+                      'editor' => utf8_decode($pagesMenuCMS->where('id',458)->first()->data_json),
+                      // 'redirect' => []
+                    ],
+                    [
+                      'name' => 'Formas de pago',
+                      'editor' => utf8_decode($pagesMenuCMS->where('id',460)->first()->data_json),
+                      // 'redirect' => []
+                    ],
+                    [
+                      'name' => 'Envíos a todo el país',
+                      'editor' => utf8_decode($pagesMenuCMS->where('id',459)->first()->data_json),
+                      // 'redirect' => []
+                    ],
+                    [
+                      'name' => 'Términos y Condiciones',
+                      'editor' => $pagesMenuCMS->where('id',470)->first()->data_json,
+                      // 'redirect' => []
+                    ],
+                  ]
+                ]
+            ];
+    
+    
+           
+    Cache::put('bloqueshome',collect($data));
+    
+    return Cache::get('bloqueshome');
   }
 
 }
