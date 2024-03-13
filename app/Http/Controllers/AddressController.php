@@ -21,103 +21,183 @@ class AddressController extends Controller
      */
     public function index()
     {
-        try {
-            $this->token = Auth::user()->api_token;
-            
-            $response = Http::withHeaders([ 
-                            'x-api-key' => $this->token,
-                            'Content-Type' => 'application/json'
-                        ])
-                        ->get($this->urlAddress.'Profile::addresses&app=1');
+        
+        // try {
+            // dd('kiki');
+           $data = $this->getDirecciones();
+            return response()->json($data->all());
 
-            if(!$response->json()['DIRECCIONES']){
-                throw new \Exception("No se encontraron resultados");
-            }
-
-            
-            $data = collect($response->json()['DIRECCIONES'])->map(function($direccion){
-                return [
-                    "direccion" => $direccion['GENERAL'],
-                    "localidad" => $direccion['GENERAL_TIT'],
-                    "codigo_postal" => "1609",
-                    "name" => $direccion['ALIAS'] == 0 ? '':$direccion['ALIAS'],
-                    "id" => $direccion['ID'],
-                    "default" =>  $direccion['SELECCIONADO'] ? true : false,
-                    "detalle" => ClientLocal::where('NUM', $direccion['ID'] )->first(),
-                    
-                ];
-            });
-
-            return response()->json($data);
-
-        } catch (\Exception $e) {
-            return null;
-        }
+        // } catch (\Exception $e) {
+        //     return $e->getMessage();
+        // }
     }
 
-    /**
-     * CREAR DIRECCIONES
-     */
+    private function getDirecciones()
+    {
+        $this->token = Auth::user()->api_token;
+            
+        $response = Http::withHeaders([ 
+                        'x-api-key' => $this->token,
+                        'Content-Type' => 'application/json'
+                    ])
+                    ->get($this->urlAddress.'Profile::addresses&app=1');
+
+        if(!$response->json()['DIRECCIONES']){
+            throw new \Exception("No se encontraron resultados");
+        }
+
+        // Primero, obtén todos los IDs únicos de direcciones para reducir las consultas a la base de datos
+        $direccionesIds = collect($response->json()['DIRECCIONES'])
+                            ->pluck('ID')
+                            ->unique()
+                            ->reject(function($id) { return empty($id); });
+
+        // Luego, obtén todos los ClientLocal necesarios en una sola consulta
+        $clientLocals = ClientLocal::whereIn('NUM', $direccionesIds)->get()->keyBy('NUM');
+
+        // Ahora, procesa las direcciones
+        $data = collect($response->json()['DIRECCIONES'])->map(function($direccion) use ($clientLocals) {
+            // Salta las direcciones sin ID
+            if (empty($direccion['ID'])) {
+                return [];
+            }
+
+            // Acceso directo a ClientLocal, evitando múltiples consultas
+            $detalle = isset($clientLocals[$direccion['ID']]) ? $clientLocals[$direccion['ID']] : null;
+
+            // Construye y retorna la estructura deseada
+            return [
+                "direccion" => $direccion['GENERAL'] ?? '',
+                "localidad" => $direccion['GENERAL_TIT'] ?? '',
+                "codigo_postal" => $direccion['ZIPCODE'],
+                "name" => $direccion['ALIAS'] == 0 ? '' : $direccion['ALIAS'],
+                "id" => $direccion['ID'],
+                "default" => !empty($direccion['SELECCIONADO']),
+                "detalle" => $detalle,
+            ];
+        })->filter()->values(); // Filtra cualquier elemento vacío y reindexa
+
+        return $data;
+    }
+
+    // /**
+    //  * CREAR DIRECCIONES
+    //  */
     public function create(Request $request)
     {
         try {
             // dd($request->all());
 
-            // $this->token = Auth::user()->api_token;
+            $this->token = Auth::user()->api_token;
             
-            // $response = Http::withHeaders([ 
-            //                 'x-api-key' => $this->token,
-            //                 'Content-Type' => 'application/json'
-            //             ])
-            //             ->post($this->urlAddress.'Profile::addresses&app=1', $request->all());
+            $response = Http::withHeaders([ 
+                            'x-api-key' => $this->token,
+                            // 'Content-Type' => 'application/json'
+                        ])
+                        ->asForm()
+                        ->post($this->urlAddress.'Profile::addrSave&app=1', [
+                            "addrname" => $request->ADDRESS_NAME,
+                            "street" => $request->CALLE_NAME,
+                            "streetNumber" => $request->CALLE_NUM,
+                            "floor" => $request->CALLE_PISO,
+                            "dto" => $request->CALLE_DTO,
+                            "zipCode" => $request->ADDRESS_ZIP,
+                            "state" => $request->STAT_NUM,
+                            "city" => $request->CITY,
+                            "comments" => $request->COMMENTS,
+                            "deliveryHour" => $request->DELIVERY_HOUR,
+                        ]);
 
-            // if(!$response->json()['DIRECCIONES']){
-            //     throw new \Exception("No se encontraron resultados");
-            // }
-            
-            $adress                = new ClientLocal();
-            $adress->CLIENT_NUM    = Auth::user()->num;
-            $adress->COUNTRY_NUM   = $request->COUNTRY_NUM;   
-            $adress->STAT_NUM      = $request->STAT_NUM;      
-            $adress->STAT_STR      = $request->STAT_STR;      
-            $adress->LOCALIDAD     = $request->LOCALIDAD;     
-            $adress->CALLE_NAME    = $request->CALLE_NAME;    
-            $adress->CALLE_NUM     = $request->CALLE_NUM;     
-            $adress->CALLE_DTO     = $request->CALLE_DTO;     
-            $adress->CALLE_PISO    = $request->CALLE_PISO;    
-            $adress->ADDRESS_ZIP   = $request->ADDRESS_ZIP;   
-            $adress->AREA_CODE     = $request->AREA_CODE;     
-            $adress->ADDRESS_NAME  = $request->ADDRESS_NAME;  
-            $adress->COMMENTS      = $request->COMMENTS;     
-            $adress->DELIVERY_HOUR = $request->DELIVERY_HOUR;
-            $adress->STAT_CD = 1000;
-            $adress->STAT_CD_TRA = 1000; 
-            $adress->save();
+                 
+            $data = $this->getDirecciones();
+            return response()->json($data->all());
 
-            return response()->json($this->getData($adress));
         } catch (\Throwable $th) {
             return response()->json($th->getMessage());
         }
     }
 
-   
-
     public function update($adress, Request $request)
     {
-        $id = $adress;
-        $adress = ClientLocal::find($adress);
 
-        if(!$adress){
-            return response()->json(['status'=> false, 'message'=> 'Adress not found'], 401);
+        // $id = $adress;
+        // $adress = ClientLocal::find($adress);
+        // dd($adress,ClientLocal::where('NUM', $id)->first());
+        // if(!$adress){
+        //     return response()->json(['status'=> false, 'message'=> 'Adress not found'], 401);
+        // }
+
+        // try {
+        //     //code...
+        //     $adress = ClientLocal::where('NUM', $id)->update([
+        //     "ADDRESS_NAME" => $request->ADDRESS_NAME,
+        //     "CALLE_NAME" => $request->CALLE_NAME,
+        //     "CALLE_NUM" => $request->CALLE_NUM,
+        //     "CALLE_PISO" => $request->CALLE_PISO,
+        //     "CALLE_DTO" => $request->CALLE_DTO,
+        //     "STAT_NUM" => $request->STAT_NUM,
+        //     "CITY" => $request->CITY,
+        //     "ADDRESS_ZIP" => $request->ADDRESS_ZIP,
+        //     "DELIVERY_HOUR" => $request->DELIVERY_HOUR,
+        //     "COMMENTS" => $request->COMMENTS
+        // ]);
+        // // } catch (\Exception $th) {
+        // //     //throw $th;
+        // //     \Log::info($th->getMessage());
+        // // }
+        
+        // dd($id,$request->all());
+        // $adress = ClientLocal::find($id);
+        // $data = $this->getDirecciones();
+        // return response()->json($data->all());
+
+        // $this->token = Auth::user()->api_token;
+            // dd($request->CALLE_NAME);
+        $response = Http::withHeaders([ 
+                        'x-api-key' =>  Auth::user()->api_token,
+                        'Content-Type' => 'application/x-www-form-urlencoded'
+                    ])
+                    ->asForm()
+                    ->post($this->urlAddress.'Profile::addrSave&app=1', [
+                        "addrname" => $request->ADDRESS_NAME,
+                        "street" => $request->CALLE_NAME,
+                        "streetNumber" => $request->CALLE_NUM,
+                        "floor" => $request->CALLE_PISO,
+                        "dto" => $request->CALLE_DTO,
+                        "zipCode" => $request->ADDRESS_ZIP,
+                        "state" => $request->STAT_NUM,
+                        "city" => $request->CITY,
+                        "comments" => $request->COMMENTS,
+                        "deliveryHour" => $request->DELIVERY_HOUR,
+                        "num" => $adress
+                    ]);
+
+        $response = $response->collect();
+        if($response['status'] == 'error'){
+            return response()->json($response->all());
         }
 
-        $adress = ClientLocal::where('NUM', $id)->update($request->all());
-        $adress = ClientLocal::find($id);
+                //  dd($response->body());
+        $data = $this->getDirecciones();
+        return response()->json($data->all());
 
-        return response()->json($this->getData($adress));
     }
 
-    
+    public function deleteDireccion(Request $request)
+    {
+        // dd('llega',$request->num,Auth::user());
+
+        $response = Http::withHeaders([ 
+            'x-api-key' => Auth::user()->api_token,
+            // 'Content-Type' => 'application/x-www-form-urlencoded'
+        ])
+        ->asForm()///
+        ->post($this->urlAddress.'Profile::deleteAddress&app=1', ['num'=> $request->num]);
+        
+        $data = $this->getDirecciones();
+        return response()->json($data->all());
+            
+    }
 
     public function changePrincipalAddress(Request $request)
     {

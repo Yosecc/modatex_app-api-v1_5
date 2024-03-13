@@ -30,6 +30,7 @@ $router->group(['prefix' => 'auth'], function () use ($router) {
 
 $router->group(['middleware' => 'auth'], function () use ($router) {
 
+    $router->get('generarCacheBloquesHome','HomeController@generarCacheBloquesHome');
     $router->get('home','HomeController@index');
     $router->get('menu','HomeController@menuList');
 
@@ -110,6 +111,7 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
         $router->group(['prefix' => 'direcciones'], function () use ($router) {
             $router->get('/','AddressController@index');
             $router->post('create','AddressController@create');
+            $router->post('deleteDireccion','AddressController@deleteDireccion');
             $router->post('update/{adress}','AddressController@update');
             $router->post('change_principal_address','AddressController@changePrincipalAddress');
         });
@@ -125,6 +127,8 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
         $router->group(['prefix' => 'client'], function () use ($router) {
             $router->get('/','ClientController@index');
             $router->post('change_password','ClientController@change_password');
+            $router->post('update','ClientController@update');
+
         });
     });
     

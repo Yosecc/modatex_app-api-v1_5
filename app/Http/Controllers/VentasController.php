@@ -70,7 +70,7 @@ class VentasController extends Controller
               return [
                 'count' => $grupo->count(),
                 'name' => $grupo[0]['name'],
-                'image' => $grupo[0]['images'][0],
+                'image' => isset($grupo[0]) && isset($grupo[0]['images'][0]) ? $grupo[0]['images'][0] : '',
                 'amount' => $grupo->sum('amount'),
                 'data' => $grupo,
               ];

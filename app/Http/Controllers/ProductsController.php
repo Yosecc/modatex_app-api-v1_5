@@ -17,6 +17,10 @@ use App\Models\ProductFavorite;
 use Illuminate\Http\Client\Pool;
 use App\Http\Traits\ProductsTraits;
 use Illuminate\Support\Facades\Http;
+use App\Http\Controllers\Objects\Producto;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Collection;
+
 
 class ProductsController extends Controller
 {
@@ -27,58 +31,99 @@ class ProductsController extends Controller
     private $page = 0;
     private $categories = ['woman','man','xl','kids','accessories','sportive','lingerie','home','shoes'];
     private $urlBase = 'https://www.modatex.com.ar/modatexrosa3/?c=';
-    /*
-    * @params product_page is required
-    * @return Products Array
-    */
-    public function getProducts(Request $request){
+    private $storesCache;
 
-        if (!isset($request->product_page) && !isset($request->product_limit)) {
-            return response()->json(['status'=>false, 'message'=> 'El paramatero :product_page es requerido'],422);
-        }
-
-        $products = new Products($request->all());
-        $products = $products->allProducts($request->all());
-
-        return response()->json(['status'=>true,'products'=> $products], 200);
-    }
-
-    /*
-    * @params $product = $slug
-    * @return Collection
-    */
-    public function getProduct($product, Request $request){
-
-        $product = new Products(['product' => $product]);
-        $product = $product->getProduct($request->all());
-
-        return response()->json(['status'=>true,'product'=> $product], 200);
-    }
-
-    public function product_favorite(Request $request)
+    public function __construct()
     {
-        $this->validate($request, [
-            'MODELO_NUM' => 'required',
-        ]);
-
-        $product = ProductFavorite::where('MODELO_NUM',$request->MODELO_NUM)
-                                    ->where('CLIENT_NUM',Auth::user()->num)
-                                    ->first();
-        if (!$product) {
-            $product             = new ProductFavorite();
-            $product->MODELO_NUM = $request->MODELO_NUM;
-            $product->CLIENT_NUM = Auth::user()->num;
-            $product->save();
-        }else{
-            $product->delete();
-        }
-
-        return response()->json(['status'=> true],201);
+        $this->storesCache  = Cache::get('stores');
     }
 
     public function getProductsRosa(Request $request)
     {     
-      return response()->json($this->onGetSearch($request->all()));
+      $response = $this->onGetSearch($request->all());
+      return response()->json($response);
+    }
+
+    public function getSearch(Request $request)
+    {
+      $response = $this->onGetSearch($request->all());
+      return response()->json($response);
+    }
+
+    public function onGetSearch($request): Collection
+    {
+     
+      $rr = $request;
+     
+      if(isset($request->no_product_id)){
+        $rr['length'] = $rr['length'] + 1;
+      }
+      
+      $url = $this->url.Arr::query($rr);
+      $response = Http::acceptJson()->get($url);
+
+      // dd($response->body());
+      if(!$response->json()){
+        return [];
+      }
+
+      $data = $response->json()['data'];
+      // dd($data);
+      $data = collect($data)->map(function ($element){
+        
+        $producto = new Producto($element);
+        return $producto->getProducto();
+      });
+
+      // dd($data);
+      // $data = $this->arregloProduct($data);
+
+      $d = [];
+      if(isset($request->no_product_id)){
+        foreach ($data as $key => $value) {
+          if($value['id'] != $request->no_product_id){
+           $d[] = $value;
+          }
+        }
+        $data = $d;
+      }
+
+      return $data;
+
+    }
+
+    public function oneProduct($product_id)
+    {
+     
+      $request = [];
+      $request['product_id'] = $product_id;
+      $url = $this->url.Arr::query($request);
+
+      $response = Http::acceptJson()->get($url);
+      $data = $response->collect()->first();
+
+      if(!$data){
+        return null;
+      }
+
+      $cartUrl = 'https://www.modatex.com.ar/?c=Cart::product&'.Arr::query([
+        'store_id' => $data['store'],
+        'company_id' => $data['company'],
+        'product_id' => $data['id'],
+      ]);
+
+      $responseCart = Http::withHeaders([
+        'x-api-key' => Auth::user()->api_token,
+        'Content-Type' => 'application/json'
+      ])->get($cartUrl);
+
+      $producto = new Producto($data);
+
+      $producto->setModelos($responseCart->collect()->all());
+
+      return $producto->getProducto();
+      // return $data;
+
     }
 
     private function generateModels($product)
@@ -163,31 +208,7 @@ class ProductsController extends Controller
       return $models;
     }
 
-    public function arregloProduct2($data)
-    {
-      $producto = collect($data);
-      $producto = $producto->first();
-      
-      $store = Http::acceptJson()->get("https://www.modatex.com.ar/?c=Store::_get&store_ref={$producto['store']}");
-      $store = $store->collect()->all();
-      $store = $store['data'];
-
-      $storeq = new StoresController();
-      $predefSection = $storeq->categorieDefaultId($store);
-
-      $producto['store'] = [
-        'logo' => env('URL_IMAGE').'/common/img/logo/'.$store['LOGO_FILE_NAME'],
-        'name' => $store['LOCAL_NAME'],
-        'min'  => $store['LIMIT_PRICE'],
-        "id"   => $store['LOCAL_CD'],
-        "company"     => $store['GROUP_CD'],
-        'rep' => $store['stats']['points'],
-        'vc' => $store['stats']['completed_sales_perc'],
-        "category_default" => $predefSection
-      ];
-
-      dd($producto);
-    }
+   
 
     public function arregloProduct($data, $config = ['isModels' => false])
     {
@@ -291,63 +312,8 @@ class ProductsController extends Controller
       return Cart::where('CLIENT_NUM',Auth::user()->num)->where('MODELO_NUM', $product_id)->where('STAT_CD',1000)->count();
     }
 
-    public function getSearch(Request $request)
-    {
-      $response = $this->onGetSearch($request->all());
-
-      return response()->json($response);
-    }
-
-    public function onGetSearch($request)
-    {
-     
-      $rr = $request;
-     
-      if(isset($request->no_product_id)){
-        $rr['length'] = $rr['length'] + 1;
-      }
-      
-      $url = $this->url.Arr::query($rr);
-      $response = Http::acceptJson()->get($url);
-
-      if(!$response->json()){
-        return [];
-      }
-
-      $data = $response->json()['data'];
-
-      $data = $this->arregloProduct($data);
-
-      $d = [];
-      if(isset($request->no_product_id)){
-        foreach ($data as $key => $value) {
-          if($value['id'] != $request->no_product_id){
-           $d[] = $value;
-          }
-        }
-        $data = $d;
-      }
-
-      return $data;
-
-    }
-
-    public function oneProduct($product_id)
-    {
-     
-      $request = [];
-      $request['product_id'] = $product_id;
-      $url = $this->url.Arr::query($request);
-
-      // $url = 'https://www.modatex.com.ar/?c=Cart::product&'.Arr::query($request);
-      // dd($url);
-      $response = Http::acceptJson()->get($url);
-      $data = $response->collect()->all();
-      
-      // $data = $this->arregloProduct($data,['isModels' => true]);
-      $data = $this->arregloProduct2($data);
-      return $data;
-    }
+    
+    
 
     public function inProducts(Request $request)
     {
@@ -407,8 +373,26 @@ class ProductsController extends Controller
 
       $data = $response->json()['data'];
 
-      $data = $this->arregloProduct($data);
-      
+      $data = collect($data)->map(function($prod){
+        
+        $request = [];
+        $request['product_id'] = $prod['id'];
+        $url = $this->url.Arr::query($request);
+
+        $response = Http::acceptJson()->get($url);
+        $data = $response->collect()->first();
+
+        if(!$data){
+          return null;
+        }
+
+        $producto = new Producto($data);
+        
+        return $producto->getProducto();
+        
+      });
+
+      // dd($data);
       return $data;
       
     }
