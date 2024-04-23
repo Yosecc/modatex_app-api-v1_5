@@ -25,7 +25,7 @@ use App\Http\Controllers\Objects\Marca;
 use App\Helpers\General\CollectionHelper;
 use App\Models\TipoModeloUno as Category;
 use App\Http\Controllers\ProductsController;
-
+use Illuminate\Support\Facades\Log;
 
 class HomeController extends Controller
 {
@@ -89,7 +89,16 @@ class HomeController extends Controller
   public function  sliders(Request $request){
 
       $response = Http::acceptJson()->get('https://www.modatex.com.ar/?c=SlidesApp::getAllSlides');
+
       $sliders = collect($response->json())->collapse()->map(function($item){
+       
+        if($item['APP_URL_JSON'] == ''){
+          return [
+            "img" => "https://netivooregon.s3.amazonaws.com/common/img/main_slide/1.1/". $item['IMG_APP_PATH'],
+            "title" => "",
+            "redirect" => ""
+          ] ; 
+        }
         $redirect = json_decode($item['APP_URL_JSON'])->redirect;
         $redirect->route = str_replace('/','',$redirect->route);
 
@@ -107,8 +116,8 @@ class HomeController extends Controller
           "title" => "",
           "redirect" => $redirect
         ] ; 
-      })
-      ;
+      });
+
       return response()->json( $sliders);
 
     // $params = collect($request->all());
@@ -353,32 +362,101 @@ class HomeController extends Controller
 
   }
 
+  private function utf8_decode_recursive($mixed) {
+    if (is_array($mixed)) {
+        foreach ($mixed as $key => $value) {
+            $mixed[$key] = $this->utf8_decode_recursive($value);
+        }
+    } elseif (is_object($mixed)) {
+        $vars = get_object_vars($mixed);
+        foreach ($vars as $key => $value) {
+            $mixed->$key = $this->utf8_decode_recursive($value);
+        }
+    } elseif (is_string($mixed)) {
+        // Verificar si la cadena es binaria
+        if (strpos($mixed, 'b"') === 0) {
+            // Eliminar el prefijo 'b"' y decodificar la cadena binaria
+            $mixed = substr($mixed, 2); // Elimina el prefijo 'b"'
+            $mixed = utf8_decode($mixed); // Decodificar la cadena binaria
+        } else {
+            // La cadena no es binaria, decodificarla como UTF-8
+            $mixed = utf8_decode($mixed);
+        }
+    }
+    return $mixed;
+}
+
+
+  private function coding($json_text){
+
+
+    // Función para aplicar utf8_decode recursivamente
+   
+    // dd($json_text);
+    // Decodificar el JSON
+    $data = json_decode($json_text);
+    // Aplicar utf8_decode a los valores de cadena
+    $data = $this->utf8_decode_recursive($data);
+    
+    // Codificar el objeto PHP como JSON nuevamente
+    $json_output = json_encode($data);
+    // dd($json_output, $data);
+
+    // Imprimir el resultado
+    return $json_output;
+  }
   /**
    * GET PROMOCIONES
    */
   public function getPromociones()
   {
-    $pagePromotion = PagesCms::where('isPromotionApp','!=','0000-00-00 00:00:00')->whereNotNull('isPromotionApp')->orderBy('last_updated', 'desc')->first();
+    try {
 
-    $cmsCarouselHome = PagesCms::where('isHomeApp','!=','0000-00-00 00:00:00')->whereNotNull('isHomeApp')->orderBy('last_updated','desc')->orderBy('id','desc')->get();
+      $pagePromotion = PagesCms::where('isPromotionApp','!=','0000-00-00 00:00:00')->whereNotNull('isPromotionApp')->orderBy('last_updated', 'desc')->first();
+      $cmsCarouselHome = PagesCms::where('isHomeApp','!=','0000-00-00 00:00:00')->whereNotNull('isHomeApp')->orderBy('last_updated','desc')->orderBy('id','desc')->get();
 
-    $carousel_home = $cmsCarouselHome->map(function($item){
-      return [
-        'id' => $item['id'],
-        'url' => $item['url_banner'],
-        'name' => utf8_decode($item['title']),
-        'editor' => utf8_decode($item['data_json']),
-      ];
-    });
-    return [
-      'carousel_home' => $carousel_home,
-      'promotion_page' => collect([$pagePromotion])->map(function($item){
+      $modal = PagesCms::where('isModal','!=','0000-00-00 00:00:00')->whereNotNull('isModal')->first();
+
+     try {
+      $carousel_home = $cmsCarouselHome->map(function($item){
+        
+         try {
+          // $editor = utf8_encode(utf8_decode($item['data_json']));
+          $editor = $this->coding($item['data_json']);
+          // $editor = $item['data_json'];
+         } catch (\Throwable $th) {
+           $editor = '';
+         }
+
         return [
-          'name' => utf8_decode($item['title']),
-          'editor' => utf8_decode($item['data_json']),
+          'id' => $item['id'],
+          'url' => $item['url_banner'],
+          'name' => utf8_decode($item['title_app']),
+          'editor' => $editor,
         ];
-      })->first()
-    ];
+      });
+     } catch (\Throwable $th) {
+      return [];
+     }
+
+      return [
+        'carousel_home' => $carousel_home,
+        'promotion_page' => collect([$pagePromotion])->map(function($item){
+          return [
+            'name' => utf8_decode($item['title_app']),
+            'editor' => $this->coding($item['data_json'])
+          ];
+        })->first(),
+        'modal' => $modal ? [
+          'editor' => $this->coding($modal->data_json),
+          'status' => true,
+          'title' => $modal->title_app ? utf8_decode($modal->title_app): utf8_decode($modal->title)
+        ] : ['editor' => '', 'status' => false, 'title' => '']
+      ];
+
+    } catch (\Throwable $th) {
+      return [];
+    }
   }
 
   /**
@@ -390,10 +468,16 @@ class HomeController extends Controller
     $pageDeportivo = PagesCms::where('isCategoryApp','!=','0000-00-00 00:00:00')->whereNotNull('isCategoryApp')->orderBy('last_updated','desc')->orderBy('id','desc')->get();
 
     $pages = $pageDeportivo->map(function($item){
+
+      try {
+        $editor = $this->coding($item['data_json']);
+      } catch (\Throwable $th) {
+        $editor = '';
+      }
       return [
         'id' => $item['id'],
-        'name' => utf8_decode($item['title']),
-        'editor' => utf8_decode($item['data_json']),
+        'name' => $item['title_app'] ?  utf8_decode($item['title_app']) : utf8_decode($item['title']),
+        'editor' => $editor,
         'key' =>  'page', 
         'type' =>  'page',
         'icon' =>  $item['url_icono'],
@@ -404,6 +488,7 @@ class HomeController extends Controller
         'left' =>  100,
       ];
     });
+    
     $items = [
       [
         'id' => 1,
@@ -463,20 +548,20 @@ class HomeController extends Controller
         'left' =>  35,
         'top' =>  20
       ],
-      [
-        'id' => 0,
-        'name' => 'Calzado',
-        'type' =>  'search',
-        'search' =>  'zapatos',
-        'key' =>  'zapatos', 
-        'icon' => 'res://shoes',
-        'color' =>  "",
-        'colSpan' =>  2,
-        'col' =>  4,
-        'row' =>  1,
-        'left' =>  35,
-        'top' =>  20
-      ],
+      // [
+      //   'id' => 0,
+      //   'name' => 'Calzado',
+      //   'type' =>  'search',
+      //   'search' =>  'zapatos',
+      //   'key' =>  'zapatos', 
+      //   'icon' => 'res://shoes',
+      //   'color' =>  "",
+      //   'colSpan' =>  2,
+      //   'col' =>  4,
+      //   'row' =>  1,
+      //   'left' =>  35,
+      //   'top' =>  20
+      // ],
       [
         'id' => 0,
         'name' => 'Remeras',
@@ -525,11 +610,17 @@ class HomeController extends Controller
     $pagesMenuCMS = PagesCms::where('isMenuApp','!=','0000-00-00 00:00:00')->whereNotNull('isMenuApp')->orderBy('last_updated')->get();
 
     $pagesMenu = $pagesMenuCMS->map(function($item){
+      try {
+        $editor = $this->coding($item['data_json']);
+      } catch (\Throwable $th) {
+        $editor = '';
+      }
+
       return [
         "icon" => $item['url_icono'], #'~/assets/icons/icon_menu_3.png',
-        "name" => utf8_decode($item['title']),
+        "name" => $item['title_app'] ?  utf8_decode($item['title_app']) : utf8_decode($item['title']),
         "disabled" => $item['status'] == 1 ? false: true ,
-        'editor' => utf8_decode($item['data_json'])
+        'editor' => $editor
       ];
     });
 
@@ -779,7 +870,7 @@ class HomeController extends Controller
 
   public function generarCacheBloquesHome()
   {
-
+   
     $this->generarCacheMarcas();
 
     $products = new ProductsController();
@@ -788,7 +879,7 @@ class HomeController extends Controller
 
     $productoMujer = $products->onGetSearch([
                       'start' => 0,
-                      'length' => 6,
+                      'length' => 10,
                       'storeData' => 1,
                       'inStock' => 1,
                       'daysExpir' => 365,
@@ -908,11 +999,11 @@ class HomeController extends Controller
                   'name' => 'Mujer',
                   'type' => 'filter',
                   'value' => 'Mujer',
-                  'config' => [
-                    'slider' => true,
-                    'is_title' => false,
-                    'is_card' => false,
-                  ],
+                  // 'config' => [
+                  //   'slider' => true,
+                  //   'is_title' => false,
+                  //   'is_card' => false,
+                  // ],
                   'products' => $productoMujer
                 ],
                 [
@@ -1005,22 +1096,22 @@ class HomeController extends Controller
                   'items' => [
                     [
                       'name' => '¿Cómo comprar?',
-                      'editor' => utf8_decode($pagesMenuCMS->where('id',458)->first()->data_json),
+                      'editor' => $this->coding($pagesMenuCMS->where('id',458)->first()->data_json),
                       // 'redirect' => []
                     ],
                     [
                       'name' => 'Formas de pago',
-                      'editor' => utf8_decode($pagesMenuCMS->where('id',460)->first()->data_json),
+                      'editor' => $this->coding($pagesMenuCMS->where('id',460)->first()->data_json),
                       // 'redirect' => []
                     ],
                     [
                       'name' => 'Envíos a todo el país',
-                      'editor' => utf8_decode($pagesMenuCMS->where('id',459)->first()->data_json),
+                      'editor' => $this->coding($pagesMenuCMS->where('id',459)->first()->data_json),
                       // 'redirect' => []
                     ],
                     [
-                      'name' => 'Términos y Condiciones',
-                      'editor' => $pagesMenuCMS->where('id',470)->first()->data_json,
+                      'name' => 'Políticas de Privacidad',
+                      'editor' => $this->coding($pagesMenuCMS->where('id',470)->first()->data_json),
                       // 'redirect' => []
                     ],
                   ]
@@ -1032,6 +1123,11 @@ class HomeController extends Controller
     Cache::put('bloqueshome',collect($data));
     
     return Cache::get('bloqueshome');
+  }
+
+  public function saveToken(Request $request)
+  {
+    return response()->json($request->all());
   }
 
 }

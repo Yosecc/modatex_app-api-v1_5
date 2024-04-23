@@ -448,10 +448,26 @@ class CartController extends Controller
       $datos['is_missing_data'] = $response->json();
 
 
-      $datos['cupon'] = null;
+      $response = Http::withHeaders([
+          'x-api-key' => $this->token,
+          'Content-Type' => 'application/json'
+      ])
+      ->post($this->url.'?c=Coupons::get&store_id='.$request->local_cd.'&welcome=1',[]);
 
-      $cupones = new CouponsController();
-      $datos['cupon'] =  $cupones->getCupones($request->local_cd) ? [$cupones->getCupones($request->local_cd)]: null ;
+      $datos['cupon'] = $response->collect()->map(function($cupon){
+        $cupon['tiendas'] = [];
+        $cupon['coupon_name'] = '';
+        $cupon['coupon_price'] = $cupon['amount'];
+        $cupon['coupon_type'] = $cupon['pattern'];
+        $cupon['expire_date'] = $cupon['expire'];
+        $cupon['num'] = $cupon['id'];
+        $cupon['active'] = false;
+        return $cupon;
+      });
+
+      if(!$datos['cupon']->count()){
+        $datos['cupon'] = null;
+      }
 
       return response()->json($datos);
 

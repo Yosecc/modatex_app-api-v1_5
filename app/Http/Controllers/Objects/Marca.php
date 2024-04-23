@@ -23,6 +23,7 @@ class Marca extends Controller
         'paquete'          => '',
         'cleaned'          => '',
         'favorite'         => false ,
+        'status'           => '1000'
     ];
 
     private  $CATEGORIES = [
@@ -151,6 +152,8 @@ class Marca extends Controller
         $this->data['paquete']          = $categoria['paquete'];
 
         $this->data['cleaned'] = $store['cleaned'];
+        $this->data['status'] = $store['status'];
+        
         // $this->data['favorite'] = $store[''];
       } catch (\Throwable $th) {
         \Log::info($th->getMessage());

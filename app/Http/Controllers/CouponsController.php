@@ -143,9 +143,10 @@ class CouponsController extends Controller
         return response()->json([]);
       }
 
-      $data = $response->json();
+      $data = $response->collect();
       
       if($data['status'] == 'error'){
+        // dd($data['errors']);/
         return response()->json($data['errors'],422);
       }
 
