@@ -12,7 +12,7 @@
 */
 
 $app = require __DIR__.'/../bootstrap/app.php';
-
+ini_set('display_errors', 1);
 /*
 |--------------------------------------------------------------------------
 | Run The Application
@@ -24,5 +24,7 @@ $app = require __DIR__.'/../bootstrap/app.php';
 | and wonderful application we have prepared for them.
 |
 */
+
+$app->setLocale('es');
 
 $app->run();

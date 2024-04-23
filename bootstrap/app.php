@@ -63,6 +63,8 @@ $app->singleton(
 
 $app->configure('app');
 
+$app->setLocale('es');
+
 $app->configure('config.database');
 $app->configure('auth');
 

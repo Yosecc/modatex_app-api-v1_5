@@ -91,19 +91,30 @@ class StoresController extends Controller
     public function consultaStoresRosa($request)
     {
 
-      $response = Http::accept('application/json')->get($this->urlStore.'all');
+      $cache = false;
+      if(Cache::get('stores')){
+        $cache= true;
+        $response = Cache::get('stores');
+      }else{
+        $response = Http::accept('application/json')->get($this->urlStore.'all');
 
-      if($response->json() == null){
-        return response()->json(CollectionHelper::paginate(collect([]), $request->paginate ?? 16 ));
+        if($response->json() == null){
+          return response()->json(CollectionHelper::paginate(collect([]), $request->paginate ?? 16 ));
+        }
       }
-      // dd($response->collect()['data']);
-      $response = collect($response->collect()['data']);
+
+
       $stores = Store::whereIn('LOCAL_CD',$response->pluck('id')->all())->get();
       $favoritos = Favorite::whereIn('LOCAL_CD',$response->pluck('id')->all())->where('STAT_CD','1000')->where('CLIENT_NUM',Auth::user()->num)->get();
       
       
       // dd('$favoritos');
-      return $this->crearConsulta($response->map(function($tienda) use ($stores,$favoritos){
+      return $this->crearConsulta($response->map(function($tienda) use ($stores,$favoritos, $cache){
+
+        if($cache){
+          return $tienda;
+        }
+        
         $store = $stores->where('LOCAL_CD', $tienda['id'])->first();
 
         $categorie = '';
@@ -151,6 +162,7 @@ class StoresController extends Controller
           'categories_store' => $categorieR,
           'paquete' => $paquete,
           'cleaned' => $tienda['cleaned'],
+          'status' => $tienda['status'],
           'favorite' => $favoritos->where('LOCAL_CD',$tienda['id'])->count() ? true : false ,
           // 'favorite_count' => $favoritos->where('LOCAL_CD',$tienda['id'])->count() `
         ];
@@ -218,6 +230,13 @@ class StoresController extends Controller
         $response = Http::accept('application/json')->get($this->urlPromos.$local_cd);
         $response = $response->json();
 
+        if(isset($response['data']['custom']) && count($response['data']['custom'])){
+          $response['data']['custom'] = collect($response['data']['custom'])->map(function($pastilla){
+            $pastilla['title'] = html_entity_decode($pastilla['title']);
+            return $pastilla;
+          });
+        }
+      
         return response()->json($response);
       }
       return [];

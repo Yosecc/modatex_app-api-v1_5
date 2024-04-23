@@ -54,15 +54,21 @@ class ProductsController extends Controller
     {
      
       $rr = $request;
+// dd($rr);
+      if(isset($rr['oferta']) && ($rr['oferta'] || $rr['oferta'] == 'true' || $rr['oferta'] == true)){
+        $rr['onSale'] = 1;
+      }
      
       if(isset($request->no_product_id)){
         $rr['length'] = $rr['length'] + 1;
       }
       
       $url = $this->url.Arr::query($rr);
+
+      // dd($url);
       $response = Http::acceptJson()->get($url);
 
-      // dd($response->body());
+      // dd($response->json());
       if(!$response->json()){
         return [];
       }

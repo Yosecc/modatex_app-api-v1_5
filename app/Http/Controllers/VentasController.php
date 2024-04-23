@@ -40,7 +40,7 @@ class VentasController extends Controller
       ->acceptJson()
       ->post($url,[ ]);
       
-      // dd($response->body());
+      // dd($response->json());
         
       $pedidos = $response->collect();
 
@@ -63,20 +63,25 @@ class VentasController extends Controller
           'date' => $k,
           'data' => $g->map(function($pedido) use ($marcas,$orders){
             
+            // dd($pedido['details']);
             $pedido['details'] = collect($pedido['details'])
             ->groupBy('model_id')
             ->map(function($grupo){
+
               // dd($grupo);
               return [
                 'count' => $grupo->count(),
-                'name' => $grupo[0]['name'],
+                'name' => isset($grupo[0]['name']) ? $grupo[0]['name'] : $grupo[0]['code'],
                 'image' => isset($grupo[0]) && isset($grupo[0]['images'][0]) ? $grupo[0]['images'][0] : '',
                 'amount' => $grupo->sum('amount'),
                 'data' => $grupo,
               ];
             });
 
+            // dd($pedido['details']);
+
             $pedido['estado_calculado'] = $this->getEstadoCalculado($pedido);
+           
             $pedido['store_brand'] = env('URL_IMAGE').'/common/img/logo/'. $pedido['store_brand'];
             return $pedido;
           })
@@ -96,14 +101,14 @@ class VentasController extends Controller
       return response()->json([
         'page' => $page,
         'order' => isset($request->id) ? $order : null,
-        'orders' => !isset($request->id) ? $f->toArray():null,  
+        'orders' => !isset($request->id) ? $f->values()->toArray():null,  
         'billing' => $pedidos['data']['billing'] 
       ]);
       // dd();
     }
 
     private $status_steps = [
-          'unknown' 		 	 => ['descrip' => 'Desconocido', 'color' => 'gray'],
+          'unknown' 		 	   => ['descrip' => 'Desconocido', 'color' => 'gray'],
           'initiated' 		 	 => ['descrip' => 'Ingresado', 'color' => 'green'],
           'verified' 			 	 => ['descrip' => 'Verificado', 'color' => 'green'],
           'payment_pending'  => ['descrip' => 'Pago pendiente', 'color' => 'orange'],
@@ -150,256 +155,277 @@ class VentasController extends Controller
     private function getEstadoCalculado($pedido)
     {
       
-      $this->estado['key'] = $pedido['status'];
-      
-      $this->estado['name'] = $this->status_steps[$this->estado['key']]['descrip'];
-      $this->estado['color'] = $this->status_steps[$this->estado['key']]['color'];
-      
-      if($this->estado['key'] == 'unknown'){
-        $this->estado['name'] = 'Desconocido';
-        $this->estado['textos'] = [
-          [
-            'type' => 'text',
-            'text' => 'El estado de la compra es desconocido.'
-          ],
-        ];
-      }
-      else if( in_array($this->estado['key'], ['canceled_by_customer'] )) {
-        $this->estado['textos'] = [
-          [
-            'type' => 'text',
-            'text' => 'La compra fue cancelada.'
-          ],
-        ];
+      // dd($this->estado, $pedido['status_map']);
 
-      }
-      else if( in_array($this->estado['key'], ['canceled_by_store'] )) {
-        $this->estado['textos'] = [
-          [
-            'type' => 'text',
-            'text' => 'La tienda canceló la compra.'
-          ],
-        ];
-      }
-      else {
+      $status = $pedido['status_map'];
+      // $this->estado['key'] = $status['key'];
+      
+      // $this->estado['name'] = $status['name'];
+      // $this->estado['color'] = $this->status_steps[$this->estado['key']]['color'];
+
+      $status = collect($status['steps'])->where('active', true)->first();
+      // dd($this->estado, $status);
+
+      $this->estado['name'] = $status['title'];
+      $this->estado['color'] = $status['title_col'];
+
+
+      $this->estado['textos'] = collect($status['message_parsed'])
+                                ->map(function($texto){
+                                  if($texto['type'] == 'button'){
+                                    $texto['redirect'] =  [ 'route' => 'link', 'params' => $texto['route'], 'beforeConfirm' => true ];
+                                  }
+                                  return $texto;
+                                });
+
+
+      
+
+      // if($this->estado['key'] == 'unknown'){
+      //   $this->estado['name'] = 'Desconocido';
+      //   $this->estado['textos'] = [
+      //     [
+      //       'type' => 'text',
+      //       'text' => 'El estado de la compra es desconocido.'
+      //     ],
+      //   ];
+      // }
+      // else if( in_array($this->estado['key'], ['canceled_by_customer'] )) {
+      //   $this->estado['textos'] = [
+      //     [
+      //       'type' => 'text',
+      //       'text' => 'La compra fue cancelada.'
+      //     ],
+      //   ];
+
+      // }
+      // else if( in_array($this->estado['key'], ['canceled_by_store'] )) {
+      //   $this->estado['textos'] = [
+      //     [
+      //       'type' => 'text',
+      //       'text' => 'La tienda canceló la compra.'
+      //     ],
+      //   ];
+      // }
+      // else {
         
-        if(in_array($this->estado['key'], ['initiated','verified'])){
-          $this->estado['textos'] = [
-            [
-              'type' => 'text',
-              'text' => 'Tu compra ha sido confirmada por la tienda.',
-            ],
-            [
-              'type' => 'text',
-              'text' => 'Te enviamos un mail que tiene el link que te permitirá realizar el pago.',
-            ],
-            [
-              'type' => 'text',
-              'text' => 'Si todavía no te llegó, esperá unos minutos hasta que llegue o buscalo en correo no deseado.',
-              'fontSize' => 12
-            ],
-          ];
-        }
+      //   if(in_array($this->estado['key'], ['initiated','verified'])){
+      //     $this->estado['textos'] = [
+      //       [
+      //         'type' => 'text',
+      //         'text' => 'Tu compra ha sido confirmada por la tienda.',
+      //       ],
+      //       [
+      //         'type' => 'text',
+      //         'text' => 'Te enviamos un mail que tiene el link que te permitirá realizar el pago.',
+      //       ],
+      //       [
+      //         'type' => 'text',
+      //         'text' => 'Si todavía no te llegó, esperá unos minutos hasta que llegue o buscalo en correo no deseado.',
+      //         'fontSize' => 12
+      //       ],
+      //     ];
+      //   }
 
-        if(in_array($this->estado['key'], ['payment_pending'])){
-          $this->estado['textos'] = [
-            [
-              'type' => 'text',
-              'text' => 'La compra está lista para ser abonada.',
-            ],
-          ];
-          if ($pedido['payment_type'] != 'B') {
-            if (empty($pedido['modapago_link'])) {
-              $this->estado['textos'][] = [
-                'type' => 'text',
-                'text' => 'Esperá el link que te permitirá realizar el pago.',
-              ];
-            } else {
-              $this->estado['textos'][] = [
-                'type' => 'button',
-                'text' => 'Podés hacer el pago haciendo click aquí',
-                'redirect' => [
-                  'route' => 'link',
-                  'params' => $pedido['modapago_link']
-                ]
-              ];
-            }
-          } else {
-            $this->estado['textos'][] = [
-              'type' => 'text',
-              'text' => 'La tienda hará el envío una vez realizado el depósito o transferencia bancaria.',
-            ];
-            $this->estado['textos'][] = [
-              'type' => 'text',
-              'text' => 'Los datos bancarios fueron enviados a tu casilla de correo electrónico.',
-            ];
-            $this->estado['textos'][] = [
-              'type' => 'button',
-              'text' => 'Hacé click aquí para notificar el pago.',
-              'redirect' => [
-                'route' => 'link',
-                'params' => 'https://www.modatex.com.ar/perfil?comprobante_deposito='.$pedido['id']
-              ]
-            ];
-          }
-        }
+      //   if(in_array($this->estado['key'], ['payment_pending'])){
+      //     $this->estado['textos'] = [
+      //       [
+      //         'type' => 'text',
+      //         'text' => 'La compra está lista para ser abonada.',
+      //       ],
+      //     ];
+      //     if ($pedido['payment_type'] != 'B') {
+      //       if (empty($pedido['modapago_link'])) {
+      //         $this->estado['textos'][] = [
+      //           'type' => 'text',
+      //           'text' => 'Esperá el link que te permitirá realizar el pago.',
+      //         ];
+      //       } else {
+      //         $this->estado['textos'][] = [
+      //           'type' => 'button',
+      //           'text' => 'Podés hacer el pago haciendo click aquí',
+      //           'redirect' => [
+      //             'route' => 'link',
+      //             'params' => $pedido['modapago_link']
+      //           ]
+      //         ];
+      //       }
+      //     } else {
+      //       $this->estado['textos'][] = [
+      //         'type' => 'text',
+      //         'text' => 'La tienda hará el envío una vez realizado el depósito o transferencia bancaria.',
+      //       ];
+      //       $this->estado['textos'][] = [
+      //         'type' => 'text',
+      //         'text' => 'Los datos bancarios fueron enviados a tu casilla de correo electrónico.',
+      //       ];
+      //       $this->estado['textos'][] = [
+      //         'type' => 'button',
+      //         'text' => 'Hacé click aquí para notificar el pago.',
+      //         'redirect' => [
+      //           'route' => 'link',
+      //           'params' => 'https://www.modatex.com.ar/perfil?comprobante_deposito='.$pedido['id']
+      //         ]
+      //       ];
+      //     }
+      //   }
 
-        if(in_array($this->estado['key'], ['payment_received'])){
-          $this->estado['textos'] = [
-            [
-              'type' => 'text',
-              'text' => 'La tienda recibió el pago.',
-            ],
-            [
-              'type' => 'text',
-              'text' => 'Tu compra está siendo preparada para ser enviada.',
-            ],
-          ];
+      //   if(in_array($this->estado['key'], ['payment_received'])){
+      //     $this->estado['textos'] = [
+      //       [
+      //         'type' => 'text',
+      //         'text' => 'La tienda recibió el pago.',
+      //       ],
+      //       [
+      //         'type' => 'text',
+      //         'text' => 'Tu compra está siendo preparada para ser enviada.',
+      //       ],
+      //     ];
          
-        }
+      //   }
 
-        if(in_array($this->estado['key'], ['sent','closed'])){
-          if($pedido['deliv_status'] == 2){
-            $this->estado['name'] = 'En depósito';
-            $this->estado['textos'] = [
-              [
-                'type' => 'text',
-                'text' => 'El paquete llegó a nuestro depósito.',
-              ],
-            ];
+      //   if(in_array($this->estado['key'], ['sent','closed'])){
+      //     if($pedido['deliv_status'] == 2){
+      //       $this->estado['name'] = 'En depósito';
+      //       $this->estado['textos'] = [
+      //         [
+      //           'type' => 'text',
+      //           'text' => 'El paquete llegó a nuestro depósito.',
+      //         ],
+      //       ];
 
-          } else if ($pedido['deliv_status'] == 11){
-            $this->estado['name'] = 'Entregado';
-            $this->estado['textos'] = [
-              [
-                'type' => 'text',
-                'text' => "Lo retiró {$pedido['first_name']} {$pedido['last_name']}",
-              ],
-            ];
-          } else if(in_array( $pedido['deliv_status'] , [3,4,7,8,9,10] )){
+      //     } else if ($pedido['deliv_status'] == 11){
+      //       $this->estado['name'] = 'Entregado';
+      //       $this->estado['textos'] = [
+      //         [
+      //           'type' => 'text',
+      //           'text' => "Lo retiró {$pedido['first_name']} {$pedido['last_name']}",
+      //         ],
+      //       ];
+      //     } else if(in_array( $pedido['deliv_status'] , [3,4,7,8,9,10] )){
             
-            $envio_name = $this->completeNameEnvios($pedido);
+      //       $envio_name = $this->completeNameEnvios($pedido);
 
-            $this->estado['textos'] = [
-              [
-                'type' => 'text',
-                'text' => "Salió el {$pedido['deliv_update_date_beautified']}."
-              ],
-              [
-                'type' => 'text',
-                'text' => "Paquete enviado por {$envio_name}."
-              ],
-            ];
+      //       $this->estado['textos'] = [
+      //         [
+      //           'type' => 'text',
+      //           'text' => "Salió el {$pedido['deliv_update_date_beautified']}."
+      //         ],
+      //         [
+      //           'type' => 'text',
+      //           'text' => "Paquete enviado por {$envio_name}."
+      //         ],
+      //       ];
 
-            if($pedido['deliv_price_data']['type'] == 'CA'){
-              if( !empty( $pedido['deliv_reference'] ) ) {
+      //       if($pedido['deliv_price_data']['type'] == 'CA'){
+      //         if( !empty( $pedido['deliv_reference'] ) ) {
                 
-                $this->estado['textos'][] = [
-                  'type' => 'text',
-                  'text' => "Podés hacerle el seguimiento a tu paquete con este número de guía:"
-                ];
-                $this->estado['textos'][] = [
-                  'type' => 'text',
-                  'text' => $pedido['deliv_reference'],
-                  'fontSize' => 18
-                ];
-                $this->estado['textos'][] = [
-                  'type' => 'button',
-                  'text' => 'Haciendo click aquí en Seguimientos de Envíos.',
-                  'redirect' => [
-                    'route' => 'link',
-                    'params' => 'https://www.correoargentino.com.ar/formularios/ondnc'
-                  ]
-                ];
+      //           $this->estado['textos'][] = [
+      //             'type' => 'text',
+      //             'text' => "Podés hacerle el seguimiento a tu paquete con este número de guía:"
+      //           ];
+      //           $this->estado['textos'][] = [
+      //             'type' => 'text',
+      //             'text' => $pedido['deliv_reference'],
+      //             'fontSize' => 18
+      //           ];
+      //           $this->estado['textos'][] = [
+      //             'type' => 'button',
+      //             'text' => 'Haciendo click aquí en Seguimientos de Envíos.',
+      //             'redirect' => [
+      //               'route' => 'link',
+      //               'params' => 'https://www.correoargentino.com.ar/formularios/ondnc'
+      //             ]
+      //           ];
               
-              }else{
-                $this->estado['textos'][] = [
-                  'type' => 'text',
-                  'text' => "Podés hacerle el seguimiento a tu paquete con este número de guía SD/CP {$pedido['deliv_reference_id']}",
-                  'fontSize' => 18
-                ];
-              }
-            }
-            else if($pedido['deliv_price_data']['type'] == 'OCA'){
+      //         }else{
+      //           $this->estado['textos'][] = [
+      //             'type' => 'text',
+      //             'text' => "Podés hacerle el seguimiento a tu paquete con este número de guía SD/CP {$pedido['deliv_reference_id']}",
+      //             'fontSize' => 18
+      //           ];
+      //         }
+      //       }
+      //       else if($pedido['deliv_price_data']['type'] == 'OCA'){
                           
-              $this->estado['textos'][] = [
-                'type' => 'text',
-                'text' => "Podés hacerle el seguimiento a tu paquete con este número de guía",
-              ];
+      //         $this->estado['textos'][] = [
+      //           'type' => 'text',
+      //           'text' => "Podés hacerle el seguimiento a tu paquete con este número de guía",
+      //         ];
 
-              $this->estado['textos'][] = [
-                'type' => 'button',
-                'text' => $pedido['deliv_reference_id'],
-                'redirect' => [
-                  'route' => 'link',
-                  'params' => "http://www5.oca.com.ar/ocaepakNet/Views/ConsultaTracking/TrackingConsult.aspx?numberTracking={$pedido['deliv_reference_id']}"
-                ]
-              ];
+      //         $this->estado['textos'][] = [
+      //           'type' => 'button',
+      //           'text' => $pedido['deliv_reference_id'],
+      //           'redirect' => [
+      //             'route' => 'link',
+      //             'params' => "http://www5.oca.com.ar/ocaepakNet/Views/ConsultaTracking/TrackingConsult.aspx?numberTracking={$pedido['deliv_reference_id']}"
+      //           ]
+      //         ];
 
-            }
-            else if($pedido['deliv_price_data']['type'] == 'IP'){
+      //       }
+      //       else if($pedido['deliv_price_data']['type'] == 'IP'){
               
-              $this->estado['textos'][] = [
-                'type' => 'text',
-                'text' => "Podés hacerle el seguimiento a tu paquete con este número de guía",
-                'fontSize' => 18
-              ];
+      //         $this->estado['textos'][] = [
+      //           'type' => 'text',
+      //           'text' => "Podés hacerle el seguimiento a tu paquete con este número de guía",
+      //           'fontSize' => 18
+      //         ];
 
-              $this->estado['textos'][] = [
-                'type' => 'button',
-                'text' => $pedido['deliv_reference_id']."-001",
-                'redirect' => [
-                  'route' => 'link',
-                  'params' => "https://trackingonline.integralexpress.com/tracking_corpo.php?cod=8693&valor={$pedido['id']}-001"
-                ]
-              ];
-            }
-            else if($pedido['deliv_price_data']['type'] == 'OTHER' && !empty( $pedido['shipping_data']['receipt'] )){
+      //         $this->estado['textos'][] = [
+      //           'type' => 'button',
+      //           'text' => $pedido['deliv_reference_id']."-001",
+      //           'redirect' => [
+      //             'route' => 'link',
+      //             'params' => "https://trackingonline.integralexpress.com/tracking_corpo.php?cod=8693&valor={$pedido['id']}-001"
+      //           ]
+      //         ];
+      //       }
+      //       else if($pedido['deliv_price_data']['type'] == 'OTHER' && !empty( $pedido['shipping_data']['receipt'] )){
               
-              $this->estado['textos'][] = [
-                'type' => 'text',
-                'text' => "Para descargar el remito del transporte hacé click",
-              ];
+      //         $this->estado['textos'][] = [
+      //           'type' => 'text',
+      //           'text' => "Para descargar el remito del transporte hacé click",
+      //         ];
 
-              $this->estado['textos'][] = [
-                'type' => 'button',
-                'text' => 'Descargar el remito',
-                'redirect' => [
-                  'route' => 'link',
-                  'params' => "https://www.modatex.com.ar/common/descargarFile.php?file={$pedido['shipping_data']['receipt']}"
-                ]
-              ];
-            }else{
-              $this->estado['textos'][] = [
-                'type' => 'text',
-                'text' => "Tu número de guía es {$pedido['deliv_reference_id']}",
-              ];
-            }
+      //         $this->estado['textos'][] = [
+      //           'type' => 'button',
+      //           'text' => 'Descargar el remito',
+      //           'redirect' => [
+      //             'route' => 'link',
+      //             'params' => "https://www.modatex.com.ar/common/descargarFile.php?file={$pedido['shipping_data']['receipt']}"
+      //           ]
+      //         ];
+      //       }else{
+      //         $this->estado['textos'][] = [
+      //           'type' => 'text',
+      //           'text' => "Tu número de guía es {$pedido['deliv_reference_id']}",
+      //         ];
+      //       }
             
-            if( $pedido['deliv_price_data']['service_type'] == 'sucursal' ) { 
-              if(isset($pedido['shipping_data'])){
+      //       if( $pedido['deliv_price_data']['service_type'] == 'sucursal' ) { 
+      //         if(isset($pedido['shipping_data'])){
 
-                $this->estado['textos'][] = [
-                  'type' => 'text',
-                  'text' => "Lo retira {$pedido['shipping_data']['first_name']} {$pedido['shipping_data']['last_name']}",
-                ];
-              }
-            }
-          }else if( $pedido['deliv_status'] < 2 ){
-            $this->estado['name'] = $this->status_steps[$this->estado['key']]['descrip'];
-          }else{
-            $this->estado['name'] = 'Desconocido';
-            $this->estado['textos'] = [
-              [
-                'type' => 'text',
-                'text' => "El estado del envío es desconocido."
-              ],
+      //           $this->estado['textos'][] = [
+      //             'type' => 'text',
+      //             'text' => "Lo retira {$pedido['shipping_data']['first_name']} {$pedido['shipping_data']['last_name']}",
+      //           ];
+      //         }
+      //       }
+      //     }else if( $pedido['deliv_status'] < 2 ){
+      //       $this->estado['name'] = $this->status_steps[$this->estado['key']]['descrip'];
+      //     }else{
+      //       $this->estado['name'] = 'Desconocido';
+      //       $this->estado['textos'] = [
+      //         [
+      //           'type' => 'text',
+      //           'text' => "El estado del envío es desconocido."
+      //         ],
               
-            ];
-          }
-        }
+      //       ];
+      //     }
+      //   }
 
-      }
+      // }
 
       return $this->estado;
     }

@@ -52,16 +52,19 @@ class NotificationsUserAppController extends Controller
             'token' => 'required'
         ]);
 
-        $notification = NotificationsUserApp::updateOrInsert([ 'client_num' => Auth::user()->num , 'token' => $request->token ],[
+        $notification = NotificationsUserApp::updateOrInsert([ 
+            'client_num' => Auth::user()->num , 
+            'token' => $request->token 
+        ],[
             'platform' => 'app',
         ]);
 
-        return response()->json($notification ? true : false);
+        return response()->json(NotificationsUserApp::where('client_num',Auth::user()->num)->get());
     }
 
     public function getTokens()
     {
-        return NotificationsUserApp::all();
+        return NotificationsUserApp::where('client_num',Auth::user()->num)->get();
     }
 
     public function get_notifications()

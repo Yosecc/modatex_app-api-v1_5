@@ -60,6 +60,7 @@ class NotificationsPush
 
         $this->tokens = $this->getUserToken($user_id);
         
+        // dd($this->tokens);
         if($this->fails()){
             \Log::info($this->errors);
             return $this->getErrors();
@@ -67,7 +68,7 @@ class NotificationsPush
 
         // $this->saveNotification();
         $this->request['data']['image'] = isset($this->notification['image']) ? $this->notification['image']:"";
-        // foreach ($this->tokens as $key => $token) {
+        foreach ($this->tokens as $key => $token) {
             $response = Http::withHeaders([
                 'Authorization' => 'key='.$this->server_key,
             ])->acceptJson()->post($this->url, [
@@ -80,9 +81,9 @@ class NotificationsPush
                 ],
                 "data"=> $this->request['data'],
                 "priority"=> "High",
-                "to"=> '/topics/Testing'
+                "to"=>  $token
             ]);
-        // }
+        }
 
         return $response->status();
 
@@ -101,10 +102,10 @@ class NotificationsPush
 
     public function getUserToken($user_id): array
     {
-        try {
+        // try {
             $this->user_id = $user_id;
             $consulta = NotificationsUserApp::where('client_num', $user_id)
-                ->where('platform','app')
+                // ->where('platform','app')
                 ->get();
 
             // dd();
@@ -117,9 +118,9 @@ class NotificationsPush
 
             return $consulta->pluck('token')->all();
 
-        } catch (\Exception $e) {
-            return $e->getMessage();
-        }
+        // } catch (\Exception $e) {
+        //     return $e->getMessage();
+        // }
 
     }
 

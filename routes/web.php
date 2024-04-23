@@ -27,12 +27,20 @@ $router->group(['prefix' => 'auth'], function () use ($router) {
     
 });
 
+// $router->group(['prefix' => 'notifications_push'], function() use ($router){
+//     $router->get('save_token','NotificationsUserAppController@save_token');
+// });
 
+
+$router->post('saveToken','HomeController@saveToken');
 $router->group(['middleware' => 'auth'], function () use ($router) {
 
     $router->get('generarCacheBloquesHome','HomeController@generarCacheBloquesHome');
     $router->get('home','HomeController@index');
     $router->get('menu','HomeController@menuList');
+
+
+    
 
     $router->get('productsVisitados','HomeController@productsVisitados');
     $router->get('sliders','HomeController@sliders');
