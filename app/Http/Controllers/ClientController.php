@@ -61,23 +61,29 @@ class ClientController extends Controller
 
     public function change_password(Request $request)
     {
-        $this->validate($request, [
-            'oldpass'   => 'required',
-            'newpass'   => 'required',
-            // 'email'  => 'required|email',
-        ]);
+        // $this->validate($request, [
+        //     'oldpass'   => 'required',
+        //     'newpass'   => 'required',
+        //     // 'email'  => 'required|email',
+        // ]);
 
         $response = $this->ApiRosa([
             'client_num' =>  Auth::user()->num, 
-            'newpass'=> $request->newpass,
-            'oldpass'=> $request->oldpass,
+            'newpass'=> $request->newpass || '',
+            'oldpass'=> $request->oldpass || '',
             'api_token' => Auth::user()->api_token
         ], 'changepass');
 
+        // dd($response);
+
         if($response->status == 200){
             return response()->json(['message'=> 'Contrasena cambiada con exito'], 200);
-        }elseif($response->status == 500){
-            return response()->json(['message'=> 'Ocurrió un error intente más tarde'], 422);
+        }else{
+            $response = collect($response->response)->map(function($item,$key){
+                return [$item] ;
+              });
+              return response()->json( $response , 422);
+            // return response()->json(['message'=> 'Ocurrió un error intente más tarde'], 422);
         }
 
     }

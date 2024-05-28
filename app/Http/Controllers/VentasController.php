@@ -32,8 +32,7 @@ class VentasController extends Controller
       }
 
       $this->token = Auth::user()->api_token;
-        // dd($this->token);
-        $response = Http::withHeaders([
+      $response = Http::withHeaders([
         'x-api-key' => $this->token,
       ])
       // ->asForm()
@@ -44,12 +43,12 @@ class VentasController extends Controller
         
       $pedidos = $response->collect();
 
-
       if(!$pedidos->count()){
-        return response()->json(['page' => $page, 'orders' => [] ]); 
+        return response()->json(['page' => $page, 'orders' => [], 'billing' => null, 'order' => null ]); 
       }
+      // dd($pedidos,$pedidos['data']['length'],$pedidos->count());
       if(!$pedidos['data']['length']){
-        return response()->json(['page' => $page, 'orders' => [] ]); 
+        return response()->json(['page' => $page, 'orders' => [], 'order' => null,'billing' => $pedidos['data']['billing'] ]); 
 
       }
       $orders = collect($pedidos['data']['orders']);
@@ -102,7 +101,7 @@ class VentasController extends Controller
         'page' => $page,
         'order' => isset($request->id) ? $order : null,
         'orders' => !isset($request->id) ? $f->values()->toArray():null,  
-        'billing' => $pedidos['data']['billing'] 
+        'billing' => $pedidos['data']['billing']
       ]);
       // dd();
     }
