@@ -108,7 +108,7 @@ class AddressController extends Controller
                             "deliveryHour" => $request->DELIVERY_HOUR,
                         ]);
 
-                 
+                // dd($response->body());/
             $data = $this->getDirecciones();
             return response()->json($data->all());
 

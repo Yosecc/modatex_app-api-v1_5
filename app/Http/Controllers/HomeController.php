@@ -118,6 +118,12 @@ class HomeController extends Controller
         ] ; 
       });
 
+      // $sliders[] = [
+      //   "img" => "https://netivooregon.s3.amazonaws.com/common/img/main_slide/1.1/17137931221713375144cupones-extra-slide-app.webp_app.webp",
+      //   "title" => "",
+      //   "redirect" => []
+      // ];
+
       return response()->json( $sliders);
 
     // $params = collect($request->all());
@@ -377,10 +383,10 @@ class HomeController extends Controller
         if (strpos($mixed, 'b"') === 0) {
             // Eliminar el prefijo 'b"' y decodificar la cadena binaria
             $mixed = substr($mixed, 2); // Elimina el prefijo 'b"'
-            $mixed = utf8_decode($mixed); // Decodificar la cadena binaria
+            $mixed = $mixed; // Decodificar la cadena binaria
         } else {
             // La cadena no es binaria, decodificarla como UTF-8
-            $mixed = utf8_decode($mixed);
+            $mixed = $mixed;
         }
     }
     return $mixed;
@@ -431,7 +437,7 @@ class HomeController extends Controller
         return [
           'id' => $item['id'],
           'url' => $item['url_banner'],
-          'name' => utf8_decode($item['title_app']),
+          'name' => $item['title_app'],
           'editor' => $editor,
         ];
       });
@@ -443,14 +449,14 @@ class HomeController extends Controller
         'carousel_home' => $carousel_home,
         'promotion_page' => collect([$pagePromotion])->map(function($item){
           return [
-            'name' => utf8_decode($item['title_app']),
+            'name' => $item['title_app'],
             'editor' => $this->coding($item['data_json'])
           ];
         })->first(),
         'modal' => $modal ? [
           'editor' => $this->coding($modal->data_json),
           'status' => true,
-          'title' => $modal->title_app ? utf8_decode($modal->title_app): utf8_decode($modal->title)
+          'title' => $modal->title_app ? $modal->title_app: $modal->title
         ] : ['editor' => '', 'status' => false, 'title' => '']
       ];
 
@@ -467,27 +473,27 @@ class HomeController extends Controller
 
     $pageDeportivo = PagesCms::where('isCategoryApp','!=','0000-00-00 00:00:00')->whereNotNull('isCategoryApp')->orderBy('last_updated','desc')->orderBy('id','desc')->get();
 
-    $pages = $pageDeportivo->map(function($item){
+    // $pages = $pageDeportivo->map(function($item){
 
-      try {
-        $editor = $this->coding($item['data_json']);
-      } catch (\Throwable $th) {
-        $editor = '';
-      }
-      return [
-        'id' => $item['id'],
-        'name' => $item['title_app'] ?  utf8_decode($item['title_app']) : utf8_decode($item['title']),
-        'editor' => $editor,
-        'key' =>  'page', 
-        'type' =>  'page',
-        'icon' =>  $item['url_icono'],
-        'color' =>  "",
-        'colSpan' =>  3,
-        'col' =>  0,
-        'row' =>  0,
-        'left' =>  100,
-      ];
-    });
+    //   try {
+    //     $editor = $this->coding($item['data_json']);
+    //   } catch (\Throwable $th) {
+    //     $editor = '';
+    //   }
+    //   return [
+    //     'id' => $item['id'],
+    //     'name' => $item['title_app'] ?  utf8_decode($item['title_app']) : utf8_decode($item['title']),
+    //     'editor' => $editor,
+    //     'key' =>  'page', 
+    //     'type' =>  'page',
+    //     'icon' =>  $item['url_icono'],
+    //     'color' =>  "",
+    //     'colSpan' =>  3,
+    //     'col' =>  0,
+    //     'row' =>  0,
+    //     'left' =>  100,
+    //   ];
+    // });
     
     $items = [
       [
@@ -589,7 +595,8 @@ class HomeController extends Controller
       // ],
     ];
 
-    return array_merge($items, $pages->toArray());
+    return $items;
+    // return array_merge($items, $pages->toArray());
   }
 
   /**
@@ -609,20 +616,20 @@ class HomeController extends Controller
 
     $pagesMenuCMS = PagesCms::where('isMenuApp','!=','0000-00-00 00:00:00')->whereNotNull('isMenuApp')->orderBy('last_updated')->get();
 
-    $pagesMenu = $pagesMenuCMS->map(function($item){
-      try {
-        $editor = $this->coding($item['data_json']);
-      } catch (\Throwable $th) {
-        $editor = '';
-      }
+    // $pagesMenu = $pagesMenuCMS->map(function($item){
+    //   try {
+    //     $editor = $this->coding($item['data_json']);
+    //   } catch (\Throwable $th) {
+    //     $editor = '';
+    //   }
 
-      return [
-        "icon" => $item['url_icono'], #'~/assets/icons/icon_menu_3.png',
-        "name" => $item['title_app'] ?  utf8_decode($item['title_app']) : utf8_decode($item['title']),
-        "disabled" => $item['status'] == 1 ? false: true ,
-        'editor' => $editor
-      ];
-    });
+    //   return [
+    //     "icon" => $item['url_icono'], #'~/assets/icons/icon_menu_3.png',
+    //     "name" => $item['title_app'] ?  utf8_decode($item['title_app']) : utf8_decode($item['title']),
+    //     "disabled" => $item['status'] == 1 ? false: true ,
+    //     'editor' => $editor
+    //   ];
+    // });
 
 
     $itemsMenu = [
@@ -649,6 +656,7 @@ class HomeController extends Controller
         "name" => 'Mis pedidos',
         "disabled" => false,
         "redirect"=> [
+          // "route"=> "/profileOrdersList",
           "route"=> "/profile",
           "params"=> []
         ]
@@ -751,7 +759,8 @@ class HomeController extends Controller
       ],
     ];
 
-    return array_merge($itemsMenu, $pagesMenu->toArray());
+    return $itemsMenu;
+    // return array_merge($itemsMenu, $pagesMenu->toArray());
 
   }
 
@@ -836,11 +845,14 @@ class HomeController extends Controller
       Cache::put('stores',$response->json()['data']);
     }
 
-
     $storesCache = Cache::get('stores');
 
+    // dd($storesCache);
+
     if($storesCache){
-      $enlaces = collect($storesCache)->map(function($store){
+      $enlaces = collect($storesCache)->filter(function ($value, $key) {
+        return ($value['id']!=1006 && $value['id'] != 1365);
+    })->map(function($store){
           $store['enlace'] = "https://www.modatex.com.ar/?c=Store::_get&store_ref={$store['id']}";
           return $store;
       })->pluck('enlace');
@@ -1090,32 +1102,32 @@ class HomeController extends Controller
                   'type' => 'box_categories',
                   'categories' => $this->getCategories()
                 ],
-                [
-                  'name' => '¿Necesitas ayuda?',
-                  'type' => 'card_list_redirect',
-                  'items' => [
-                    [
-                      'name' => '¿Cómo comprar?',
-                      'editor' => $this->coding($pagesMenuCMS->where('id',458)->first()->data_json),
-                      // 'redirect' => []
-                    ],
-                    [
-                      'name' => 'Formas de pago',
-                      'editor' => $this->coding($pagesMenuCMS->where('id',460)->first()->data_json),
-                      // 'redirect' => []
-                    ],
-                    [
-                      'name' => 'Envíos a todo el país',
-                      'editor' => $this->coding($pagesMenuCMS->where('id',459)->first()->data_json),
-                      // 'redirect' => []
-                    ],
-                    [
-                      'name' => 'Políticas de Privacidad',
-                      'editor' => $this->coding($pagesMenuCMS->where('id',470)->first()->data_json),
-                      // 'redirect' => []
-                    ],
-                  ]
-                ]
+                // [
+                //   'name' => '¿Necesitas ayuda?',
+                //   'type' => 'card_list_redirect',
+                //   'items' => [
+                //     [
+                //       'name' => '¿Cómo comprar?',
+                //       'editor' => $this->coding($pagesMenuCMS->where('id',458)->first()->data_json),
+                //       // 'redirect' => []
+                //     ],
+                //     [
+                //       'name' => 'Formas de pago',
+                //       'editor' => $this->coding($pagesMenuCMS->where('id',460)->first()->data_json),
+                //       // 'redirect' => []
+                //     ],
+                //     [
+                //       'name' => 'Envíos a todo el país',
+                //       'editor' => $this->coding($pagesMenuCMS->where('id',459)->first()->data_json),
+                //       // 'redirect' => []
+                //     ],
+                //     [
+                //       'name' => 'Políticas de Privacidad',
+                //       'editor' => $this->coding($pagesMenuCMS->where('id',470)->first()->data_json),
+                //       // 'redirect' => []
+                //     ],
+                //   ]
+                // ]
             ];
     
     
