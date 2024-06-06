@@ -89,7 +89,7 @@ class AddressController extends Controller
             // dd($request->all());
 
             $this->token = Auth::user()->api_token;
-            
+            // dd($this->token);
             $response = Http::withHeaders([ 
                             'x-api-key' => $this->token,
                             // 'Content-Type' => 'application/json'
@@ -101,14 +101,30 @@ class AddressController extends Controller
                             "streetNumber" => $request->CALLE_NUM,
                             "floor" => $request->CALLE_PISO,
                             "dto" => $request->CALLE_DTO,
-                            "zipCode" => $request->ADDRESS_ZIP,
+                            "zipcode" => $request->ADDRESS_ZIP,
                             "state" => $request->STAT_NUM,
                             "city" => $request->CITY,
                             "comments" => $request->COMMENTS,
                             "deliveryHour" => $request->DELIVERY_HOUR,
+                            "method" => 'home_delivery',
+                            "id" => '',
+                            'alias' => $request->ADDRESS_NAME,
+                            "first_name" => 'first name',
+                            "last_name" => 'last name',
+                            "group_id" => 1000,
+                            "dni" => '96085695',
+                            "street_name" => $request->CALLE_NAME,
+                            "street_number" => $request->CALLE_NUM ,
+                            "apartment" => '', 
+                            "area_code" => '11', 
+                            "mobile_phone"=> 43523445,
+                            "location" =>' La Paternal',
+                            "location_custom" =>  "",
+                            "drop_off_time"=> 8,
+                            "comments" => ''
                         ]);
 
-                // dd($response->body());/
+                dd($response->body());
             $data = $this->getDirecciones();
             return response()->json($data->all());
 
@@ -120,39 +136,7 @@ class AddressController extends Controller
     public function update($adress, Request $request)
     {
 
-        // $id = $adress;
-        // $adress = ClientLocal::find($adress);
-        // dd($adress,ClientLocal::where('NUM', $id)->first());
-        // if(!$adress){
-        //     return response()->json(['status'=> false, 'message'=> 'Adress not found'], 401);
-        // }
-
-        // try {
-        //     //code...
-        //     $adress = ClientLocal::where('NUM', $id)->update([
-        //     "ADDRESS_NAME" => $request->ADDRESS_NAME,
-        //     "CALLE_NAME" => $request->CALLE_NAME,
-        //     "CALLE_NUM" => $request->CALLE_NUM,
-        //     "CALLE_PISO" => $request->CALLE_PISO,
-        //     "CALLE_DTO" => $request->CALLE_DTO,
-        //     "STAT_NUM" => $request->STAT_NUM,
-        //     "CITY" => $request->CITY,
-        //     "ADDRESS_ZIP" => $request->ADDRESS_ZIP,
-        //     "DELIVERY_HOUR" => $request->DELIVERY_HOUR,
-        //     "COMMENTS" => $request->COMMENTS
-        // ]);
-        // // } catch (\Exception $th) {
-        // //     //throw $th;
-        // //     \Log::info($th->getMessage());
-        // // }
-        
-        // dd($id,$request->all());
-        // $adress = ClientLocal::find($id);
-        // $data = $this->getDirecciones();
-        // return response()->json($data->all());
-
-        // $this->token = Auth::user()->api_token;
-            // dd($request->CALLE_NAME);
+      
         $response = Http::withHeaders([ 
                         'x-api-key' =>  Auth::user()->api_token,
                         'Content-Type' => 'application/x-www-form-urlencoded'
@@ -172,6 +156,7 @@ class AddressController extends Controller
                         "num" => $adress
                     ]);
 
+                    dd($response->body());
         $response = $response->collect();
         if($response['status'] == 'error'){
             return response()->json($response->all());

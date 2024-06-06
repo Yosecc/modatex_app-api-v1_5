@@ -349,8 +349,7 @@ class HomeController extends Controller
         // 'sections' => 'woman',
       ]); 
     })
-    ->collapse()
-    ;
+    ->collapse();
   }
 
   /**
@@ -427,9 +426,7 @@ class HomeController extends Controller
       $carousel_home = $cmsCarouselHome->map(function($item){
         
          try {
-          // $editor = utf8_encode(utf8_decode($item['data_json']));
-          $editor = $this->coding($item['data_json']);
-          // $editor = $item['data_json'];
+          $editor = $item['data_json'];
          } catch (\Throwable $th) {
            $editor = '';
          }
@@ -473,27 +470,27 @@ class HomeController extends Controller
 
     $pageDeportivo = PagesCms::where('isCategoryApp','!=','0000-00-00 00:00:00')->whereNotNull('isCategoryApp')->orderBy('last_updated','desc')->orderBy('id','desc')->get();
 
-    // $pages = $pageDeportivo->map(function($item){
+    $pages = $pageDeportivo->map(function($item){
 
-    //   try {
-    //     $editor = $this->coding($item['data_json']);
-    //   } catch (\Throwable $th) {
-    //     $editor = '';
-    //   }
-    //   return [
-    //     'id' => $item['id'],
-    //     'name' => $item['title_app'] ?  utf8_decode($item['title_app']) : utf8_decode($item['title']),
-    //     'editor' => $editor,
-    //     'key' =>  'page', 
-    //     'type' =>  'page',
-    //     'icon' =>  $item['url_icono'],
-    //     'color' =>  "",
-    //     'colSpan' =>  3,
-    //     'col' =>  0,
-    //     'row' =>  0,
-    //     'left' =>  100,
-    //   ];
-    // });
+      try {
+        $editor = $item['data_json'];
+      } catch (\Throwable $th) {
+        $editor = '';
+      }
+      return [
+        'id' => $item['id'],
+        'name' => $item['title_app'] ? $item['title_app'] : $item['title'],
+        'editor' => $editor,
+        'key' =>  'page', 
+        'type' =>  'page',
+        'icon' =>  $item['url_icono'],
+        'color' =>  "",
+        'colSpan' =>  3,
+        'col' =>  0,
+        'row' =>  0,
+        'left' =>  100,
+      ];
+    });
     
     $items = [
       [
@@ -595,8 +592,8 @@ class HomeController extends Controller
       // ],
     ];
 
-    return $items;
-    // return array_merge($items, $pages->toArray());
+    // return $items;
+    return array_merge($items, $pages->toArray());
   }
 
   /**
@@ -616,20 +613,20 @@ class HomeController extends Controller
 
     $pagesMenuCMS = PagesCms::where('isMenuApp','!=','0000-00-00 00:00:00')->whereNotNull('isMenuApp')->orderBy('last_updated')->get();
 
-    // $pagesMenu = $pagesMenuCMS->map(function($item){
-    //   try {
-    //     $editor = $this->coding($item['data_json']);
-    //   } catch (\Throwable $th) {
-    //     $editor = '';
-    //   }
+    $pagesMenu = $pagesMenuCMS->map(function($item){
+      try {
+        $editor = $this->coding($item['data_json']);
+      } catch (\Throwable $th) {
+        $editor = '';
+      }
 
-    //   return [
-    //     "icon" => $item['url_icono'], #'~/assets/icons/icon_menu_3.png',
-    //     "name" => $item['title_app'] ?  utf8_decode($item['title_app']) : utf8_decode($item['title']),
-    //     "disabled" => $item['status'] == 1 ? false: true ,
-    //     'editor' => $editor
-    //   ];
-    // });
+      return [
+        "icon" => $item['url_icono'], #'~/assets/icons/icon_menu_3.png',
+        "name" => $item['title_app'] ?  $item['title_app'] : $item['title'],
+        "disabled" => $item['status'] == 1 ? false: true ,
+        'editor' => $editor
+      ];
+    });
 
 
     $itemsMenu = [
@@ -759,8 +756,8 @@ class HomeController extends Controller
       ],
     ];
 
-    return $itemsMenu;
-    // return array_merge($itemsMenu, $pagesMenu->toArray());
+    // return $itemsMenu;
+    return array_merge($itemsMenu, $pagesMenu->toArray());
 
   }
 
