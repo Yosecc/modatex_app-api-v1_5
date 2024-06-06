@@ -39,9 +39,9 @@ class VentasController extends Controller
       ->acceptJson()
       ->post($url,[ ]);
       
-      // dd($response->json());
-        
+      
       $pedidos = $response->collect();
+      
 
       if(!$pedidos->count()){
         return response()->json(['page' => $page, 'orders' => [], 'billing' => null, 'order' => null ]); 
@@ -169,6 +169,9 @@ class VentasController extends Controller
       $this->estado['color'] = $status['title_col'];
 
 
+      if(isset($status['message_parsed'])){
+       
+      
       $this->estado['textos'] = collect($status['message_parsed'])
                                 ->map(function($texto){
                                   if($texto['type'] == 'button'){
@@ -176,7 +179,7 @@ class VentasController extends Controller
                                   }
                                   return $texto;
                                 });
-
+                              }
 
       
 

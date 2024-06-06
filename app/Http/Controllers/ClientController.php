@@ -110,8 +110,8 @@ class ClientController extends Controller
         ])
         ->asForm()
         ->post($this->urlProfile.'Profile::usrDataUpdate',[
-            'firstName' => $request->firstName,
-            'lastName' => $request->lastName,
+            'firstName' => $request->lastName,
+            'lastName' => $request->firstName,
             'dni' => $request->dni,
             "gender" => $request->gender,
             "areaCode" => $request->areaCode,
