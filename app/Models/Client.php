@@ -15,8 +15,6 @@ class Client extends Model
 
     protected $hidden       = ['password','client_pwd','code_confirm'];
 
-
- 
     const CREATED_AT        = 'insert_date';
 
     const UPDATED_AT        = 'update_date';

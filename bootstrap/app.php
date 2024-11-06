@@ -94,6 +94,7 @@ $app->alias('mailer', Illuminate\Contracts\Mail\MailQueue::class);
 
 $app->routeMiddleware([
     'auth' => App\Http\Middleware\Authenticate::class,
+    'apiToken' => App\Http\Middleware\validaTokenApi::class,
 ]);
 
 /*
@@ -106,6 +107,7 @@ $app->routeMiddleware([
 | totally optional, so you are not required to uncomment this line.
 |
 */
+$app->register(Tymon\JWTAuth\Providers\LumenServiceProvider::class);
 $app->register(Yajra\Oci8\Oci8ServiceProvider::class);
 $app->register(Flipbox\LumenGenerator\LumenGeneratorServiceProvider::class);
 $app->register(Illuminate\Mail\MailServiceProvider::class);

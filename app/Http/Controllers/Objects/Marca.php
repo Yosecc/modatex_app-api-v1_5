@@ -2,41 +2,38 @@
 
 namespace App\Http\Controllers\Objects;
 
-use App\Http\Controllers\Controller;
+use App\Models\Favorite;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
+use App\Http\Controllers\HomeController;
 
 class Marca extends Controller
 {
     private $data = [
-        "logo"             => '',
-        "name"             => '',
-        "id"               => '',
-        "local_cd"         => '',
-        "company_id"       => '',
-        "company"          => '',
-        "min"              => '',
-        "rep"              => '',
-        "vc"               => '',
-        "categorie"        => '',
-        "category_default" => '',
-        'categories_store' => '',
-        'paquete'          => '',
-        'cleaned'          => '',
-        'favorite'         => false ,
-        'status'           => '1000'
+        "logo"             => '', #String
+        "name"             => '', #String
+        "id"               => '', #Int
+        "local_cd"         => '', #String
+        "company_id"       => '', #String
+        "company"          => '', #String
+        "min"              => '', #Int
+        "rep"              => '', #Int
+        "vc"               => '', #Int
+        "categorie"        => '', #String
+        "category_default" => '', #Int
+        'categories_store' => '', #Array
+        'paquete'          => '', #String
+        'cleaned'          => '', #String
+        'favorite'         => false , #bool
+        'status'           => '1000', #String
+        'max_discount'     => 0, #Int
+        'portada'          => '' #opcional String
     ];
 
-    private  $CATEGORIES = [
-        ['key'=> 'USE_WOMAN'     , 'id' => 1, 'name' => 'woman'],
-        ['key'=> 'USE_ACCESORY'  , 'id' => 2, 'name' => 'accessories'],
-        ['key'=> 'USE_MAN'       , 'id' => 3, 'name' => 'man'],
-        ['key'=> 'USE_CHILD'     , 'id' => 4, 'name' => 'kids'],
-        ['key'=> 'USE_SPECIAL'   , 'id' => 6, 'name' => 'xl'],
-        ['key'=> 'USE_DEPORTIVA' , 'id' => 7, 'name' => 'sportive'],
-        ['key'=> 'USE_LENCERIA'  , 'id' => 10, 'name' => 'lingerie'],
-        ['key'=> 'USE_SHOES'     , 'id' => 24, 'name' => 'shoes'],
-        ['key'=> 'USE_HOME'      , 'id' => 17, 'name' => 'home'],
-    ];
+    private $allowebCategories = ['woman','man','xl','kids','accessories','sportive','lingerie','home','shoes'];
+
+    static public $allowedPlanes = ['premium', 'black','platinum','gold','blue'];
+
  
     public function __construct($store)
     {
@@ -47,69 +44,20 @@ class Marca extends Controller
         return env('URL_IMAGE').'/common/img/logo/'. $logo;
     }
 
-    // private function categorieDefaultId($store)
-    // {
-    //   /**
-    //      * Si PREDEF_SECTION != '' ??  Es es el ID por defecto. 
-    //      * Si PREDEF_SECTION == '' ??  Si subcaetgorias > 1 ? La prioridad es woman|talle especial|men|nino|accesorios : Es la posicion 0  
-    //      */
+    private function sortCategories(array $categoryOptions)
+    {
+        usort($categoryOptions, function ($a, $b) {
+            $orderA = array_search($a, $this->allowebCategories);
+            $orderB = array_search($b, $this->allowebCategories);
+            return $orderA <=> $orderB;
+        });
 
-    //   $predefSection = 0;
-
-    //   if( $store && $store['PREDEF_SECTION'] != '')
-    //   {
-    //     $predefSection = intval($store['PREDEF_SECTION']);
-    //   }
-    //   elseif( $store && $store['PREDEF_SECTION'] == '')
-    //   {
-    //     $categorias = $this->categoriesCollection($store, null);
-       
-    //       if($categorias->count() > 1){
-    //         $predefSection = $categorias->where('descripcion' , 'mujer')->first();
-    //         if($predefSection){
-    //           $predefSection = $predefSection['id'];
-    //         }else{
-    //           $predefSection = $categorias->first();
-    //           if($predefSection){
-    //             $predefSection = $predefSection['id'];
-    //           }
-    //         }
-    //       }else{
-    //         $predefSection = $categorias->first();
-    //         if($predefSection){
-    //           $predefSection = $predefSection['id'];
-    //         }
-    //       }
-    //   }
-    //   return $predefSection;
-    // }
+        return $categoryOptions;
+    }
 
     private function getCategoria($store)
     {
        
-        $categorie = '';
-        if(isset($store['more']['USE_MAN']) && $store['more']['USE_MAN'] == "Y"){
-          $categorie = 'man';
-        }elseif(isset($store['more']['USE_WOMAN']) && $store['more']['USE_WOMAN'] == "Y"){
-          $categorie = 'woman';
-        }elseif(isset($store['more']['USE_CHILD']) && $store['more']['USE_CHILD'] == "Y"){
-          $categorie = 'kids';
-        }elseif(isset($store['more']['USE_ACCESORY']) && $store['more']['USE_ACCESORY'] == "Y"){
-          $categorie = 'accessories';
-        }elseif(isset($store['more']['USE_SPECIAL']) && $store['more']['USE_SPECIAL'] == "Y"){
-          $categorie = 'xl';
-        }elseif(isset($store['more']['USE_DEPORTIVA']) && $store['more']['USE_DEPORTIVA'] == "Y"){
-          $categorie = 'sportive';
-        }elseif(isset($store['more']['USE_LENCERIA']) && $store['more']['USE_LENCERIA'] == "Y"){
-          $categorie = 'lingerie';
-        }elseif(isset($store['more']['USE_SHOES']) && $store['more']['USE_SHOES'] == "Y"){
-          $categorie = 'shoes';
-        }elseif(isset($store['more']['USE_HOME']) && $store['more']['USE_HOME'] == "Y"){
-          $categorie = 'home';
-        }
-    
-        $categoriaCalc = collect($this->CATEGORIES)->where('name',  $categorie)->first();
-    
         $categorieR = [];
         $paquete = '';
         if(isset($store['sections'])){
@@ -119,19 +67,32 @@ class Marca extends Controller
           }
         }
 
+        $categorieR = $this->sortCategories($categorieR);
+
+        $d = new HomeController();
+        $categoriesBase = $d->getCategories();
+
+        $c = count($categorieR) ? $categorieR[0] : '';
+
+        $predefSection = collect($categoriesBase)->where('key', $c)->first();
+        
+        if($predefSection){
+          $predefSection =  $predefSection['id'];
+        }else{
+          $predefSection = 0;
+        }
+
         return [
             'categories_store' => $categorieR,
             'paquete' => $paquete,
-            'category_default' => isset($categoriaCalc['id']) ? $categoriaCalc['id'] : '',
-            'categorie' => $categorie
+            'category_default' => $predefSection,
+            'categorie' => $c
         ];
     }
 
     private function crearMarca($store)
     {
       try {
-        //code...
-      
 
         $this->data['logo']         = $this->getLogo($store['logo']);
 
@@ -140,9 +101,9 @@ class Marca extends Controller
         $this->data['local_cd']     = $store['more']['LOCAL_CD'];
         $this->data['company_id']   = $store['more']['GROUP_CD'];
         $this->data['company']      = $store['more']['GROUP_CD'];
-        $this->data['min']          = $store['more']['minimum'];
-        $this->data['rep']          = $store['more']['stats']['points'];
-        $this->data['vc']           = $store['more']['stats']['completed_sales_perc'];
+        $this->data['min']          = intval($store['minimum']);
+        $this->data['rep']          = $store['stats']['points'];
+        $this->data['vc']           = $store['stats']['completed_sales_perc'];
         
         $categoria = $this->getCategoria($store);
         
@@ -153,8 +114,10 @@ class Marca extends Controller
 
         $this->data['cleaned'] = $store['cleaned'];
         $this->data['status'] = $store['status'];
-        
-        // $this->data['favorite'] = $store[''];
+        $this->data['max_discount'] = isset($store['stats']) && isset($store['stats']['max_disc_perc']) ? $store['stats']['max_disc_perc'] : 0;
+
+        $this->data['favorite'] = $store['favorite'];
+
       } catch (\Throwable $th) {
         \Log::info($th->getMessage());
       }

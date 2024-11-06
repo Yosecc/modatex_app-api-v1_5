@@ -16,11 +16,30 @@ class cmsController extends Controller
     {   
         $cms = PagesCms::find($id);
         $cms = [
-            'name' =>utf8_decode($cms->title),  
-            'editor' => $this->coding($cms->data_json),  
+            'name' => $cms->title,  
+            'editor' => $cms->data_json,  
         ];
         
         return response()->json($cms);
+    }
+
+    public static function searchCms($params = ['slug' => null, 'id' => 'null'])
+    {
+        if(isset($params['id']) && $params['id']!=null){
+            $cms = PagesCms::find($params['id']);
+        }
+
+        if(isset($params['slug']) &&  $params['slug']!=null){
+            $cms = PagesCms::where('slug','like','%'.$params['slug'].'%')->first();
+        }
+
+        $cms = [    
+            'name' => $cms ? ($cms->title_app != '' ? $cms->title_app : $cms->title ) : null,  
+            'id' => $cms ? $cms->id : null,  
+            'editor' => $cms ? $cms->data_json  : null,  
+        ];
+
+        return $cms;
     }
 
     private function utf8_decode_recursive($mixed) {

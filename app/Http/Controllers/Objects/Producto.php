@@ -27,13 +27,13 @@ class Producto extends Controller
         "isCart"      => false,
         "has_stock"   => true,
         "models"      => [],
-        "store"       => []
+        "store"       => [],
+        "is_promo_2x1"=> false,
     ];
 
     public function __construct($producto)
     {
         $this->storesCache = Cache::get('stores');
-        // dd($this->storesCache );
         $this->crearProducto($producto);
     }
 
@@ -43,7 +43,15 @@ class Producto extends Controller
         $this->data['code']         = $producto['code'];
         $this->data['local_cd']     = $producto['store'];
         $this->data['company']      = $producto['company'];
-        $this->data['name']         = $producto['name'];
+        
+        $buscar = "2x1";
+        $name = $producto['name'];
+        if(strpos($producto['name'], $buscar) !== false){
+            $this->data['is_promo_2x1'] = true;
+            // $name = str_replace($buscar, '', $producto['name']);
+        }
+        $this->data['name']         = $name;
+        
         $this->data['category']     = isset($producto['category']) ? $producto['category'] : '';
         $this->data['category_id']  = $producto['category_id'];
         $this->data['price']        = $producto['price'];

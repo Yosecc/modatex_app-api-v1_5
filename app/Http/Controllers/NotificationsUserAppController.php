@@ -35,7 +35,7 @@ class NotificationsUserAppController extends Controller
 
         // dd(Auth::user()->num);
         $notification = new NotificationsPush($request->all());
-        $notificacion = $notification->sendUserNotification($request->client_id);
+        $notificacion = $notification->sendUserNotification(Auth::user()->num);
 
 
         if($notification->fails()){
@@ -54,9 +54,10 @@ class NotificationsUserAppController extends Controller
 
         $notification = NotificationsUserApp::updateOrInsert([ 
             'client_num' => Auth::user()->num , 
-            'token' => $request->token 
-        ],[
             'platform' => 'app',
+            'device' => $request->device
+        ],[
+            'token' => $request->token 
         ]);
 
         return response()->json(NotificationsUserApp::where('client_num',Auth::user()->num)->get());

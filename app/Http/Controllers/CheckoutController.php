@@ -19,7 +19,15 @@ class CheckoutController extends Controller
                 'name'=> 'Tarjeta de Crédito / Débito',
                 'modapago'=> true,
                 'descripcion'=> 'Selecciona esta opción si deseas abonar con tarjeta de crédito. Fácil, seguro y rápido.',
-                'logos'=> ['~/assets/visa.jpg', '~/assets/master.jpg', '~/assets/american.jpg', '~/assets/cencosud.jpg', '~/assets/argencard.jpg'],
+                'logos'=> [
+                    // '~/assets/visa.jpg', 
+                    // '~/assets/master.jpg', 
+                    // '~/assets/american.jpg', 
+                    // '~/assets/cencosud.jpg', 
+                    // '~/assets/argencard.jpg',
+                    // '~/assets/tarjeta.png',
+                    'https://app-api.modatex.com.ar/tarjeta.png'
+                ],
                 'active'=> false,
                 'detalle'=> 'Luego de recibir este pedido, la tienda te enviará por mail dentro de las 48 hs, el cupón para pagar esta compra con tu tarjeta.',
                 'method'=> 'card'
@@ -29,7 +37,12 @@ class CheckoutController extends Controller
                 'name' => 'Efectivo',
                 'modapago' => true,
                 'descripcion' => 'Si quieres obtener un cupón de pago para abonar en efectivo, selecciona esta opción.',
-                'logos' => ['~/assets/pagofacil.jpg', '~/assets/rapipagos.jpg'],
+                'logos' => [
+                    // '~/assets/pagofacil.jpg', 
+                    // '~/assets/rapipagos.jpg',
+                    // '~/assets/efectivo.png',
+                    'https://app-api.modatex.com.ar/efectivo1.png'
+                ],
                 'active' => false,
                 'detalle' => 'Luego de recibir este pedido, la tienda te enviará por mail dentro de las 48 hs, el cupón para pagar esta compra en los puntos de Pago Fácil, Rapipagos o Cobro Express.',
                 'method' => 'cash'
@@ -39,7 +52,12 @@ class CheckoutController extends Controller
                 'name' =>  'Transferencia o depósito bancario',
                 'modapago' =>  false,
                 'descripcion' =>  'Seleccionando aquí, podrás realizar una transferencia o depósito bancario.',
-                'logos' =>  ['~/assets/santanderrio.png', '~/assets/bancocomafi.jpg'],
+                'logos' =>  [
+                    // '~/assets/santanderrio.png', 
+                    // '~/assets/bancocomafi.jpg',
+                    // '~/assets/transferencia.png',
+                    'https://app-api.modatex.com.ar/transferencia.png'
+                ],
                 'active' =>  false,
                 'detalle' =>  'Luego de recibir este pedido, la tienda te enviará por mail dentro de las 48 hs, los datos bancarios.',
                 'method' =>  'bank'
@@ -848,7 +866,7 @@ class CheckoutController extends Controller
             ->post($this->generateUrl(['controller' => 'Checkout','method' => 'summary']), 
                 $request->all());
 
-             if($response->json()['status'] == 'error'){
+            if($response->json()['status'] == 'error'){
                 throw new \Exception(json_encode($response->json()));
             }
 

@@ -2,32 +2,37 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+
+use Carbon\Carbon;
 use App\Models\Store;
 use App\Models\Favorite;
 use App\Models\Products;
-use App\Http\Traits\HelpersTraits;
-use App\Http\Traits\StoreTraits;
-use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
+use Illuminate\Http\Request;
+use App\Http\Traits\StoreTraits;
+use Illuminate\Http\Client\Pool;
+use App\Http\Traits\HelpersTraits;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Auth;
+
 use Illuminate\Support\Facades\Cache;
 use App\Helpers\General\CollectionHelper;
-use Auth;
 
-
-use Illuminate\Http\Client\Pool;
 class StoresController extends Controller
 {
     use StoreTraits;
 
     private $categories = ['woman','man','xl','kids','accessories','sportive','lingerie','home','shoes'];
 
+    private $allowedPlanes = ['premium', 'black','platinum','gold','blue'];
+
     private $url = 'https://www.modatex.com.ar/modatexrosa3/';
 
     private $urlStore = 'https://www.modatex.com.ar/?c=Store::';
 
+    
     private $storesPlanes = [
         '_black.json',
         '_platinum.json',
@@ -38,34 +43,7 @@ class StoresController extends Controller
     private $urlProduct = 'https://www.modatex.com.ar/modatexrosa3/?c=Products::get&';
 
     private $urlPromos = 'https://www.modatex.com.ar/?c=Canpaigns::promos&store_id=';
-    /*
-    * DEPRECADO
-    * @return Store Array
-    * @return $store = Collection()   
-    */
-    // public function getStores(Request $request){
-
-    //     // $stores = Store::Active()->paginate();
-    //     $store = new Store($request->all());
-    //     $stores = $store->getStores($request->all());
-
-    //     return response()->json($stores,200);
-    // }
-
-    /*
-    * DEPRECADO
-    * @params $store == LOCAL_NAME_KEYWORD value (slug)
-    * @return Store Object
-    * @return $store = Collection()   
-    */
-    // public function getStore($store, Request $request){
-
-    //   $store = new Store(['store' => $store]);
-    //   $store = $store->getStore($request->all());
-
-    //   return response()->json(['status'=>true,'store'=>$store],200);
-
-    // }
+   
 
     /**
      * REQUEST STORE
@@ -90,84 +68,23 @@ class StoresController extends Controller
      */
     public function consultaStoresRosa($request)
     {
+      $response = Cache::get('stores');
 
-      $cache = false;
-      if(Cache::get('stores')){
-        $cache= true;
-        $response = Cache::get('stores');
-      }else{
-        $response = Http::accept('application/json')->get($this->urlStore.'all');
-
-        if($response->json() == null){
-          return response()->json(CollectionHelper::paginate(collect([]), $request->paginate ?? 16 ));
-        }
-      }
-
-
-      $stores = Store::whereIn('LOCAL_CD',$response->pluck('id')->all())->get();
-      $favoritos = Favorite::whereIn('LOCAL_CD',$response->pluck('id')->all())->where('STAT_CD','1000')->where('CLIENT_NUM',Auth::user()->num)->get();
+      $ids = collect($response)->pluck('id')->all();
       
+      $favoritos = Favorite::whereIn('LOCAL_CD',$ids)->where('STAT_CD','1000')->where('CLIENT_NUM',Auth::user()->num)->get();
       
-      // dd('$favoritos');
-      return $this->crearConsulta($response->map(function($tienda) use ($stores,$favoritos, $cache){
-
-        if($cache){
-          return $tienda;
-        }
-        
-        $store = $stores->where('LOCAL_CD', $tienda['id'])->first();
-
-        $categorie = '';
-        if($store['USE_MAN'] == "Y"){
-          $categorie = 'man';
-        }elseif($store['USE_WOMAN'] == "Y"){
-          $categorie = 'woman';
-        }elseif($store['USE_CHILD'] == "Y"){
-          $categorie = 'kids';
-        }elseif($store['USE_ACCESORY'] == "Y"){
-          $categorie = 'accessories';
-        }elseif($store['USE_SPECIAL'] == "Y"){
-          $categorie = 'xl';
-        }elseif($store['USE_DEPORTIVA'] == "Y"){
-          $categorie = 'sportive';
-        }elseif($store['USE_LENCERIA'] == "Y"){
-          $categorie = 'lingerie';
-        }elseif($store['USE_SHOES'] == "Y"){
-          $categorie = 'shoes';
-        }elseif($store['USE_HOME'] == "Y"){
-          $categorie = 'home';
-        }
-
-        $predefSection = $this->categorieDefaultId($store);
-
-        $categorieR = [];
-        $paquete = '';
-        if(isset($tienda['sections'])){
-          foreach (json_decode($tienda['sections']) as $key => $value) {
-            $categorieR[] = $key;
-            $paquete = $value;
-          }
-        }
-
-        return [
-          "logo" => env('URL_IMAGE').'/common/img/logo/'. $tienda['logo'],
-          "name" => $tienda['name'],
-          "local_cd" => $tienda['id'],
-          "company_id" => $store['GROUP_CD'],
-          "min" => $store ? $store['LIMIT_PRICE']: '',
-          "rep" => $store ? $store['MODAPOINT']: '',
-          "vc" => '',
-          "categorie" => $categorie,
-          "category_default" => $predefSection,
-          'categories_store' => $categorieR,
-          'paquete' => $paquete,
-          'cleaned' => $tienda['cleaned'],
-          'status' => $tienda['status'],
-          'favorite' => $favoritos->where('LOCAL_CD',$tienda['id'])->count() ? true : false ,
-          // 'favorite_count' => $favoritos->where('LOCAL_CD',$tienda['id'])->count() `
-        ];
-
+      $data = $this->crearConsulta(collect($response)->map(function($tienda) use ($favoritos) {
+        $tienda['favorite'] = $favoritos->where('LOCAL_CD', $tienda['id'])->count() ? true : false;
+        return $tienda;
       }),$request);
+      
+      $data = $data->sortBy(function ($item) {
+          $position = array_search($item['paquete'], $this->allowedPlanes);
+          return $position === false ? PHP_INT_MAX : $position;
+      })->values();
+
+      return $data;
     }
 
     /**
@@ -192,7 +109,6 @@ class StoresController extends Controller
 
       
       if(isset($request['categorie'])){
-
         if($request['categorie'] == 'all'){
           $data = $data->shuffle();
         }else{
@@ -200,8 +116,6 @@ class StoresController extends Controller
         }
       }
 
-      
-     
       if(isset($request['plan']) && $request['plan']!=''){
         $data = $data->filter(fn ($store) => Str::lower($request['plan'])  == Str::lower($store['paquete']) );
       }
@@ -233,9 +147,55 @@ class StoresController extends Controller
         if(isset($response['data']['custom']) && count($response['data']['custom'])){
           $response['data']['custom'] = collect($response['data']['custom'])->map(function($pastilla){
             $pastilla['title'] = html_entity_decode($pastilla['title']);
+            
             return $pastilla;
           });
         }
+
+        // dd(Auth::user()->num);
+        // if(Auth::user()->num == 1115249){
+
+          if(isset($response['data']) && isset($response['data']['general']))
+          {
+            $response['data']['general'] = collect($response['data']['general'])->map(function($pastilla){
+              // Expresión regular para encontrar todas las etiquetas <a href="...">...</a>
+              $pattern = '/<a\s+href=["\']([^"\']+)["\'].*?>(.*?)<\/a>/i';
+              
+              // Array para almacenar los links encontrados
+              $botones = [];
+
+              // Buscar todas las etiquetas <a> y extraer el contenido
+              preg_match_all($pattern, $pastilla['text'], $matches);
+
+              // Eliminar las etiquetas <a> del texto
+              $textWithoutLinks = preg_replace($pattern, '', $pastilla['text']);
+
+              // Recorrer todas las coincidencias y reemplazar la etiqueta <a> con su contenido formateado
+              if (!empty($matches[1])) {
+                foreach ($matches[1] as $index => $href) {
+                  $botones[] = [
+                    'text' => $matches[2][$index],
+                    'link' => ltrim($href, '/')
+                  ];
+                }
+              }
+
+              $pastilla['text'] = $textWithoutLinks;
+                
+              $pastilla['buttons'] =  collect($botones)->map(function($boton){
+                // dd($boton);    
+                $cms = cmsController::searchCms(['slug'=> $boton['link']]);
+                $boton['redirect'] = [
+                  'route' => '/page',
+                  'params' => [ 'id' => $cms['id'], 'editor' => $cms['editor'], 'name' => $cms['name'] ]
+                ];
+                return $boton;
+              });     
+
+              return $pastilla;
+            });
+          }
+        // }
       
         return response()->json($response);
       }
@@ -507,6 +467,49 @@ class StoresController extends Controller
           }
       }
       return $predefSection;
+    }
+
+    public function getRatings($store_id)
+    {
+      $marca = Carbon::now()->timestamp * 1000;
+      
+      $response = Http::accept('application/json')->get($this->urlStore.'ratings&store_id='.$store_id.'&_='.$marca);
+
+      $data = [];
+      if($response->json()){
+        $response = $response->json();
+        if($response['status'] == 'success'){
+          $data = $response['data'];
+        }
+      }
+
+      return response()->json($data);
+
+    }
+
+    public function getDialogs($store_id, Request $request)
+    {
+      
+      $marca = Carbon::now()->timestamp * 1000;
+
+      $start = '&start='.$request->start;
+
+      $length = '&length='.$request->length;
+      
+      $url = $this->urlStore.'dialogs&store_id='.$store_id.$start.$length.'&_='.$marca;
+
+      $response = Http::accept('application/json')->get($url);
+
+      $data = [];
+      if($response->json()){
+        $response = $response->json();
+        if($response['status'] == 'success'){
+          $data = $response['data'];
+        }
+      }
+
+      return response()->json($data);
+
     }
 
 }
