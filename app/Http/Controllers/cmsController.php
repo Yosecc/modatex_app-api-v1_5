@@ -23,6 +23,25 @@ class cmsController extends Controller
         return response()->json($cms);
     }
 
+    public static function searchCms($params = ['slug' => null, 'id' => 'null'])
+    {
+        if(isset($params['id']) && $params['id']!=null){
+            $cms = PagesCms::find($params['id']);
+        }
+
+        if(isset($params['slug']) &&  $params['slug']!=null){
+            $cms = PagesCms::where('slug','like','%'.$params['slug'].'%')->first();
+        }
+
+        $cms = [    
+            'name' => $cms ? ($cms->title_app != '' ? $cms->title_app : $cms->title ) : null,  
+            'id' => $cms ? $cms->id : null,  
+            'editor' => $cms ? $cms->data_json  : null,  
+        ];
+
+        return $cms;
+    }
+
     private function utf8_decode_recursive($mixed) {
         if (is_array($mixed)) {
             foreach ($mixed as $key => $value) {

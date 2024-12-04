@@ -22,32 +22,22 @@ class CouponsController extends Controller
     public function index()
     {
       $this->token = Auth::user()->api_token;
+      
       $response = Http::withHeaders([ 
           'x-api-key' => $this->token,
           'Content-Type' => 'application/json'
       ])
       ->get($this->urlProfile.'Profile::coupons&app=1');
-
+    
       if(!$response->json()){
         return response()->json([]);
       }
-      $cTienda = new StoresController();
-      $cTienda = $cTienda->consultaStoresRosa([
-        'categorie' => 'all'
-      ]);
-      $data = collect($response->json())->map(function($cupon) use($cTienda) {
-        $t = [];
-        foreach ($cTienda->whereIn('local_cd', $cupon['DETALLE_TIENDAS']) as $key => $value) {
-         $t[] = $value;
-        }
-        return [
-          "num"=> $cupon['NUM'],
-          "coupon_price"=> $cupon['COUPON_PRICE'],
-          "coupon_name"=> $cupon['COUPON_NAME'],
-          "expire_date"=> $cupon['EXPIRE_DATE'],
-          "tiendas"=> $t
-        ];
-      });
+      
+      $data = $response->collect()['data'];
+
+      $data = $this->getCupon($data);
+    
+
       return response()->json($data);
     }
 
@@ -282,5 +272,37 @@ class CouponsController extends Controller
         $datos[] = ['name'=> 'Descuentos Exclusivos', 'data' => $grouped['descexcl'] ];
 
       return response()->json($datos);
+    }
+
+    static public function getCupon($data)
+    {
+      $cTienda = new StoresController();
+      $cTienda = $cTienda->consultaStoresRosa([
+        'categorie' => 'all'
+      ]);
+
+      return collect($data)->map(function($cupon) use($cTienda) {
+        $t = [];
+        foreach ($cTienda->whereIn('local_cd', $cupon['validStores']) as $key => $value) {
+         $t[] = $value;
+        }
+
+        $cupon['tiendas'] = $t;
+        $cupon['coupon_name'] = $cupon['name'];
+        $cupon['coupon_price'] = $cupon['amount'];
+        $cupon['label'] = $cupon['label'] == false ? 'Cupón de Descuentos' : $cupon['label'] ;
+        $cupon['coupon_type'] = $cupon['pattern'];
+        $cupon['bg'] = 'https://api.donosite.com/storage/companies/prev-card-'.$cupon['pattern'].'.png' ;
+
+        if($cupon['name'] == 'app_coupon'){
+          // $cupon['pattern'] = $cupon['pattern'].'_app';
+          $cupon['pattern'] = 'free-shipping';
+        }
+
+        $cupon['expire_date'] = $cupon['expire'];
+        $cupon['num'] = $cupon['id'];
+        $cupon['active'] = false;
+        return $cupon;
+      });
     }
 }

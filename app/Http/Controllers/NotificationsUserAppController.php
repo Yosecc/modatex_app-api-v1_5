@@ -27,15 +27,16 @@ class NotificationsUserAppController extends Controller
             'title' => 'required',
             'body' => 'required',
         ]);
-        
+
 
         if ($validator->fails()) {
             return response()->json($validator->errors(), 422);
         }
 
+
         // dd(Auth::user()->num);
         $notification = new NotificationsPush($request->all());
-        $notificacion = $notification->sendUserNotification($request->client_id);
+        $notificacion = $notification->sendUserNotification(Auth::user()->num);
 
 
         if($notification->fails()){
@@ -52,11 +53,12 @@ class NotificationsUserAppController extends Controller
             'token' => 'required'
         ]);
 
-        $notification = NotificationsUserApp::updateOrInsert([ 
-            'client_num' => Auth::user()->num , 
-            'token' => $request->token 
-        ],[
+        $notification = NotificationsUserApp::updateOrInsert([
+            'client_num' => Auth::user()->num ,
             'platform' => 'app',
+            'device' => $request->device
+        ],[
+            'token' => $request->token
         ]);
 
         return response()->json(NotificationsUserApp::where('client_num',Auth::user()->num)->get());
@@ -87,7 +89,7 @@ class NotificationsUserAppController extends Controller
         ->acceptJson()
         ->post('https://www.modatex.com.ar/modatexrosa3/helpers/Notifications_app_endpoint.php',
             $array
-        ); 
+        );
 
         return response()->json($response->collect()->map(function($not){
             $not['redirect'] = json_decode($not['redirect'])->redirect;
@@ -110,7 +112,7 @@ class NotificationsUserAppController extends Controller
     //                 })
     //                 ;
     //     if($noti->count()){
-    //         $notificationsIds = $noti->pluck('num');  
+    //         $notificationsIds = $noti->pluck('num');
     //         $links = Links::whereIn('section_id', $notificationsIds->toArray() )->get();
 
     //         $noti = $noti->map(function($item) use ($links) {
@@ -126,7 +128,7 @@ class NotificationsUserAppController extends Controller
     //         });
 
     //     }
-         
+
 
     //     return response()->json($noti);
     // }

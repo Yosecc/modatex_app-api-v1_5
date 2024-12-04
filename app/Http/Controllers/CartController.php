@@ -60,20 +60,29 @@ class CartController extends Controller
 
       $url = $this->url.'?c=Cart::get&store_id='.$store_id;
 
+      // dd($url);
       $this->token = Auth::user()->api_token; 
-      
+     
       $response = Http::withHeaders([
           'x-api-key' => $this->token,
           'Content-Type' => 'application/json'
           // 'Content-Type' => 'application/x-www-form-urlencoded'
       ])
-      ->asForm()
+      // ->asForm()
       ->post($url,[
         'store_id' => $store_id,
       ]);
 
+      
       $carrito = $response->json();
 
+      if(!$carrito){
+        return response()->json([
+          'total' => 0,
+          'cantidadModelos' => 0,
+          'productos' => []
+        ], 422);
+      }
       $Urlagregados = collect($carrito['added'])->map(function($agregado){
         return 'https://www.modatex.com.ar/?c=Products::get&product_id='.$agregado['product_id'];
       });
@@ -434,8 +443,6 @@ class CartController extends Controller
       ])
       ->post($url);
 
-      // dd($response->body());
-
       $datos = [ 'cart' => $response->json() ];
 
 
@@ -448,22 +455,25 @@ class CartController extends Controller
       $datos['is_missing_data'] = $response->json();
 
 
+      // dd($this->url.'?c=Coupons::get&store_id='.$request->local_cd.'&welcome=1');
+      // dd([
+      //   'x-api-key' => $this->token,
+      //   'Content-Type' => 'application/json'
+      // ]);
       $response = Http::withHeaders([
           'x-api-key' => $this->token,
           'Content-Type' => 'application/json'
       ])
       ->post($this->url.'?c=Coupons::get&store_id='.$request->local_cd.'&welcome=1',[]);
 
-      $datos['cupon'] = $response->collect()->map(function($cupon){
-        $cupon['tiendas'] = [];
-        $cupon['coupon_name'] = '';
-        $cupon['coupon_price'] = $cupon['amount'];
-        $cupon['coupon_type'] = $cupon['pattern'];
-        $cupon['expire_date'] = $cupon['expire'];
-        $cupon['num'] = $cupon['id'];
-        $cupon['active'] = false;
-        return $cupon;
-      });
+      $datos['cupon'] = CouponsController::getCupon($response->collect());
+
+      $datos['cupon'] = $datos['cupon']->sortByDesc(function ($item) {
+        return $item['name'] === 'app_coupon';
+      })
+      ->values()
+      // ->where('name','!=','app_coupon')->values()
+      ;
 
       if(!$datos['cupon']->count()){
         $datos['cupon'] = null;

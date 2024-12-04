@@ -52,23 +52,14 @@ class ProductsController extends Controller
 
     public function onGetSearch($request): Collection
     {
-     
+      // \Log::debug($request);
+      
       $rr = $request;
-// dd($rr);
-      if(isset($rr['oferta']) && ($rr['oferta'] || $rr['oferta'] == 'true' || $rr['oferta'] == true)){
-        $rr['onSale'] = 1;
-      }
-     
-      if(isset($request->no_product_id)){
-        $rr['length'] = $rr['length'] + 1;
-      }
       
       $url = $this->url.Arr::query($rr);
-
-      // dd($url);
+      
       $response = Http::acceptJson()->get($url);
 
-      // dd($response->json());
       if(!$response->json()){
         return [];
       }
@@ -76,26 +67,13 @@ class ProductsController extends Controller
       $data = $response->json()['data'];
       // dd($data);
       $data = collect($data)->map(function ($element){
-        
         $producto = new Producto($element);
         return $producto->getProducto();
-      });
-
-      // dd($data);
-      // $data = $this->arregloProduct($data);
-
-      $d = [];
-      if(isset($request->no_product_id)){
-        foreach ($data as $key => $value) {
-          if($value['id'] != $request->no_product_id){
-           $d[] = $value;
-          }
-        }
-        $data = $d;
-      }
+      })->filter(function ($value, $key) {
+        return ($value['local_cd']!=1006 && $value['local_cd'] != 1365);
+      })->values();
 
       return $data;
-
     }
 
     public function oneProduct($product_id)
@@ -376,6 +354,10 @@ class ProductsController extends Controller
 
       $url = $this->urlBase.'Highlights::get&'.Arr::query($request);
       $response = Http::acceptJson()->get($url);
+
+      if(!isset($response->json()['data'])){
+        return response()->json([]);
+      }
 
       $data = $response->json()['data'];
 

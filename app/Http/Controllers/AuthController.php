@@ -23,25 +23,26 @@ class AuthController extends Controller
 
     public $campos;
     private $url = 'https://www.modatex.com.ar/ntadministrator/router/Router.php/user';
-    
+
     public function __construct(){
       $this->campos = Client::CAMPOS;
     }
 
     public function login(Request $request){
-      
+
+        // dd('kd');
       // $this->validate($request, [
       //   'password' => 'required|max:20',
       //   'email'    => 'required|email',
       // ]);
-      
+
       if ($request->isJson()) {
         // try{
-          
-          $client = Client::select($this->campos)->where('client_id',$request->email)->where('stat_cd', 1000)->first();
 
+          $client = Client::select($this->campos)->where('client_id',$request->email)->where('stat_cd', 1000)->first();
+// dd($client);
             if ($client) {
-             
+
               $payload = [
                 'password' => $request->password,
                 'email' => $request->email,
@@ -49,47 +50,47 @@ class AuthController extends Controller
               ];
 
               $login = $this->ApiRosa($payload, 'login');
-      
+
               if(!$login){
-                return response()->json(['status'=>false,'message'=>'Ha ocurrido un error. Verifique e intente nuevamente'],401);
+                return response()->json(['status'=>false,'response'=>'Ha ocurrido un error. Verifique e intente nuevamente'],401);
               }
               // dd($login);
               if($login->status != 200){
                 $response = collect($login->response)->map(function($item,$key){
                   return [$item] ;
                 });
-                return response()->json( $response , 422);
+                return response()->json( [ 'status'=> false, 'errors' => $response  ], 422);
               }
 
               if (intval($login->response->stat_cd) != 1000) {
-                return response()->json(['status'=>false,'message'=>'Usuario inactivo'],401);
+                return response()->json(['status'=>false,'response'=>'Usuario inactivo'],401);
               }
 
               if($client->verification_status=="1" || $client->verification_status == 1){
-            
+
                 $client = Client::select($this->campos)
                           ->where('client_id',$request->email)
                           ->first();
 
                 if($client->api_token != $login->response->token){
-                  return response()->json(['status'=>false,'message'=>'Ha ocurrido un error. La clave token no coincide, comuniquese con el administrador.'],401);
+                  return response()->json(['status'=>false,'response'=>'Ha ocurrido un error. La clave token no coincide, comuniquese con el administrador.'],401);
                 }
-                
+
                 return response()->json(['status'=>true,'client'=> $client],200);
               }else{
-                return response()->json(['status'=> 'code_validation','message'=>'Cliente no validado','client'=> $client],200);
+                return response()->json(['status'=> 'code_validation','response'=>'Cliente no validado','client'=> $client],200);
               }
 
             }else{
-              return response()->json(['status'=>false,'message'=>'No se encontraron registros'],401);
+              return response()->json(['status'=>false,'response'=>'No se encontraron registros'],401);
             }
-          
+
 
         // }catch(\Exception $e){
-        //     return response()->json(['status'=>false,'message'=>'No se encontraron registros'],401);
+        //     return response()->json(['status'=>false,'response'=>'No se encontraron registros'],401);
         // }
       }
-      return response()->json(['message'=>'Unauthorized'],401);
+      return response()->json(['response'=>'Unauthorized'],401);
     }
 
     public function LoginSocial(Request $request)
@@ -130,15 +131,15 @@ class AuthController extends Controller
      * @param $payload : Array
      * @param $action : String
      * @param $isdecode : Boolean (Asume que el respuesta siempre viene codificada debe decodificarse de lo contrario se retorna el mismo resultado de la peticion)
-     * 
+     *
      */
     private function ApiRosa($payload, $action, $isdecode = true)
     {
         // try {
 
-          
+
           $jwt = JWT::encode($payload, env('KEY_JWT'), 'HS256');
-          
+
             // dd($jwt);
             $response = Http::asForm()
                               ->post($this->url, [
@@ -149,13 +150,13 @@ class AuthController extends Controller
             $token = str_replace("\n", "",$response->body());
 
             // dd($response->body());
-            
+
             $decode = false;
-            
+
             try {
               if($isdecode){
                 $decode = JWT::decode($token, new Key(env('KEY_JWT'), 'HS256'));
-                // dd($decode);  
+                // dd($decode);
               }else{
                 $decode = $token;
               }
@@ -173,7 +174,7 @@ class AuthController extends Controller
     }
 
     /**
-     * return { status: string, message: string, client: object Client } 
+     * return { status: string, message: string, client: object Client }
      * errors { key: []string }
      */
 
@@ -184,7 +185,8 @@ class AuthController extends Controller
 
       if($client){
         if($client->verification_status=="0" || $client->verification_status == 0){
-          return response()->json(['status'=> 'code_validation','message'=>'Cliente no validado','client'=> $client],200);
+          // return response()->json(['status'=> 'code_validation','message'=>'Cliente no validado','client'=> $client],200);`
+          return response()->json(['status'=> false,'response'=> 'Cliente no validado' ,'client'=> $client],200);
         }
       }
 
@@ -197,7 +199,7 @@ class AuthController extends Controller
       //     'password'   => 'required|max:20'
       // ]);
 
-      
+
       $payload = [
           "name"     => $request->first_name,
           "lastname" => isset($request->last_name) ? $request->last_name : '',
@@ -207,33 +209,18 @@ class AuthController extends Controller
           "mobile"   => $request->phone
       ];
 
- 
+
       $register = $this->ApiRosa($payload, 'newuser', true);
-      // dd($register);
+
+
       if(gettype($register) == 'object' && !empty($register->status) && $register->status == 200){
         $client = Client::where('client_id',$request->email)->first();
-        return response()->json(['status'=> true , 'message'=>'Registro realizado.','client'=>$client], 200);
+        return response()->json(['status'=> true , 'response'=>'Registro realizado.','client'=>$client], 200);
       }
+//  dd($register);
 
-      // $mensages = collect($register)->map(function($value, $key){
-      //   $keyy = $key;
-      //   if($key == 'Mobile'){
-      //     $keyy = 'phone';
-      //   }
-      //   $value = [$value];
-      //   return [$keyy => $value];
-      // })->collapse();
+      return response()->json(['status'=>false,'errors'=>$register->response], 422);
 
-      // dd($register->response );
-
-       // Obtener los valores del objeto
-       $valores = array_values((array)$register->response);
-
-       // Convertir los valores en una cadena separada por comas
-       $cadena = implode(', ', $valores);
-
-      return response()->json(['status'=>false,'response'=>$cadena], 422);
-     
     }
 
     public function code_validation(Request $request){
@@ -269,7 +256,7 @@ class AuthController extends Controller
         if (!$email) {
             return response()->json(['email'=>['Email is required']],422);
         }
-        // if ($this->isEmail($email)) { 
+        // if ($this->isEmail($email)) {
 
           $resend = $this->ApiRosa(['email'=> $email, 'asunto' => 'Código de validación' ], 'resendcodigo');
 
@@ -288,6 +275,42 @@ class AuthController extends Controller
         // }else{
         //     return response()->json(['status'=>false,'message'=> ['email' => 'Email no se encuentra registrado']],422);
         // }
+    }
+
+    public function resendcode(Request $request){
+
+      $this->validate($request, [
+          'email'  => 'required|email',
+      ],[
+        'email' => [
+          'required' => 'El email es requerido',
+          'email' => 'El email es incorrecto'
+        ]
+      ]);
+
+
+      if (!$request->email) {
+          return response()->json(['email'=>['Email is required']],422);
+      }
+      // if ($this->isEmail($email)) {
+
+        $resend = $this->ApiRosa(['email'=> $request->email, 'asunto' => 'Código de validación-' ], 'resendcodigo');
+
+        if($resend->status != 200){
+          // Obtener los valores del objeto
+          $valores = array_values((array)$resend->response);
+
+          // Convertir los valores en una cadena separada por comas
+          $cadena = implode(', ', $valores);
+
+          return response()->json(['status'=> false, 'message'=> $cadena], 422);
+        }
+
+        return response()->json(['status'=> true, 'message'=>  $resend->response->status_mail ]);
+
+      // }else{
+      //     return response()->json(['status'=>false,'message'=> ['email' => 'Email no se encuentra registrado']],422);
+      // }
     }
 
     public function recover_password(Request $request){
@@ -309,9 +332,9 @@ class AuthController extends Controller
             $client = Client::where('client_id', $request->email)->first();
 
             if($client){
-              $response = $this->ApiRosa([ 
-                'num_cliente' => $client->num, 
-                'nuevo_pass'=> $request->newpass 
+              $response = $this->ApiRosa([
+                'num_cliente' => $client->num,
+                'nuevo_pass'=> $request->newpass
               ], 'recoverypass');
 
               // dd($response);
@@ -323,11 +346,11 @@ class AuthController extends Controller
 
                 // Convertir los valores en una cadena separada por comas
                 $cadena = implode(', ', $valores);
-    
+
                 return response()->json(['status'=> false, 'message'=> $cadena], 401);
               }
             }else{
-              return response()->json(['status'=>false,'message'=>'Email no se encuentra registrado'],401);  
+              return response()->json(['status'=>false,'message'=>'Email no se encuentra registrado'],401);
             }
 
         // }else{
@@ -335,7 +358,7 @@ class AuthController extends Controller
         // }
     }
 
-    
+
 
     public function createCoupon($client, $definitions)
     {
@@ -345,7 +368,7 @@ class AuthController extends Controller
 
         if ($consulta == 0) {
             $cupones = [];
-            for ($i=0; $i < $definitions['count']; $i++) { 
+            for ($i=0; $i < $definitions['count']; $i++) {
                 $coupons = new Coupons();
                 $coupons->fill([
                     'coupon_str'    => '201710',

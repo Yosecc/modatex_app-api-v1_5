@@ -26,10 +26,16 @@ use App\Helpers\General\CollectionHelper;
 use App\Models\TipoModeloUno as Category;
 use App\Http\Controllers\ProductsController;
 use Illuminate\Support\Facades\Log;
+use Tymon\JWTAuth\Facades\JWTAuth;
+use Tymon\JWTAuth\Facades\JWTFactory;
+use Tymon\JWTAuth\Exceptions\JWTException;
 
 class HomeController extends Controller
 {
   use StoreTraits, ProductsTraits, ClientTraits;
+
+
+  private $url = 'https://www.modatex.com.ar/';
 
   /**
    * DEPRECADO
@@ -83,6 +89,18 @@ class HomeController extends Controller
     ],200);
   }  
 
+  public function test()
+  {
+    $editor = PagesCms::where('id', 516)->first();
+
+    $json = json_decode($editor->data_json);
+    $blocks = collect($json->blocks);
+
+    dd($blocks->where('type','Marcas'));
+    // $editor->data_json
+    return response()->json($editor->data_json);
+  }
+
   /**
    * GET SLIDERS
    */
@@ -90,7 +108,11 @@ class HomeController extends Controller
 
       $response = Http::acceptJson()->get('https://www.modatex.com.ar/?c=SlidesApp::getAllSlides');
 
-      $sliders = collect($response->json())->collapse()->map(function($item){
+      // dd($response->json());
+      // dd($response->body());
+      $datos = $response->json();
+      $mujer = (isset($datos) && isset($datos['Mujer'])) ? $datos['Mujer'] : [];
+      $sliders = collect($mujer)->map(function($item){
        
         if($item['APP_URL_JSON'] == ''){
           return [
@@ -106,11 +128,22 @@ class HomeController extends Controller
           case 'categories':
             $redirect->route = 'categorie';
             break;
-          
+          case 'page':
+            if($redirect->params->id){
+              $editor = PagesCms::where('id', $redirect->params->id)->first();
+
+              if($editor){
+                $redirect->params->name = $editor->title_app ? $editor->title_app : $editor->title;
+                $redirect->params->editor = $editor->data_json;
+              }
+            }
+            break;
           default:
             # code...
             break;
         }
+
+        // dd($redirect);
         return [
           "img" => "https://netivooregon.s3.amazonaws.com/common/img/main_slide/1.1/". $item['IMG_APP_PATH'],
           "title" => "",
@@ -118,11 +151,16 @@ class HomeController extends Controller
         ] ; 
       });
 
+      
       // $sliders[] = [
       //   "img" => "https://netivooregon.s3.amazonaws.com/common/img/main_slide/1.1/17137931221713375144cupones-extra-slide-app.webp_app.webp",
       //   "title" => "",
-      //   "redirect" => []
+      //   // "redirect" => [],
+      //   'editor' => PagesCms::where('id',487)->first()->data_json,
       // ];
+
+    
+
 
       return response()->json( $sliders);
 
@@ -224,6 +262,26 @@ class HomeController extends Controller
     // 
     return response()->json(['stores' => $response['stores'], 'products' => $response['products'] ]);
 
+  }
+
+  public function getCategorieFilter()
+  {
+      $response = Http::acceptJson()->get($this->url.'?c=Products::categories');
+
+      $data = $response->collect();
+
+
+      $data = $data->map( function($seccion){
+        $seccion['sections'] = explode(',',$seccion['section_id']);
+
+        $seccion['categories'] = collect($seccion['categories'])->map(function($subcategoria){
+          $subcategoria['amount'] = intval($subcategoria['amount']);
+          return $subcategoria;
+        });
+        return $seccion;
+      });
+
+      return response()->json($data);
   }
 
   /**
@@ -480,15 +538,21 @@ class HomeController extends Controller
       return [
         'id' => $item['id'],
         'name' => $item['title_app'] ? $item['title_app'] : $item['title'],
-        'editor' => $editor,
-        'key' =>  'page', 
+        // 'editor' => $editor,
+        'key' =>  $item['key_category_app'], 
         'type' =>  'page',
         'icon' =>  $item['url_icono'],
+        'icon_image' => $item['url_icono'],
+        'icon_image_asset' => 'assets/icons/woman.png',
         'color' =>  "",
         'colSpan' =>  3,
         'col' =>  0,
         'row' =>  0,
         'left' =>  100,
+        'redirect' => [
+          'route' => '/page',
+          'params' => [ 'id' => $item['id'], 'editor' => $editor, 'name' => $item['title_app'] ? $item['title_app'] : $item['title'],]
+        ]
       ];
     });
     
@@ -496,60 +560,95 @@ class HomeController extends Controller
       [
         'id' => 1,
         'name' => 'Mujer',
+        'type' =>  'products',
         'key' =>  'woman', 
         'icon' => 'res://woman',
+        'icon_image' => 'woman.png',
+        'icon_image_asset' => '/assets/icons/woman.png',
         'color' =>  "",
         'colSpan' =>  3,
         'col' =>  0,
         'row' =>  0,
         'left' =>  100,
+        'redirect' => [
+          'route' => '/categories',
+          'params' => [ 'woman' ]
+        ]
       ],
       [
         'id' => 3,
         'name' => 'Hombre',
+        'type' =>  'products',
         'key' =>  'man', 
         'icon' => 'res://men',
+        'icon_image' => 'men.png',
+        'icon_image_asset' => 'assets/icons/men.png',
         'color' =>  "",
         'colSpan' =>  3,
         'col' =>  3,
         'row' =>  0,
         'left' =>  100,
+        'redirect' => [
+          'route' => '/categories',
+          'params' => [ 'man' ]
+        ]
       ],
       [
         'id' => 6,
         'name' => 'Talle especial',
+        'type' =>  'products',
         'key' =>  'xl', 
         'icon' => 'res://label',
+        'icon_image' => 'label.png',
+        'icon_image_asset' => 'assets/icons/label.png',
         'color' =>  "",
         'colSpan' =>  2,
         'col' =>  0,
         'row' => 1,
         'left' =>  35,
-        'top' =>  20
+        'top' =>  20,
+        'redirect' => [
+          'route' => '/categories',
+          'params' => [ 'xl' ]
+        ]
       ],
       [
         'id' => 4,
         'name' => 'Niños',
         'key' =>  'kids', 
+        'type' =>  'products',
         'icon' => 'res://baby',
+        'icon_image' => 'baby.png',
+        'icon_image_asset' => 'assets/icons/baby.png',
         'color' =>  "",
         'colSpan' =>  2,
         'col' =>  2,
         'row' =>  1,
         'left' =>  35,
-        'top' =>  20
+        'top' =>  20,
+        'redirect' => [
+          'route' => '/categories',
+          'params' => [ 'kids' ]
+        ]
       ],
       [
         'id' => 2,
         'name' => 'Accesorios',
         'key' =>  'accessories', 
+        'type' =>  'products',
         'icon' => 'res://accessories',
+        'icon_image' => 'accessories.png',
+        'icon_image_asset' => 'assets/icons/accessories.png',
         'color' =>  "",
         'colSpan' =>  2,
         'col' =>  4,
         'row' =>  1,
         'left' =>  35,
-        'top' =>  20
+        'top' =>  20,
+        'redirect' => [
+          'route' => '/categories',
+          'params' => [ 'accessories' ]
+        ]
       ],
       // [
       //   'id' => 0,
@@ -569,15 +668,25 @@ class HomeController extends Controller
         'id' => 0,
         'name' => 'Remeras',
         'type' =>  'search',
+        'type' =>  'products',
         'search' =>  'remera',
         'key' =>  'tshitr', 
         'icon' => 'res://tshirt',
+        'icon_image' => 'tshirt.png',
+        'icon_image_asset' => 'assets/icons/tshirt.png',
         'color' =>  "",
         'colSpan' =>  2,
         'col' =>  4,
         'row' =>  1,
         'left' =>  35,
-        'top' =>  20
+        'top' =>  20,
+        'redirect' => [
+          'route' => '/search',
+          'params' => [ 
+            'search' => 'remera',
+            'section' => ['woman']
+          ]
+        ]
       ],
       // [
       //   'id' => 7,
@@ -678,7 +787,7 @@ class HomeController extends Controller
             "redirect" => [
               "route" => "/search",
               "params" => [
-                "betweenDates" => \Carbon\Carbon::now()->format('Y-m-d').','.\Carbon\Carbon::now()->addDays(1)->format('Y-m-d'),
+                "betweenDates" => "hoy",
                 "order" => 'register DESC',
                 "search" => ''
               ]
@@ -690,7 +799,7 @@ class HomeController extends Controller
             "redirect" => [
               "route" => "/search",
               "params" => [
-                "betweenDates" => \Carbon\Carbon::now()->subDays(1)->format('Y-m-d').','.\Carbon\Carbon::now()->format('Y-m-d'),
+                "betweenDates" => "ayer",
                 "order" => 'register DESC',
                 "search" => ''
               ]
@@ -702,7 +811,7 @@ class HomeController extends Controller
             "redirect" => [
               "route" => "/search",
               "params" => [
-                "betweenDates" => \Carbon\Carbon::now()->subDays(2)->format('Y-m-d').','.\Carbon\Carbon::now()->subDays(1)->format('Y-m-d'),
+                "betweenDates" => "antesdeayer",
                 "order" => 'register DESC',
                 "search" => ''
 
@@ -715,7 +824,7 @@ class HomeController extends Controller
             "redirect" => [
               "route" => "/search",
               "params" => [
-                "betweenDates" => \Carbon\Carbon::now()->subDays(3)->format('Y-m-d').','.\Carbon\Carbon::now()->subDays(2)->format('Y-m-d'),
+                "betweenDates" =>"3dias",
                 "order" => 'register DESC',
                 "search" => ''
 
@@ -728,7 +837,7 @@ class HomeController extends Controller
             "redirect" => [
               "route" => "/search",
               "params" => [
-                "betweenDates" => \Carbon\Carbon::now()->subDays(4)->format('Y-m-d').','.\Carbon\Carbon::now()->subDays(3)->format('Y-m-d'),
+                "betweenDates" => "4dias",
                 "order" => 'register DESC',
                 "search" => ''
 
@@ -791,7 +900,7 @@ class HomeController extends Controller
 
         $blocks[] = $this->constructorBloque([
           'type' => 'Marcas',
-          'data' => ['marcas' => $marcasBlock ]
+          'data' => [ 'marcas' => $marcasBlock , 'marcasBuscadorData' => []]
         ]);
 
     return json_encode($this->constructorObjectPage($blocks)) ;
@@ -834,9 +943,9 @@ class HomeController extends Controller
 
   public function generarCacheMarcas()
   {
+    $response = Http::accept('application/json')->get($this->url.'?c=Store::all');
 
-   
-    $response = Http::accept('application/json')->get('https://www.modatex.com.ar/?c=Store::all');
+    // dd($response->collect())); 
 
     if(isset($response->json()['data'])){
       Cache::put('stores',$response->json()['data']);
@@ -844,13 +953,10 @@ class HomeController extends Controller
 
     $storesCache = Cache::get('stores');
 
-    // dd($storesCache);
-
     if($storesCache){
-      $enlaces = collect($storesCache)->filter(function ($value, $key) {
-        return ($value['id']!=1006 && $value['id'] != 1365);
-    })->map(function($store){
-          $store['enlace'] = "https://www.modatex.com.ar/?c=Store::_get&store_ref={$store['id']}";
+
+      $enlaces = collect($storesCache)->map(function($store){
+          $store['enlace'] = $this->url."?c=Store::_get&store_ref={$store['id']}";
           return $store;
       })->pluck('enlace');
 
@@ -866,25 +972,35 @@ class HomeController extends Controller
 
       $stores = collect($storesCache)->map(function($store) use ($respuestas){
         $store['more'] = $respuestas->where('LOCAL_CD',$store['id'])->first();
+        if($store['id'] == 2000){
+          // dd($store);
+        }
         $store = new Marca($store);
         return $store->getMarca();
       });
+
+      $planes = Marca::$allowedPlanes;
+
+      $stores = $stores->sortBy(function ($item) use ($planes) {
+          $position = array_search($item['paquete'], $planes);
+          return $position === false ? PHP_INT_MAX : $position;
+      })->values();
 
       Cache::put('stores',$stores);
 
       return $stores;
     }
-    
   }
 
   public function generarCacheBloquesHome()
   {
    
-    $this->generarCacheMarcas();
-
+   $f = $this->generarCacheMarcas();
+   
+// dd($f);
     $products = new ProductsController();
     
-    $pagesMenuCMS = PagesCms::whereIn('id',[460,458,459, 470])->get();
+    $pagesMenuCMS = PagesCms::whereIn('id',[460,458,459, 470, 481])->get();
 
     $productoMujer = $products->onGetSearch([
                       'start' => 0,
@@ -988,26 +1104,149 @@ class HomeController extends Controller
       "betweenDates" => \Carbon\Carbon::now()->format('Y-m-d').','.\Carbon\Carbon::now()->addDays(1)->format('Y-m-d'),
     ]);
 
-    try {
-      $imagenes = $productoMujer->pluck('images')->map(function($images){ return collect($images)->first();});
-      $imagenes = $imagenes->merge($productoHombre->pluck('images')->map(function($images){ return collect($images)->first();}));
-      $imagenes = $imagenes->merge($productoXL->pluck('images')->map(function($images){ return collect($images)->first();}));
-      $imagenes = $imagenes->merge($productoNino->pluck('images')->map(function($images){ return collect($images)->first();}));
-      $imagenes = $imagenes->merge($productoaccessories->pluck('images')->map(function($images){ return collect($images)->first();}));
-      $imagenes = $imagenes->merge($productoZapatos->pluck('images')->map(function($images){ return collect($images)->first();}));
-      $imagenes = $imagenes->merge($productoRemeras->pluck('images')->map(function($images){ return collect($images)->first();}));
-      $imagenes = $imagenes->merge($productoDetacados->pluck('images')->map(function($images){ return collect($images)->first();}));
-      $imagenes = $imagenes->merge($productoHoy->pluck('images')->map(function($images){ return collect($images)->first();}));
-
-      Cache::put('bloqueshomeImagenes',$imagenes);
-    } catch (\Throwable $th) {
-      //throw $th;
-    }
     $data = [
+                [
+                  "name" => "Líderes Modatex",
+                  "type" => "banners_animated_change",
+                  "value" => "",
+                  "items" => [
+                      [
+                          "textos" => [
+                              "head" => [
+                                  "text" => "Descuento exclusivo",
+                                  "size" => 9,
+                                  "color" => "#000000"
+                              ],
+                              "body" => [
+                                  "text" => "Cupón de $3.000",
+                                  "size" => 12,
+                                  "color" => "#000000"
+                              ],
+                              "footer" => [
+                                  "text" => "Ver tienda",
+                                  "size" => 9.0,
+                                  "color" => "#000000"
+                              ]
+                          ],
+                          "color" => "#FFFFFF",
+                          "portada" => "https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/app-premium-3.jpg",
+                          "store" => [
+                              "logo" => "https://netivooregon.s3.amazonaws.com/common/img/logo/paccaindumentaria_1599057245.webp",
+                              "name" => "PACCA INDUMENTARIA",
+                              "id" => 2126,
+                              "local_cd" => "2126",
+                              "company_id" => "2035",
+                              "company" => "2035",
+                              "min" => 15000,
+                              "rep" => 91,
+                              "vc" => 77,
+                              "categorie" => "woman",
+                              "category_default" => 1,
+                              "categories_store" => [
+                                  "man",
+                                  "woman"
+                              ],
+                              "paquete" => "premium",
+                              "cleaned" => "paccaindumentaria",
+                              "favorite" => false,
+                              "status" => "1000",
+                              "max_discount" => 0
+                          ]
+                      ],
+                      [
+                          "textos" => [
+                              "head" => [
+                                  "text" => "Variedad en sastrería",
+                                  "size" => 9,
+                                  "color" => "#FFFFFF"
+                              ],
+                              "body" => [
+                                  "text" => "Liquidación hasta 15%",
+                                  "size" => 11,
+                                  "color" => "#FFFFFF"
+                              ],
+                              "footer" => [
+                                  "text" => "Ver ofertas",
+                                  "size" => 9,
+                                  "color" => "#FFFFFF"
+                              ]
+                          ],
+                          "color" => "#ff0000",
+                          "portada" => "https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/app-premium-1.jpg",
+                          "store" => [
+                              "logo" => "https://netivooregon.s3.amazonaws.com/common/img/logo/e-motivo_1664223159.webp",
+                              "name" => "e-motivo",
+                              "id" => 1008,
+                              "local_cd" => "1008",
+                              "company_id" => "1007",
+                              "company" => "1007",
+                              "min" => 5000,
+                              "rep" => 87,
+                              "vc" => 78,
+                              "categorie" => "woman",
+                              "category_default" => 1,
+                              "categories_store" => [
+                                  "woman"
+                              ],
+                              "paquete" => "premium",
+                              "cleaned" => "e-motivo",
+                              "favorite" => false,
+                              "status" => "1000",
+                              "max_discount" => 58
+                          ]
+                      ],
+                      [
+                          "textos" => [
+                              "head" => [
+                                  "text" => "Remeras desde $3.500",
+                                  "size" => 9,
+                                  "color" => "#FFFFFF"
+                              ],
+                              "body" => [
+                                  "text" => "Vestidos desde $7.500",
+                                  "size" => 11,
+                                  "color" => "#FFFFFF"
+                              ],
+                              "footer" => [
+                                  "text" => "Ver catálogo",
+                                  "size" => 9,
+                                  "color" => "#FFFFFF"
+                              ]
+                          ],
+                          "portada" => "https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/app-premium-2.jpg",
+                          "color" => "#000000",
+                          "store" => [
+                              "logo" => "https://netivooregon.s3.amazonaws.com/common/img/logo/blackolive_1547561960.webp",
+                              "name" => "BLACK OLIVE",
+                              "id" => 1753,
+                              "local_cd" => "1753",
+                              "company_id" => "1664",
+                              "company" => "1664",
+                              "min" => 6000,
+                              "rep" => 78,
+                              "vc" => 75,
+                              "categorie" => "woman",
+                              "category_default" => 1,
+                              "categories_store" => [
+                                  "woman"
+                              ],
+                              "paquete" => "premium",
+                              "cleaned" => "blackolive",
+                              "favorite" => false,
+                              "status" => "1000",
+                              "max_discount" => 34
+                          ]
+                      ]
+                  ]
+                ],    
                 [
                   'name' => 'Mujer',
                   'type' => 'filter',
                   'value' => 'Mujer',
+                  'redirect' => [
+                    'route' => '/categories',
+                    'params' => [ 'woman' ]
+                  ],
                   // 'config' => [
                   //   'slider' => true,
                   //   'is_title' => false,
@@ -1019,13 +1258,21 @@ class HomeController extends Controller
                   'name' => 'Hombre',
                   'type' => 'filter',
                   'value' => 'Hombre',
-                  'products' => $productoHombre
+                  'products' => $productoHombre,
+                  'redirect' => [
+                    'route' => '/categories',
+                    'params' => [ 'man' ]
+                  ],
                 ],
                 [
                   'name' => 'Talle Especial',
                   'type' => 'filter',
                   'value' => 'Talle Especial',
-                  'products' => $productoXL
+                  'products' => $productoXL,
+                  'redirect' => [
+                    'route' => '/categories',
+                    'params' => [ 'xl' ]
+                  ],
                 ],
                 // [
                 //   'type' => 'promotions',
@@ -1039,25 +1286,41 @@ class HomeController extends Controller
                   'type' => 'filter',
                   'value' => 'Niños',
                   'products' => $productoNino,
+                  'redirect' => [
+                    'route' => '/categories',
+                    'params' => [ 'kids' ]
+                  ],
                 ],
                 [
                   'name' => 'Accesorios',
                   'type' => 'categorie',
                   'value' => 'Accesorios',
-                  'products' => $productoaccessories
-                  ,
+                  'products' => $productoaccessories,
+                  'redirect' => [
+                    'route' => '/categories',
+                    'params' => [ 'accesories' ]
+                  ],
+                  
                 ],
                 [
                   'name' => 'Zapatos',
                   'type' => 'filter',
                   'value' => 'zapatos',
-                  'products' => $productoZapatos
+                  'products' => $productoZapatos,
+                  'redirect' => [
+                    'route' => '/search',
+                    'params' => [ 'search' => 'zapatos' ]
+                  ],
                 ],
                 [
                   'name' => 'Remeras',
                   'type' => 'filter',
                   'value' => 'remeras',
-                  'products' => $productoRemeras
+                  'products' => $productoRemeras,
+                  'redirect' => [
+                    'route' => '/search',
+                    'params' => [ 'search' => 'remera' ]
+                  ],
                 ],
                 [
                   'name' => 'Productos destacados',
@@ -1068,7 +1331,11 @@ class HomeController extends Controller
                     'is_title' => false,
                     'is_card' => false,
                   ],
-                  'products' => $productoDetacados
+                  'products' => $productoDetacados,
+                  'redirect' => [
+                    'route' => '/search',
+                    'params' => [ 'search' => '', 'section' => ['woman']  ]
+                  ],
                 ],
                 [
                   'name' => 'Ingresos de Hoy',
@@ -1099,32 +1366,44 @@ class HomeController extends Controller
                   'type' => 'box_categories',
                   'categories' => $this->getCategories()
                 ],
-                // [
-                //   'name' => '¿Necesitas ayuda?',
-                //   'type' => 'card_list_redirect',
-                //   'items' => [
-                //     [
-                //       'name' => '¿Cómo comprar?',
-                //       'editor' => $this->coding($pagesMenuCMS->where('id',458)->first()->data_json),
-                //       // 'redirect' => []
-                //     ],
-                //     [
-                //       'name' => 'Formas de pago',
-                //       'editor' => $this->coding($pagesMenuCMS->where('id',460)->first()->data_json),
-                //       // 'redirect' => []
-                //     ],
-                //     [
-                //       'name' => 'Envíos a todo el país',
-                //       'editor' => $this->coding($pagesMenuCMS->where('id',459)->first()->data_json),
-                //       // 'redirect' => []
-                //     ],
-                //     [
-                //       'name' => 'Políticas de Privacidad',
-                //       'editor' => $this->coding($pagesMenuCMS->where('id',470)->first()->data_json),
-                //       // 'redirect' => []
-                //     ],
-                //   ]
-                // ]
+                [
+                  'name' => '¿Necesitas ayuda?',
+                  'type' => 'card_list_redirect',
+                  'items' => [
+                    [
+                      'name' => '¿Cómo comprar?',
+                      'editor' => $this->coding($pagesMenuCMS->where('id',458)->first()->data_json),
+                      'redirect' => [
+                        'route' => '/page',
+                        'params' => [ 'id' => 458 , 'editor' => $this->coding($pagesMenuCMS->where('id',458)->first()->data_json), 'name' => $pagesMenuCMS->where('id',458)->first()['title_app'] ? $pagesMenuCMS->where('id',458)->first()['title_app'] : $pagesMenuCMS->where('id',458)->first()['title']]
+                      ]
+                    ],
+                    [
+                      'name' => 'Formas de pago',
+                      'editor' => $this->coding($pagesMenuCMS->where('id',460)->first()->data_json),
+                      'redirect' => [
+                        'route' => '/page',
+                        'params' => [ 'id' => 460 , 'editor' => $this->coding($pagesMenuCMS->where('id',460)->first()->data_json), 'name' => $pagesMenuCMS->where('id',460)->first()['title_app'] ? $pagesMenuCMS->where('id',460)->first()['title_app'] : $pagesMenuCMS->where('id',460)->first()['title']]
+                      ]
+                    ],
+                    [
+                      'name' => 'Envíos a todo el país',
+                      'editor' => $this->coding($pagesMenuCMS->where('id',481)->first()->data_json),
+                      'redirect' => [
+                        'route' => '/page',
+                        'params' => [ 'id' => 481 , 'editor' => $this->coding($pagesMenuCMS->where('id',481)->first()->data_json), 'name' => $pagesMenuCMS->where('id',481)->first()['title_app'] ? $pagesMenuCMS->where('id',481)->first()['title_app'] : $pagesMenuCMS->where('id',481)->first()['title']]
+                      ]
+                    ],
+                    [
+                      'name' => 'Políticas de Privacidad',
+                      'editor' => $this->coding($pagesMenuCMS->where('id',470)->first()->data_json),
+                      'redirect' => [
+                        'route' => '/page',
+                        'params' => [ 'id' => 470 , 'editor' => $this->coding($pagesMenuCMS->where('id',470)->first()->data_json), 'name' => $pagesMenuCMS->where('id',470)->first()['title_app'] ? $pagesMenuCMS->where('id',470)->first()['title_app'] : $pagesMenuCMS->where('id',470)->first()['title']]
+                      ]
+                    ],
+                  ]
+                ]
             ];
     
     
@@ -1137,6 +1416,52 @@ class HomeController extends Controller
   public function saveToken(Request $request)
   {
     return response()->json($request->all());
+  }
+  
+  public function generateTokenApi(Request $request)
+  {
+    $apiKey = $request->input('clave_token');
+    if ($apiKey === env('CLAVE_API')) {
+        try {
+            // Crear los datos del payload del JWT
+            $customClaims = [
+                'iss' => "jwt-auth", // Emisor del token
+                'sub' => $apiKey,    // Asunto del token (podría ser un ID de usuario o clave API)
+                'iat' => Carbon::now()->timestamp,  // Tiempo en que se emitió el token
+                'exp' =>Carbon:: now()->addMinutes(60)->timestamp // Tiempo en que expira el token
+            ];
+
+            // Crear una instancia del payload usando el PayloadFactory
+            $payload = JWTFactory::customClaims($customClaims)->make();
+
+            // Generar el token JWT
+            $token = JWTAuth::encode($payload)->get();
+
+            // dd($token);
+            // Crear una cookie con el token que expira en 60 minutos
+            // $cookie = cookie('api_token', $token, 60);
+
+            // Almacenar el token temporal en la caché por 60 minutos
+            Cache::put($token, true, Carbon::now()->addMinutes(60));
+
+            return ['status' => true, 'result' => [ 'expires_at' => Carbon::now()->addMinutes(60), 'token' => $token ]];
+            
+        } catch (JWTException $e) {
+            return [ 'status' => false, 'result' => [ 'message' => 'Could not create token' ] ];
+        }
+    }
+    return ['status' => false, 'result' => ['message' => 'Unauthorized']];
+  }
+
+  public function colorsFilter(Request $request)
+  {
+    $response = Http::withHeaders([
+      'x-api-key' => Auth::user()->api_token,
+    ])
+    ->acceptJson()
+    ->get($this->url.'?c=Products::colors');
+
+    return response()->json($response->collect());
   }
 
 }

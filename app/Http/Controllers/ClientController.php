@@ -24,6 +24,21 @@ class ClientController extends Controller
       return response()->json($client);
     }
 
+    public function billing(Request $request){
+        // dd($this->urlProfile.'Profile::billInfo&app=1');
+        // dd( Auth::user()->api_token);
+        $response = Http::withHeaders([ 
+            'x-api-key' => Auth::user()->api_token,
+            'Content-Type' => 'application/json'
+        ])
+        ->get($this->urlProfile.'Profile::billing&app=1');
+
+        $response = $response->collect();
+
+        // dd();
+        return response()->json($response['data']);
+    }
+
     private function ApiRosa($payload, $action, $isdecode = true)
     {
         try {
@@ -125,6 +140,39 @@ class ClientController extends Controller
 
         $response['data'] = Client::find(Auth::user()->num);
         
+        return response()->json($response);
+    }
+
+    public function billing_update(Request $request){
+        // return $request->all();
+
+        // $validator = Validator::make($request->all(), [
+        //     "firstName" => "required",
+        //     "lastName" => "required",
+        //     "dni" => "required",
+        //     "gender" => "required",
+        //     "areaCode" => "required",
+        //     "mobilePhone" => "required"
+        // ]);
+ 
+        // if ($validator->fails()) {
+        //     return response()->json($validator->errors(), 422);
+        // }
+
+        $response = Http::withHeaders([ 
+            'x-api-key' => Auth::user()->api_token,
+            'Content-Type' => 'application/x-www-form-urlencoded'
+        ])
+        ->asForm()
+        ->post($this->urlProfile.'Profile::billingDataUpdate',$request->all());
+        $response = $response->collect();
+
+        if($response['status'] == 'error'){
+            return response()->json($response->all(), 422);
+        }
+
+        $response['data'] = Client::find(Auth::user()->num);
+        // unset $response['data']['api_token'];
         return response()->json($response);
     }
 }

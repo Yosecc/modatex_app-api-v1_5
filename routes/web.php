@@ -13,6 +13,9 @@
 |
 */
 
+$router->post('generateTokenApi','HomeController@generateTokenApi');
+
+
 $router->get('/', function () use ($router) {
     return $router->app->version();
 });
@@ -21,7 +24,7 @@ $router->group(['prefix' => 'auth'], function () use ($router) {
     $router->post('register', 'AuthController@register');
     $router->post('login', 'AuthController@login');
     $router->post('code_validation','AuthController@code_validation');
-    $router->get('resend_code/{email}','AuthController@resend_code');
+    // $router->get('resend_code/{email}','AuthController@resend_code');
     $router->post('recover_password','AuthController@recover_password');
     $router->post('LoginSocial','AuthController@LoginSocial');
     
@@ -33,14 +36,25 @@ $router->group(['prefix' => 'auth'], function () use ($router) {
 
 
 $router->post('saveToken','HomeController@saveToken');
+
+$router->group(['middleware' => 'apiToken'], function () use ($router) {
+    $router->group(['prefix' => 'auth'], function () use ($router) {
+        // $router->get('resend_code/{email}','AuthController@resend_code');
+        $router->post('resendcode','AuthController@resendcode');
+    });
+});
+
 $router->group(['middleware' => 'auth'], function () use ($router) {
+
+    $router->get('test','HomeController@test');
+
 
     $router->get('generarCacheBloquesHome','HomeController@generarCacheBloquesHome');
     $router->get('home','HomeController@index');
     $router->get('menu','HomeController@menuList');
+    $router->get('colorsFilter','HomeController@colorsFilter');
 
-
-    
+    $router->get('categories_filter','HomeController@getCategorieFilter');
 
     $router->get('productsVisitados','HomeController@productsVisitados');
     $router->get('sliders','HomeController@sliders');
@@ -49,10 +63,7 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
     $router->post('preferences','PreferencesController@store');
     $router->get('preferences','PreferencesController@getPreferences');
 
-    
-
     $router->post('likeStore','VisitsController@likeStore');
-
     
     $router->post('store_visits','VisitsController@StoreVisits');
     $router->post('product_visits','VisitsController@ProductVisits');
@@ -61,7 +72,9 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
     $router->get('get_product_category/{category_id}','HomeController@get_product_category');
     
     $router->get('store/get_categories','StoresController@getCategoriesStore'); 
-    $router->get('store/{store}','StoresController@getStore');
+    // $router->get('store/{store}','StoresController@getStore'); ///Deprecado
+    $router->get('store/ratings/{store_id}','StoresController@getRatings');
+    $router->get('store/dialogs/{store_id}','StoresController@getDialogs');
     $router->get('stores','StoresController@getStores'); 
 
     $router->get('product/{product_id}','ProductsController@oneProduct');
@@ -107,6 +120,7 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
         
         $router->post('inProducts','ProductsController@inProducts');
     });
+    
     //
     $router->group(['prefix' => 'ventas'], function () use ($router) {
         $router->get('/','VentasController@index');
@@ -136,8 +150,27 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
             $router->get('/','ClientController@index');
             $router->post('change_password','ClientController@change_password');
             $router->post('update','ClientController@update');
-
+            $router->get('billing','ClientController@billing');
+            $router->post('billing/update','ClientController@billing_update');
         });
+
+        $router->group(['prefix' => 'califications'], function () use ($router) {
+            $router->get('/','Calificaciones@index');
+            $router->post('insert_or_update','Calificaciones@insertOrUpdate');
+        });
+
+        $router->group(['prefix' => 'stats'], function () use ($router) {
+            $router->get('/','Estadisticas@index');
+            // $router->post('insert_or_update','Calificaciones@insertOrUpdate');
+        });
+
+        $router->group(['prefix' => 'questions'], function () use ($router) {
+            $router->get('/','Preguntas@index');
+            $router->post('insert','Preguntas@insert');
+            // $router->post('insert_or_update','Calificaciones@insertOrUpdate');
+        });
+
+        
     });
     
     $router->get('descuentosExclusivos','CouponsController@descuentosExclusivos');

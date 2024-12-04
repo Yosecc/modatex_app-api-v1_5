@@ -3,19 +3,18 @@
 namespace App\Http\Controllers\Objects;
 
 use App\Models\NotificationsApp;
+use App\Models\VentaDelivery;
 use App\Models\NotificationsUserApp;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Validator;
-// use App\Http\Controllers\Controller;
-// use Illuminate\Http\Request;
 
-class NotificationsPush 
+class NotificationsPush
 {
     private $notification;
     private $errors = [];
     private $server_key;
     private $user_token;
-    private $url = 'https://fcm.googleapis.com/fcm/send';
+    private $url = 'https://fcm.googleapis.com/v1/projects/modatex-e6ba5/messages:send'; // API HTTP v1
     private $user_id;
     private $tokens;
     private $request;
@@ -23,12 +22,16 @@ class NotificationsPush
     public function __construct($request)
     {
         try {
-
-
             $validator = Validator::make($request['notification'], [
                 'title' => 'required',
                 'body' => 'required',
             ]);
+
+
+            // dd(VentaDelivery::first());
+
+            $response = Http::acceptJson()->post('https://identitytoolkit.googleapis.com/v1/accounts:signInWithCustomToken?key=AIzaSyDGG784TJ_cko8UPeqhyhRzQg445SYdMI0');
+            dd('llega', $response->json());
 
             if ($validator->fails()) {
                 $this->errors = $validator->errors();
@@ -44,35 +47,31 @@ class NotificationsPush
                 throw new \Exception('Error validate');
             }
 
-            
             $this->notification = $request['notification'];
             $this->request = $request;
 
-           
         } catch (\Exception $e) {
-
-           return $e->getMessage(); 
-        }  
+            return $e->getMessage();
+        }
     }
 
     public function sendUserNotification($user_id)
     {
-
         $this->tokens = $this->getUserToken($user_id);
-        
-        // dd($this->tokens);
+
         if($this->fails()){
             \Log::info($this->errors);
             return $this->getErrors();
         }
 
-        // $this->saveNotification();
         $this->request['data']['image'] = isset($this->notification['image']) ? $this->notification['image']:"";
-        foreach ($this->tokens as $key => $token) {
-            $response = Http::withHeaders([
-                'Authorization' => 'key='.$this->server_key,
-            ])->acceptJson()->post($this->url, [
-               
+
+        // Enviar notificaciones a múltiples tokens en una sola solicitud
+        $response = Http::withHeaders([
+            'Authorization' => 'key='.$this->server_key,
+            'Content-Type' => 'application/json',
+        ])->post($this->url, [
+            "message" => [
                 "notification" => [
                     "title" => $this->notification['title'],
                     "body"  => $this->notification['body'],
@@ -80,58 +79,15 @@ class NotificationsPush
                     "image" => isset($this->notification['image']) ? $this->notification['image']:"",
                 ],
                 "data"=> $this->request['data'],
-                "priority"=> "High",
-                "to"=>  $token
-            ]);
-        }
+                "android" => [
+                    "priority" => "high",
+                ],
+                "registration_ids" => $this->tokens, // Enviar a múltiples tokens
+            ]
+        ]);
 
         return $response->status();
-
     }
 
-    private function saveNotification(): void
-    {
-        $notificacion = new NotificationsApp();
-        $notificacion->title      =  $this->notification['title'];
-        $notificacion->body       =  $this->notification['body'];
-        $notificacion->image      =  isset($this->notification['image']) ? $this->notification['image'] : null ;
-        $notificacion->data       =  NULL;
-        $notificacion->client_num =  $this->user_id;
-        $notificacion->save();
-    }
-
-    public function getUserToken($user_id): array
-    {
-        // try {
-            $this->user_id = $user_id;
-            $consulta = NotificationsUserApp::where('client_num', $user_id)
-                // ->where('platform','app')
-                ->get();
-
-            // dd();
-
-            if(!$consulta){
-                $this->errors['user_token'] = 'Client does not have app token';
-                \Log::info($this->errors);
-                throw new \Exception('Error validate');
-            }
-
-            return $consulta->pluck('token')->all();
-
-        // } catch (\Exception $e) {
-        //     return $e->getMessage();
-        // }
-
-    }
-
-    public function getErrors(): array
-    {
-        \Log::info($this->errors);
-        return $this->errors;
-    }
-
-    public function fails()
-    {
-        return count($this->errors) ? true : false;
-    }
+    // ... (resto del código)
 }
