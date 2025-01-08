@@ -44,7 +44,7 @@ class HomeController extends Controller
 
     //dd(Cart::where('CLIENT_NUM',Auth::user()->num)->where('STAT_CD',1000)->orderBy('INSERT_DATE','desc')->get());
     //1026071
-    $params = collect($request->all()); 
+    $params = collect($request->all());
 
     $stores_favorites     = $this->stores_favorites($params);
 
@@ -74,20 +74,20 @@ class HomeController extends Controller
     }
 
     $products_visits      = $this->products_visits( $params );
-    
+
     $params['slide_category'] = $params['slide_category'].','.$idsCategoriesPreferencesString;
     $slider = new Slider($params);
     $slider = $slider->getSliders();
 
     return response()->json([
-      'status'           => true, 
+      'status'           => true,
       'stores'           => $stores,
       'stores_favorites' => $stores_favorites,
       'categories'       => $categories,
       'products_visits'  => $products_visits,
       'slider'           => $slider,
     ],200);
-  }  
+  }
 
   public function test()
   {
@@ -113,13 +113,13 @@ class HomeController extends Controller
       $datos = $response->json();
       $mujer = (isset($datos) && isset($datos['Mujer'])) ? $datos['Mujer'] : [];
       $sliders = collect($mujer)->map(function($item){
-       
+
         if($item['APP_URL_JSON'] == ''){
           return [
             "img" => "https://netivooregon.s3.amazonaws.com/common/img/main_slide/1.1/". $item['IMG_APP_PATH'],
             "title" => "",
             "redirect" => ""
-          ] ; 
+          ] ;
         }
         $redirect = json_decode($item['APP_URL_JSON'])->redirect;
         $redirect->route = str_replace('/','',$redirect->route);
@@ -148,10 +148,10 @@ class HomeController extends Controller
           "img" => "https://netivooregon.s3.amazonaws.com/common/img/main_slide/1.1/". $item['IMG_APP_PATH'],
           "title" => "",
           "redirect" => $redirect
-        ] ; 
+        ] ;
       });
 
-      
+
       // $sliders[] = [
       //   "img" => "https://netivooregon.s3.amazonaws.com/common/img/main_slide/1.1/17137931221713375144cupones-extra-slide-app.webp_app.webp",
       //   "title" => "",
@@ -159,7 +159,7 @@ class HomeController extends Controller
       //   'editor' => PagesCms::where('id',487)->first()->data_json,
       // ];
 
-    
+
 
 
       return response()->json( $sliders);
@@ -176,7 +176,7 @@ class HomeController extends Controller
     // //dd($slider);
     // $funcion = function($value){
 
-	 
+
 	  //   if(stripos($value['url'], '/catalog')!==false){
 
 		//    $d = $value['url'];
@@ -188,7 +188,7 @@ class HomeController extends Controller
 
     // $slider = array_map($funcion, $slider);
     // return response()->json($slider,200);
-  } 
+  }
 
   private  function proper_parse_str($str) {
     # result array
@@ -223,7 +223,7 @@ class HomeController extends Controller
   }
 
   /**
-   * 
+   *
    */
   public function get_product_category(Request $request, $category_id){
 
@@ -249,7 +249,7 @@ class HomeController extends Controller
    */
   public function getCategorieSearch($categorie_id , Request $request)
   {
-    
+
     if($request->product_paginate){
       $config['product_paginate'] =  $request->product_paginate;
     }
@@ -258,8 +258,8 @@ class HomeController extends Controller
     }
 
     $response = $this->onGetCategorieSearch($categorie_id, $config );
-    
-    // 
+
+    //
     return response()->json(['stores' => $response['stores'], 'products' => $response['products'] ]);
 
   }
@@ -296,12 +296,12 @@ class HomeController extends Controller
       return ['stores' => $data['stores'], 'products' => CollectionHelper::paginate(collect($data['products']), $config['product_paginate']) ];
     }
 
-    $categories = [ 
-      1 => 'woman', 
+    $categories = [
+      1 => 'woman',
       2 => 'accessories',
-      3 => 'man', 
-      4 => 'kids', 
-      6 => 'xl', 
+      3 => 'man',
+      4 => 'kids',
+      6 => 'xl',
       7 => 'sportive',
       8 => 'lingerie',
       9 => 'shoes',
@@ -317,9 +317,9 @@ class HomeController extends Controller
     }
 
     $collection = collect($rutas);
-    
-    $consultas = Http::pool(fn (Pool $pool) => 
-      $collection->map(fn ($url) => 
+
+    $consultas = Http::pool(fn (Pool $pool) =>
+      $collection->map(fn ($url) =>
            $pool->accept('application/json')->get($url)
       )
     );
@@ -339,7 +339,7 @@ class HomeController extends Controller
     $storesIds = $stores->pluck('local_cd');
 
     $rutas = [];
-    
+
     foreach ($storesIds as $key => $id) {
       $rutas[] = 'https://www.modatex.com.ar/modatexrosa3/?c=Products::get&categorie='.$categorieName.'&start=0&length='.$config['product_for_store'].'&store='.$id.'&years=1&sections=&categories=&search=&order=manually';
     }
@@ -348,8 +348,8 @@ class HomeController extends Controller
 
 
 
-    $response = Http::pool(fn (Pool $pool) => 
-      $rutas->map(fn ($url) => 
+    $response = Http::pool(fn (Pool $pool) =>
+      $rutas->map(fn ($url) =>
         $pool->accept('application/json')->get($url)
       )
     );
@@ -388,7 +388,7 @@ class HomeController extends Controller
    * GET BUSCADOR PRODUCTOS SEGUN CATEGORIAS
    */
   public function productsCategorie($config){
-    
+
     $products = new ProductsController();
     $storep = new StoresController();
 
@@ -405,7 +405,7 @@ class HomeController extends Controller
         'no_product_id' => null,
         'daysExpir' => 365,
         // 'sections' => 'woman',
-      ]); 
+      ]);
     })
     ->collapse();
   }
@@ -454,13 +454,13 @@ class HomeController extends Controller
 
 
     // Función para aplicar utf8_decode recursivamente
-   
+
     // dd($json_text);
     // Decodificar el JSON
     $data = json_decode($json_text);
     // Aplicar utf8_decode a los valores de cadena
     $data = $this->utf8_decode_recursive($data);
-    
+
     // Codificar el objeto PHP como JSON nuevamente
     $json_output = json_encode($data);
     // dd($json_output, $data);
@@ -482,7 +482,7 @@ class HomeController extends Controller
 
      try {
       $carousel_home = $cmsCarouselHome->map(function($item){
-        
+
          try {
           $editor = $item['data_json'];
          } catch (\Throwable $th) {
@@ -539,7 +539,7 @@ class HomeController extends Controller
         'id' => $item['id'],
         'name' => $item['title_app'] ? $item['title_app'] : $item['title'],
         // 'editor' => $editor,
-        'key' =>  $item['key_category_app'], 
+        'key' =>  $item['key_category_app'],
         'type' =>  'page',
         'icon' =>  $item['url_icono'],
         'icon_image' => $item['url_icono'],
@@ -555,13 +555,13 @@ class HomeController extends Controller
         ]
       ];
     });
-    
+
     $items = [
       [
         'id' => 1,
         'name' => 'Mujer',
         'type' =>  'products',
-        'key' =>  'woman', 
+        'key' =>  'woman',
         'icon' => 'res://woman',
         'icon_image' => 'woman.png',
         'icon_image_asset' => '/assets/icons/woman.png',
@@ -579,7 +579,7 @@ class HomeController extends Controller
         'id' => 3,
         'name' => 'Hombre',
         'type' =>  'products',
-        'key' =>  'man', 
+        'key' =>  'man',
         'icon' => 'res://men',
         'icon_image' => 'men.png',
         'icon_image_asset' => 'assets/icons/men.png',
@@ -597,7 +597,7 @@ class HomeController extends Controller
         'id' => 6,
         'name' => 'Talle especial',
         'type' =>  'products',
-        'key' =>  'xl', 
+        'key' =>  'xl',
         'icon' => 'res://label',
         'icon_image' => 'label.png',
         'icon_image_asset' => 'assets/icons/label.png',
@@ -615,7 +615,7 @@ class HomeController extends Controller
       [
         'id' => 4,
         'name' => 'Niños',
-        'key' =>  'kids', 
+        'key' =>  'kids',
         'type' =>  'products',
         'icon' => 'res://baby',
         'icon_image' => 'baby.png',
@@ -634,7 +634,7 @@ class HomeController extends Controller
       [
         'id' => 2,
         'name' => 'Accesorios',
-        'key' =>  'accessories', 
+        'key' =>  'accessories',
         'type' =>  'products',
         'icon' => 'res://accessories',
         'icon_image' => 'accessories.png',
@@ -655,7 +655,7 @@ class HomeController extends Controller
       //   'name' => 'Calzado',
       //   'type' =>  'search',
       //   'search' =>  'zapatos',
-      //   'key' =>  'zapatos', 
+      //   'key' =>  'zapatos',
       //   'icon' => 'res://shoes',
       //   'color' =>  "",
       //   'colSpan' =>  2,
@@ -670,7 +670,7 @@ class HomeController extends Controller
         'type' =>  'search',
         'type' =>  'products',
         'search' =>  'remera',
-        'key' =>  'tshitr', 
+        'key' =>  'tshitr',
         'icon' => 'res://tshirt',
         'icon_image' => 'tshirt.png',
         'icon_image_asset' => 'assets/icons/tshirt.png',
@@ -682,7 +682,7 @@ class HomeController extends Controller
         'top' =>  20,
         'redirect' => [
           'route' => '/search',
-          'params' => [ 
+          'params' => [
             'search' => 'remera',
             'section' => ['woman']
           ]
@@ -691,7 +691,7 @@ class HomeController extends Controller
       // [
       //   'id' => 7,
       //   'name' => 'Deportiva',
-      //   'key' =>  'sportive', 
+      //   'key' =>  'sportive',
       //   'icon' => 'res://sportive',
       //   'color' =>  "",
       //   'colSpan' =>  3,
@@ -945,7 +945,7 @@ class HomeController extends Controller
   {
     $response = Http::accept('application/json')->get($this->url.'?c=Store::all');
 
-    // dd($response->collect())); 
+    // dd($response->collect()));
 
     if(isset($response->json()['data'])){
       Cache::put('stores',$response->json()['data']);
@@ -960,8 +960,8 @@ class HomeController extends Controller
           return $store;
       })->pluck('enlace');
 
-      $consultas = Http::pool(fn (Pool $pool) => 
-        $enlaces->map(fn ($url) => 
+      $consultas = Http::pool(fn (Pool $pool) =>
+        $enlaces->map(fn ($url) =>
             $pool->accept('application/json')->get($url)
         )
       );
@@ -992,14 +992,19 @@ class HomeController extends Controller
     }
   }
 
+  public function validatoken(Request $request)
+  {
+    return true;
+  }
+
   public function generarCacheBloquesHome()
   {
-   
+
    $f = $this->generarCacheMarcas();
-   
+
 // dd($f);
     $products = new ProductsController();
-    
+
     $pagesMenuCMS = PagesCms::whereIn('id',[460,458,459, 470, 481])->get();
 
     $productoMujer = $products->onGetSearch([
@@ -1238,7 +1243,7 @@ class HomeController extends Controller
                           ]
                       ]
                   ]
-                ],    
+                ],
                 [
                   'name' => 'Mujer',
                   'type' => 'filter',
@@ -1300,7 +1305,7 @@ class HomeController extends Controller
                     'route' => '/categories',
                     'params' => [ 'accesories' ]
                   ],
-                  
+
                 ],
                 [
                   'name' => 'Zapatos',
@@ -1405,11 +1410,11 @@ class HomeController extends Controller
                   ]
                 ]
             ];
-    
-    
-           
+
+
+
     Cache::put('bloqueshome',collect($data));
-    
+
     return Cache::get('bloqueshome');
   }
 
@@ -1417,7 +1422,7 @@ class HomeController extends Controller
   {
     return response()->json($request->all());
   }
-  
+
   public function generateTokenApi(Request $request)
   {
     $apiKey = $request->input('clave_token');
@@ -1445,7 +1450,7 @@ class HomeController extends Controller
             Cache::put($token, true, Carbon::now()->addMinutes(60));
 
             return ['status' => true, 'result' => [ 'expires_at' => Carbon::now()->addMinutes(60), 'token' => $token ]];
-            
+
         } catch (JWTException $e) {
             return [ 'status' => false, 'result' => [ 'message' => 'Could not create token' ] ];
         }

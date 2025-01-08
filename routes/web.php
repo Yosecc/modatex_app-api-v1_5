@@ -27,7 +27,7 @@ $router->group(['prefix' => 'auth'], function () use ($router) {
     // $router->get('resend_code/{email}','AuthController@resend_code');
     $router->post('recover_password','AuthController@recover_password');
     $router->post('LoginSocial','AuthController@LoginSocial');
-    
+
 });
 
 // $router->group(['prefix' => 'notifications_push'], function() use ($router){
@@ -37,17 +37,18 @@ $router->group(['prefix' => 'auth'], function () use ($router) {
 
 $router->post('saveToken','HomeController@saveToken');
 
-$router->group(['middleware' => 'apiToken'], function () use ($router) {
+// $router->group(['middleware' => 'apiToken'], function () use ($router) {
     $router->group(['prefix' => 'auth'], function () use ($router) {
         // $router->get('resend_code/{email}','AuthController@resend_code');
         $router->post('resendcode','AuthController@resendcode');
     });
-});
+// });
 
 $router->group(['middleware' => 'auth'], function () use ($router) {
 
     $router->get('test','HomeController@test');
 
+    $router->post('validatoken','HomeController@validatoken');
 
     $router->get('generarCacheBloquesHome','HomeController@generarCacheBloquesHome');
     $router->get('home','HomeController@index');
@@ -64,18 +65,18 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
     $router->get('preferences','PreferencesController@getPreferences');
 
     $router->post('likeStore','VisitsController@likeStore');
-    
+
     $router->post('store_visits','VisitsController@StoreVisits');
     $router->post('product_visits','VisitsController@ProductVisits');
 
     $router->get('home','HomeController@index');
     $router->get('get_product_category/{category_id}','HomeController@get_product_category');
-    
-    $router->get('store/get_categories','StoresController@getCategoriesStore'); 
+
+    $router->get('store/get_categories','StoresController@getCategoriesStore');
     // $router->get('store/{store}','StoresController@getStore'); ///Deprecado
     $router->get('store/ratings/{store_id}','StoresController@getRatings');
     $router->get('store/dialogs/{store_id}','StoresController@getDialogs');
-    $router->get('stores','StoresController@getStores'); 
+    $router->get('stores','StoresController@getStores');
 
     $router->get('product/{product_id}','ProductsController@oneProduct');
     $router->get('products','ProductsController@getProducts');
@@ -86,7 +87,7 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
 
     $router->get('subcategories','CategoriesController@getSubCategories');
 
-    // $router->get('cart/{client_id}','CartController@getCarts'); 
+    // $router->get('cart/{client_id}','CartController@getCarts');
     // $router->get('getProductsCar','CartController@getProductsCar');
 
     $router->get('client','ClientController@index');
@@ -109,7 +110,7 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
     $router->get('getBloques','HomeController@getBloques');
     $router->get('getPromociones','HomeController@getPromociones');
     $router->get('getCategories','HomeController@getCategories');
-    
+
     //ROSA
     $router->group(['prefix' => 'rosa'], function () use ($router) {
         $router->get('stores','StoresController@getStoresRosa');
@@ -117,17 +118,17 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
         $router->get('products','ProductsController@getProductsRosa');
         $router->get('products_home','StoresController@productsHome');
         $router->get('search','ProductsController@getSearch');
-        
+
         $router->post('inProducts','ProductsController@inProducts');
     });
-    
+
     //
     $router->group(['prefix' => 'ventas'], function () use ($router) {
         $router->get('/','VentasController@index');
     });
 
     $router->get('/getComboDirecciones','AddressController@getComboDirecciones');
-    
+
     $router->group(['prefix' => 'profile'], function () use ($router) {
 
         $router->group(['prefix' => 'direcciones'], function () use ($router) {
@@ -137,13 +138,13 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
             $router->post('update/{adress}','AddressController@update');
             $router->post('change_principal_address','AddressController@changePrincipalAddress');
         });
-        
+
         $router->group(['prefix' => 'coupons'], function () use ($router) {
             $router->get('/','CouponsController@index');
             $router->get('redeem_coupon','CouponsController@redeemCoupon');
             $router->post('canjear_cupon','CouponsController@canjearCupon');
-           
-            
+
+
         });
 
         $router->group(['prefix' => 'client'], function () use ($router) {
@@ -170,11 +171,11 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
             // $router->post('insert_or_update','Calificaciones@insertOrUpdate');
         });
 
-        
+
     });
-    
+
     $router->get('descuentosExclusivos','CouponsController@descuentosExclusivos');
-    
+
     $router->group(['prefix' => 'checkout'], function() use ($router){
         $router->post('getEnvios','CheckoutController@getEnvios');
         $router->post('editClient','CheckoutController@editClient');
@@ -196,7 +197,7 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
         $router->post('shippingSelectAddress','CheckoutController@shippingSelectAddress');
         $router->post('getMetodosPagos','CheckoutController@getMetodosPagos');
         $router->post('getHorarios','CheckoutController@getHorarios');
-        
+
 
     });
 
@@ -210,6 +211,6 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
     $router->group(['prefix' => 'cms'], function() use ($router){
         $router->get('get/{id}','cmsController@get');
     });
-    
+
 });
 

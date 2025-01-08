@@ -32,7 +32,7 @@ class StoresController extends Controller
 
     private $urlStore = 'https://www.modatex.com.ar/?c=Store::';
 
-    
+
     private $storesPlanes = [
         '_black.json',
         '_platinum.json',
@@ -43,7 +43,7 @@ class StoresController extends Controller
     private $urlProduct = 'https://www.modatex.com.ar/modatexrosa3/?c=Products::get&';
 
     private $urlPromos = 'https://www.modatex.com.ar/?c=Canpaigns::promos&store_id=';
-   
+
 
     /**
      * REQUEST STORE
@@ -70,15 +70,16 @@ class StoresController extends Controller
     {
       $response = Cache::get('stores');
 
+    //   dd($response);
       $ids = collect($response)->pluck('id')->all();
-      
+
       $favoritos = Favorite::whereIn('LOCAL_CD',$ids)->where('STAT_CD','1000')->where('CLIENT_NUM',Auth::user()->num)->get();
-      
+
       $data = $this->crearConsulta(collect($response)->map(function($tienda) use ($favoritos) {
         $tienda['favorite'] = $favoritos->where('LOCAL_CD', $tienda['id'])->count() ? true : false;
         return $tienda;
       }),$request);
-      
+
       $data = $data->sortBy(function ($item) {
           $position = array_search($item['paquete'], $this->allowedPlanes);
           return $position === false ? PHP_INT_MAX : $position;
@@ -93,21 +94,21 @@ class StoresController extends Controller
      */
     private function crearConsulta($data,$request)
     {
-      
+
       if(isset($request['search'])){
-        $f = $data->filter(fn ($store) => 
-          Str::is(Str::lower($request['search']).'*',Str::lower($store['cleaned'])) 
+        $f = $data->filter(fn ($store) =>
+          Str::is(Str::lower($request['search']).'*',Str::lower($store['cleaned']))
         );
 
         if(!$f->count()){
-          $f = $data->filter(fn ($store) => 
-            Str::is(Str::lower($request['search']).'*',Str::lower($store['name'])) 
+          $f = $data->filter(fn ($store) =>
+            Str::is(Str::lower($request['search']).'*',Str::lower($store['name']))
           );
         }
         $data = $f;
       }
 
-      
+
       if(isset($request['categorie'])){
         if($request['categorie'] == 'all'){
           $data = $data->shuffle();
@@ -121,7 +122,7 @@ class StoresController extends Controller
       }
 
       if(isset($request['in'])){
-        
+
         $data = $data->whereIn('local_cd', $request['in']);
       }
 
@@ -131,7 +132,7 @@ class StoresController extends Controller
 
       return $data;
     }
-    
+
     /**
      * CONSULTA PROMOCIONES DE LA TIENDAS (PASTILLAS)
      * MODATEX.COM.CAR
@@ -140,14 +141,14 @@ class StoresController extends Controller
     public function getPromociones($local_cd)
     {
       if($local_cd){
-        
+
         $response = Http::accept('application/json')->get($this->urlPromos.$local_cd);
         $response = $response->json();
 
         if(isset($response['data']['custom']) && count($response['data']['custom'])){
           $response['data']['custom'] = collect($response['data']['custom'])->map(function($pastilla){
             $pastilla['title'] = html_entity_decode($pastilla['title']);
-            
+
             return $pastilla;
           });
         }
@@ -160,7 +161,7 @@ class StoresController extends Controller
             $response['data']['general'] = collect($response['data']['general'])->map(function($pastilla){
               // Expresión regular para encontrar todas las etiquetas <a href="...">...</a>
               $pattern = '/<a\s+href=["\']([^"\']+)["\'].*?>(.*?)<\/a>/i';
-              
+
               // Array para almacenar los links encontrados
               $botones = [];
 
@@ -181,22 +182,22 @@ class StoresController extends Controller
               }
 
               $pastilla['text'] = $textWithoutLinks;
-                
+
               $pastilla['buttons'] =  collect($botones)->map(function($boton){
-                // dd($boton);    
+                // dd($boton);
                 $cms = cmsController::searchCms(['slug'=> $boton['link']]);
                 $boton['redirect'] = [
                   'route' => '/page',
                   'params' => [ 'id' => $cms['id'], 'editor' => $cms['editor'], 'name' => $cms['name'] ]
                 ];
                 return $boton;
-              });     
+              });
 
               return $pastilla;
             });
           }
         // }
-      
+
         return response()->json($response);
       }
       return [];
@@ -208,20 +209,20 @@ class StoresController extends Controller
 
     private function calculaNameCategoriaStore($categoria)
     {
-      
+
       switch ($categoria) {
         case 'woman':
           $categoria_name = 'Mujer';
           break;
-        
+
         case 'man':
           $categoria_name = 'Hombre';
           break;
-        
+
         case 'accessories':
           $categoria_name = 'Accesorios';
           break;
-        
+
         case 'xl':
           $categoria_name = 'Talle Especial';
           break;
@@ -229,15 +230,15 @@ class StoresController extends Controller
         case 'kids':
           $categoria_name = 'Niños';
           break;
-        
+
         case 'ofertas':
           $categoria_name = 'Ofertas';
           break;
-        
+
         case 'sportive':
           $categoria_name = 'Deportivo';
           break;
-               
+
         case 'lingerie':
             $categoria_name = 'Lenceria';
             break;
@@ -264,7 +265,7 @@ class StoresController extends Controller
       $this->validate($request, [
           'local_cd' => 'required',
       ]);
-      
+
       $response = Http::acceptJson()->get($this->url.'?c=Products::categories&store='.$request->local_cd.'&daysExpir=365');
       $store = Store::LOCAL_CD($request->local_cd)->first();
       $predefSection = $this->categorieDefaultId($store);
@@ -297,19 +298,19 @@ class StoresController extends Controller
 
       // $predefSection = $this->categorieDefaultId($store);
 
-        
+
       //
 
       // dd($response->json());
 
       // foreach ($categorias as $c => $categoria) {
 
-      
+
 
       //   $d = $this->urlProduct.'store='.$request->local_cd.'&sections='.$categoria['clave'].'&start=0&length=9999';
-        
+
       //   $response = Http::acceptJson()->get($d);
-          
+
       //   $idsSubscategories = [];
       //   foreach ($response->collect()->all()['data'] as $key => $value) {
       //     if(!in_array($value['category_id'], $idsSubscategories)){
@@ -337,7 +338,7 @@ class StoresController extends Controller
       // }
 
       // return $categories;
-    
+
     }
 
     public function productsHome(Request $request)
@@ -378,7 +379,7 @@ class StoresController extends Controller
             ]);
             $arreglo[] = $data;
           }
-          
+
           $products[] = $arreglo;
 
         }
@@ -396,7 +397,7 @@ class StoresController extends Controller
             ]);
             $arreglo[] = $data;
           }
-          
+
           $products[] = $arreglo;
         }
       }
@@ -414,8 +415,8 @@ class StoresController extends Controller
       }
 
       $collection = collect($urls);
-      $consultas = Http::pool(fn (Pool $pool) => 
-        $collection->map(fn ($url) => 
+      $consultas = Http::pool(fn (Pool $pool) =>
+        $collection->map(fn ($url) =>
               $pool->accept('application/json')->get($url)
         )
       );
@@ -424,7 +425,7 @@ class StoresController extends Controller
       foreach ($consultas as $c => $consulta) {
         $storesAll[] = $consulta->collect()->all()['stores'];
       }
-      
+
 
       $storesAll = collect(Arr::collapse($storesAll));
 
@@ -434,8 +435,8 @@ class StoresController extends Controller
     public function categorieDefaultId($store)
     {
       /**
-         * Si PREDEF_SECTION != '' ??  Es es el ID por defecto. 
-         * Si PREDEF_SECTION == '' ??  Si subcaetgorias > 1 ? La prioridad es woman|talle especial|men|nino|accesorios : Es la posicion 0  
+         * Si PREDEF_SECTION != '' ??  Es es el ID por defecto.
+         * Si PREDEF_SECTION == '' ??  Si subcaetgorias > 1 ? La prioridad es woman|talle especial|men|nino|accesorios : Es la posicion 0
          */
         // dd($store);
 
@@ -448,7 +449,7 @@ class StoresController extends Controller
       elseif( $store && $store['PREDEF_SECTION'] == '')
       {
         $categorias = $this->categoriesCollection($store, null);
-       
+
           if($categorias->count() > 1){
             $predefSection = $categorias->where('descripcion' , 'mujer')->first();
             if($predefSection){
@@ -472,7 +473,7 @@ class StoresController extends Controller
     public function getRatings($store_id)
     {
       $marca = Carbon::now()->timestamp * 1000;
-      
+
       $response = Http::accept('application/json')->get($this->urlStore.'ratings&store_id='.$store_id.'&_='.$marca);
 
       $data = [];
@@ -489,13 +490,13 @@ class StoresController extends Controller
 
     public function getDialogs($store_id, Request $request)
     {
-      
+
       $marca = Carbon::now()->timestamp * 1000;
 
       $start = '&start='.$request->start;
 
       $length = '&length='.$request->length;
-      
+
       $url = $this->urlStore.'dialogs&store_id='.$store_id.$start.$length.'&_='.$marca;
 
       $response = Http::accept('application/json')->get($url);

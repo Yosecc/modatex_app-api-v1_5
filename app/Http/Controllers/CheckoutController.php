@@ -16,14 +16,15 @@ class CheckoutController extends Controller
     private $metdosPagos = [
             [
                 'id'=> 1,
+                'payment_type' => 'T',
                 'name'=> 'Tarjeta de Crédito / Débito',
                 'modapago'=> true,
                 'descripcion'=> 'Selecciona esta opción si deseas abonar con tarjeta de crédito. Fácil, seguro y rápido.',
                 'logos'=> [
-                    // '~/assets/visa.jpg', 
-                    // '~/assets/master.jpg', 
-                    // '~/assets/american.jpg', 
-                    // '~/assets/cencosud.jpg', 
+                    // '~/assets/visa.jpg',
+                    // '~/assets/master.jpg',
+                    // '~/assets/american.jpg',
+                    // '~/assets/cencosud.jpg',
                     // '~/assets/argencard.jpg',
                     // '~/assets/tarjeta.png',
                     // 'https://app-api.modatex.com.ar/tarjeta.png',
@@ -36,10 +37,11 @@ class CheckoutController extends Controller
             [
                 'id' => 2,
                 'name' => 'Efectivo',
+                'payment_type' => 'E',
                 'modapago' => true,
                 'descripcion' => 'Si quieres obtener un cupón de pago para abonar en efectivo, selecciona esta opción.',
                 'logos' => [
-                    // '~/assets/pagofacil.jpg', 
+                    // '~/assets/pagofacil.jpg',
                     // '~/assets/rapipagos.jpg',
                     // '~/assets/efectivo.png',
                     'https://app-api.modatex.com.ar/efectivo1.png'
@@ -51,10 +53,11 @@ class CheckoutController extends Controller
             [
                 'id' =>  3,
                 'name' =>  'Transferencia o depósito bancario',
+                'payment_type' => 'B',
                 'modapago' =>  false,
                 'descripcion' =>  'Seleccionando aquí, podrás realizar una transferencia o depósito bancario.',
                 'logos' =>  [
-                    // '~/assets/santanderrio.png', 
+                    // '~/assets/santanderrio.png',
                     // '~/assets/bancocomafi.jpg',
                     // '~/assets/transferencia.png',
                     'https://app-api.modatex.com.ar/transferencia.png'
@@ -122,11 +125,11 @@ class CheckoutController extends Controller
                 'active'     => false
             ]];
 
-    
+
     public function getEnvios(Request $request)
     {
-       
-       try {   
+
+       try {
             $this->token = Auth::user()->api_token;
 
              $response = Http::withHeaders([
@@ -134,7 +137,7 @@ class CheckoutController extends Controller
               'x-api-device' => 'APP'
             ])
             ->asForm()
-            ->post($this->generateUrl(['controller' => 'Checkout','method' => 'shipping_prices']), 
+            ->post($this->generateUrl(['controller' => 'Checkout','method' => 'shipping_prices']),
                 $request->all());
 
             // dd($response->json());
@@ -147,7 +150,7 @@ class CheckoutController extends Controller
             $reques = Request::create('/dummy', 'GET', ['local_cd' => $request->local_cd]);
             $d = $this->getMetodos($reques);
             $metodos = json_decode($d->getContent(),true);
-            
+
             $metodosAll = collect($metodos['data']);
 
             $envios = $this->envios;
@@ -155,9 +158,9 @@ class CheckoutController extends Controller
             $shippingPricesData = $response->json()['data'];
 
             // dd($metodosAll,$shippingPricesData );
-            
+
             foreach ( $metodosAll as $key => $envio) {
-                
+
                 $data = $envios[$key];
 
                 $data['isFree'] = isset($shippingPricesData[$key]) ? $shippingPricesData[$key]['is_free'] : $data['isFree'];
@@ -184,7 +187,7 @@ class CheckoutController extends Controller
 
                 $texts = [];
 
-                // 
+                //
                 if(isset($envio['price']['is_free']) && $envio['price']['is_free']){
 
                     $precios = [];
@@ -310,7 +313,7 @@ class CheckoutController extends Controller
                                 ],
                             ]
                         ];
-                    }   
+                    }
                 }else{
                     // dd($envio['price']);
                     if(isset($envio['price']['curr_ca'])){
@@ -526,7 +529,7 @@ class CheckoutController extends Controller
                 'x-api-device' => 'APP'
               ])
               ->asForm()
-              ->post($this->generateUrl(['controller' => 'Checkout','method' => 'shipping_method']), 
+              ->post($this->generateUrl(['controller' => 'Checkout','method' => 'shipping_method']),
                   $request->all());
 
                 //   dd($response->collect());
@@ -542,7 +545,7 @@ class CheckoutController extends Controller
                      return $dato;
                 });
             }
-            
+
             return response()->json($datos);
 
         } catch (\Exception $e) {
@@ -558,16 +561,16 @@ class CheckoutController extends Controller
             'cuit_dni'   => 'required',
         ]);
 
-        $this->token = Auth::user()->api_token; 
+        $this->token = Auth::user()->api_token;
 
         try {
-            
+
         Client::where('num',Auth::user()->num)->update([
                             'first_name'   => $request->first_name,
                             'last_name'    => $request->last_name,
                             'cuit_dni'     => $request->cuit_dni]);
          return response()->json('OK');
-       
+
         } catch (\Exception $e) {
             return response()->json($e->getMessage(),422);
         }
@@ -581,7 +584,7 @@ class CheckoutController extends Controller
             'method'  => 'required',
         ]);
 
-        $this->token = Auth::user()->api_token; 
+        $this->token = Auth::user()->api_token;
 
         try {
             $response = Http::withHeaders([
@@ -592,7 +595,7 @@ class CheckoutController extends Controller
             ->post($this->generateUrl(['controller' => 'Checkout','method' => 'shipping_select_method']), $request->all());
 
               return response()->json($response->json());
-            
+
         } catch (\Exception $e) {
             return response()->json($e->getMessage(),422);
         }
@@ -610,10 +613,10 @@ class CheckoutController extends Controller
         try {
             $response = Http::withHeaders([
               'x-api-key' => $this->token,
-              'x-api-device' => 'APP' 
+              'x-api-device' => 'APP'
             ])
             ->asForm()
-            ->post($this->generateUrl(['controller' => 'Checkout','method' => 'shipping_branches']), 
+            ->post($this->generateUrl(['controller' => 'Checkout','method' => 'shipping_branches']),
                 $request->all());
 
             $response = $response->json();
@@ -623,7 +626,7 @@ class CheckoutController extends Controller
             }
 
               return response()->json($response['data']);
-            
+
         } catch (\Exception $e) {
             return response()->json(['message'=>$e->getMessage()],422);
         }
@@ -644,7 +647,7 @@ class CheckoutController extends Controller
               'x-api-device' => 'APP'
             ])
             ->asForm()
-            ->post($this->generateUrl(['controller' => 'Checkout','method' => 'shipping_linked_data']), 
+            ->post($this->generateUrl(['controller' => 'Checkout','method' => 'shipping_linked_data']),
                 $request->all());
 
             $response = $response->json();
@@ -655,11 +658,11 @@ class CheckoutController extends Controller
             }
 
               return response()->json($response['data']);
-            
+
         } catch (\Exception $e) {
             return response()->json(['message'=>$e->getMessage()],422);
         }
-    }    
+    }
 
     public function envioDetail(Request $request)
     {
@@ -669,14 +672,14 @@ class CheckoutController extends Controller
         ]);
 
         $this->token = Auth::user()->api_token;
-    
+
         try {
             $response = Http::withHeaders([
               'x-api-key' => $this->token,
               'x-api-device' => 'APP'
             ])
             ->asForm()
-            ->post($this->generateUrl(['controller' => 'Checkout','method' => 'shipping_edit']), 
+            ->post($this->generateUrl(['controller' => 'Checkout','method' => 'shipping_edit']),
                 $request->all());
 
                 // dd($response->body());
@@ -688,7 +691,7 @@ class CheckoutController extends Controller
             }
 
               return response()->json($response['data']);
-            
+
         } catch (\Exception $e) {
             return response()->json($e->getMessage(),422);
         }
@@ -710,7 +713,7 @@ class CheckoutController extends Controller
               'x-api-device' => 'APP'
             ])
             ->asForm()
-            ->post($this->generateUrl(['controller' => 'Checkout','method' => 'shipping_remove']), 
+            ->post($this->generateUrl(['controller' => 'Checkout','method' => 'shipping_remove']),
                 $request->all());
 
             $response = $response->json();
@@ -729,14 +732,14 @@ class CheckoutController extends Controller
 
     public function homeDeliveryProviders(Request $request)
     {
-        try {   
+        try {
             $this->token = Auth::user()->api_token;
              $response = Http::withHeaders([
               'x-api-key' => $this->token,
               'x-api-device' => 'APP'
             ])
             ->asForm()
-            ->post($this->generateUrl(['controller' => 'Checkout','method' => 'home_delivery_providers']), 
+            ->post($this->generateUrl(['controller' => 'Checkout','method' => 'home_delivery_providers']),
                 $request->all());
 
 
@@ -755,14 +758,14 @@ class CheckoutController extends Controller
 
     public function editServiceProvider(Request $request)
     {
-        try {   
+        try {
             $this->token = Auth::user()->api_token;
              $response = Http::withHeaders([
               'x-api-key' => $this->token,
               'x-api-device' => 'APP'
             ])
             ->asForm()
-            ->post($this->generateUrl(['controller' => 'Checkout','method' => 'edit_service_provider']), 
+            ->post($this->generateUrl(['controller' => 'Checkout','method' => 'edit_service_provider']),
                 $request->all());
 
 
@@ -781,7 +784,7 @@ class CheckoutController extends Controller
 
     public function isDatosFacturacion(Request $request)
     {
-        try {   
+        try {
             $this->token = Auth::user()->api_token;
 
              $response = Http::withHeaders([
@@ -807,14 +810,14 @@ class CheckoutController extends Controller
 
     public function datosFacturacion(Request $request)
     {
-        try {   
+        try {
             $this->token = Auth::user()->api_token;
              $response = Http::withHeaders([
               'x-api-key' => $this->token,
               'x-api-device' => 'APP'
             ])
             ->asForm()
-            ->post($this->generateUrl(['controller' => 'Checkout','method' => 'billing_edit']), 
+            ->post($this->generateUrl(['controller' => 'Checkout','method' => 'billing_edit']),
                 $request->all());
 
 
@@ -833,7 +836,7 @@ class CheckoutController extends Controller
 
     public function selectMethodPayment(Request $request)
     {
-        try {   
+        try {
             // dd($this->generateUrl(['controller' => 'Checkout','method' => 'payment_select']));
             $this->token = Auth::user()->api_token;
              $response = Http::withHeaders([
@@ -841,7 +844,7 @@ class CheckoutController extends Controller
               'x-api-device' => 'APP'
             ])
             ->asForm()
-            ->post($this->generateUrl(['controller' => 'Checkout','method' => 'payment_select']), 
+            ->post($this->generateUrl(['controller' => 'Checkout','method' => 'payment_select']),
                 $request->all());
 
             if($response->json()['status'] != 'success'){
@@ -857,14 +860,14 @@ class CheckoutController extends Controller
 
     public function getResumen(Request $request)
     {
-        try {   
+        try {
             $this->token = Auth::user()->api_token;
              $response = Http::withHeaders([
               'x-api-key' => $this->token,
               'x-api-device' => 'APP'
             ])
             ->asForm()
-            ->post($this->generateUrl(['controller' => 'Checkout','method' => 'summary']), 
+            ->post($this->generateUrl(['controller' => 'Checkout','method' => 'summary']),
                 $request->all());
 
             if($response->json()['status'] == 'error'){
@@ -889,9 +892,9 @@ class CheckoutController extends Controller
         //
         // // return $this->token;
         // return response()->json(['message'=>$this->token],422);
-        try {   
+        try {
             // dd($this->generateUrl(['controller' => 'Checkout','method' => 'confirm_purchase']));
-            
+
             $data = $request->all();
             $data['device'] = 'mobile';
             $this->token = Auth::user()->api_token;
@@ -901,16 +904,18 @@ class CheckoutController extends Controller
             ])
             ->asForm()
             ->post($this->generateUrl(['controller' => 'Checkout','method' => 'buy']), $data);
-            
-            if(isset($response->json()['status']) && $response->json()['status'] != 'success'){
-                throw new \Exception("No se encontraron resultados");
+
+            // dd('$response->json()',$response->json());
+
+            if(isset($response->json()['status']) && ($response->json()['status'] != 'success' || $response->json()['status'] != 'modapago_success')){
+              //  throw new \Exception("No se encontraron resultados");
             }
 
             if(!isset($response->json()['status'])){
                 throw new \Exception($response->json());
 
             }
-              
+
               try {
                 if(isset($response->json()['data'])){
 
@@ -933,9 +938,9 @@ class CheckoutController extends Controller
                 // $notification->sendUserNotification(Auth::user()->num);
 
               } catch (\Exception $e) {
-                
+
               }
-              
+
             if(isset($response->json()['data'])){
               return response()->json($response->json()['data']);
             }
@@ -949,14 +954,14 @@ class CheckoutController extends Controller
     public function couponUnselectAll(Request $request)
     {
         try {
-            
+
             $this->token = Auth::user()->api_token;
              $response = Http::withHeaders([
               'x-api-key' => $this->token,
               'x-api-device' => 'APP'
             ])
             ->asForm()
-            ->post($this->generateUrl(['controller' => 'Coupons','method' => 'unselect_all']), 
+            ->post($this->generateUrl(['controller' => 'Coupons','method' => 'unselect_all']),
                 $request->all());
 
             if($response->json()['status'] != 'success'){
@@ -973,14 +978,14 @@ class CheckoutController extends Controller
     public function couponSelect(Request $request)
     {
         try {
-            
+
             $this->token = Auth::user()->api_token;
              $response = Http::withHeaders([
               'x-api-key' => $this->token,
               'x-api-device' => 'APP'
             ])
             ->asForm()
-            ->post($this->generateUrl(['controller' => 'Coupons','method' => 'select']), 
+            ->post($this->generateUrl(['controller' => 'Coupons','method' => 'select']),
                 $request->all());
 
             if($response->json()['status'] != 'success'){
@@ -1047,7 +1052,7 @@ class CheckoutController extends Controller
             'x-api-key' => $this->token,
             'x-api-device' => 'APP'
           ])
-        //   ->asForm()
+            //->asForm()
           ->post($this->generateUrl(['controller' => 'DropOffTime','method' => 'get']),[]);
 
             $horarios = $response->collect();

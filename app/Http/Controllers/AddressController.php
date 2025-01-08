@@ -21,7 +21,7 @@ class AddressController extends Controller
      */
     public function index()
     {
-        
+
         // try {
             // dd('kiki');
            $data = $this->getDirecciones();
@@ -35,8 +35,8 @@ class AddressController extends Controller
     private function getDirecciones()
     {
         $this->token = Auth::user()->api_token;
-            
-        $response = Http::withHeaders([ 
+
+        $response = Http::withHeaders([
                         'x-api-key' => $this->token,
                         'Content-Type' => 'application/json'
                     ])
@@ -90,7 +90,7 @@ class AddressController extends Controller
 
             $this->token = Auth::user()->api_token;
             // dd($this->token);
-            $response = Http::withHeaders([ 
+            $response = Http::withHeaders([
                             'x-api-key' => $this->token,
                             // 'Content-Type' => 'application/json'
                         ])
@@ -115,8 +115,8 @@ class AddressController extends Controller
                             "dni" => '96085695',
                             "street_name" => $request->CALLE_NAME,
                             "street_number" => $request->CALLE_NUM ,
-                            "apartment" => '', 
-                            "area_code" => '11', 
+                            "apartment" => '',
+                            "area_code" => '11',
                             "mobile_phone"=> 43523445,
                             "location" =>' La Paternal',
                             "location_custom" =>  "",
@@ -136,8 +136,8 @@ class AddressController extends Controller
     public function update($adress, Request $request)
     {
 
-      
-        $response = Http::withHeaders([ 
+
+        $response = Http::withHeaders([
                         'x-api-key' =>  Auth::user()->api_token,
                         'Content-Type' => 'application/x-www-form-urlencoded'
                     ])
@@ -172,16 +172,16 @@ class AddressController extends Controller
     {
         // dd('llega',$request->num,Auth::user());
 
-        $response = Http::withHeaders([ 
+        $response = Http::withHeaders([
             'x-api-key' => Auth::user()->api_token,
             // 'Content-Type' => 'application/x-www-form-urlencoded'
         ])
         ->asForm()///
         ->post($this->urlAddress.'Profile::deleteAddress&app=1', ['num'=> $request->num]);
-        
+
         $data = $this->getDirecciones();
         return response()->json($data->all());
-            
+
     }
 
     public function changePrincipalAddress(Request $request)
@@ -224,7 +224,7 @@ class AddressController extends Controller
         $transportes = $this->getTransportes($request->group_id);
 
         $horarios = new CheckoutController();
-        $horarios = $horarios->getHorarios();    
+        $horarios = $horarios->getHorarios();
 
         return [
             'states'      => $states,
@@ -292,7 +292,7 @@ class AddressController extends Controller
             if($response->json()['status'] != 'success'){
                 throw new \Exception("No se encontraron resultados");
             }
-            
+
             $data = array_map($arreglo, $response->json()['data']);
 
             return $data;
@@ -344,11 +344,11 @@ class AddressController extends Controller
             $response = Http::withHeaders([ 'x-api-key' => $this->token ])->asForm()
                             ->post($this->url.'transports', ['group_id' => $group_id ]);
 
-                            
+
             if($response->json()['status'] != 'success'){
                 throw new \Exception("No se encontraron resultados");
             }
-            
+
             $data = $response->json()['data'];
 
             return $data;

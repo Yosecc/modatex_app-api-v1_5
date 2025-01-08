@@ -292,7 +292,7 @@ class CouponsController extends Controller
         $cupon['coupon_price'] = $cupon['amount'];
         $cupon['label'] = $cupon['label'] == false ? 'Cupón de Descuentos' : $cupon['label'] ;
         $cupon['coupon_type'] = $cupon['pattern'];
-        $cupon['bg'] = 'https://api.donosite.com/storage/companies/prev-card-'.$cupon['pattern'].'.png' ;
+        $cupon['bg'] = 'https://app-api.modatex.com.ar/prev-card-'.$cupon['pattern'].'.png' ;
 
         if($cupon['name'] == 'app_coupon'){
           // $cupon['pattern'] = $cupon['pattern'].'_app';

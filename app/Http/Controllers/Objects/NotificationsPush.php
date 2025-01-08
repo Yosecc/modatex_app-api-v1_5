@@ -7,6 +7,8 @@ use App\Models\VentaDelivery;
 use App\Models\NotificationsUserApp;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Validator;
+use Kreait\Firebase\Factory;
+use Kreait\Firebase\Messaging\CloudMessage;
 
 class NotificationsPush
 {
@@ -28,10 +30,27 @@ class NotificationsPush
             ]);
 
 
+            $factory = (new Factory)->withServiceAccount("/var/www/modatex_app-api-v1_5/modatex-e6ba5-firebase-adminsdk-wqbq6-04aa81f7a6.json");
+
+            // $auth = $factory->createAuth();
+
+            $messaging = $factory->createMessaging();
+
+            $message = CloudMessage::new()
+                        ->withNotification('')
+                        ->withData(['key' => 'value'])
+                        ->toToken('...')
+                        // ->toTopic('...')
+                        // ->toCondition('...')
+                    ;
+
+            dd('hasta aqui',$messaging );
+                        // dd($auth);
+
             // dd(VentaDelivery::first());
 
-            $response = Http::acceptJson()->post('https://identitytoolkit.googleapis.com/v1/accounts:signInWithCustomToken?key=AIzaSyDGG784TJ_cko8UPeqhyhRzQg445SYdMI0');
-            dd('llega', $response->json());
+            // $response = Http::acceptJson()->post('https://identitytoolkit.googleapis.com/v1/accounts:signInWithCustomToken?key=AIzaSyDGG784TJ_cko8UPeqhyhRzQg445SYdMI0');
+            // dd('llega', $response->json());
 
             if ($validator->fails()) {
                 $this->errors = $validator->errors();

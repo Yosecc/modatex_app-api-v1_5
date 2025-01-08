@@ -2,15 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use Auth;
-use App\Models\Store;
-use App\Models\Ventas;
+use App\Http\Traits\StoreTraits;
 use App\Models\BillingInfo;
 use App\Models\ClientLocal;
-use Illuminate\Http\Request;
 use App\Models\ProductsDetail;
+use App\Models\Store;
+use App\Models\Ventas;
+use Auth;
+use Carbon\Carbon;
 use Illuminate\Http\Client\Pool;
-use App\Http\Traits\StoreTraits; 
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 
@@ -30,7 +31,7 @@ class VentasController extends Controller
       if(isset($request->id)){
         $url = $this->url.'id='.$request->id;
       }
-// dd($url);
+        // dd($url);
       $this->token = Auth::user()->api_token;
       $response = Http::withHeaders([
         'x-api-key' => $this->token,
@@ -38,17 +39,17 @@ class VentasController extends Controller
       // ->asForm()
       ->acceptJson()
       ->post($url,[ ]);
-      
+
       // dd($response->body());
       $pedidos = $response->collect();
-      
+
 
       if(!$pedidos->count()){
-        return response()->json(['page' => $page, 'orders' => [], 'billing' => null, 'order' => null ]); 
+        return response()->json(['page' => $page, 'orders' => [], 'billing' => null, 'order' => null ]);
       }
       // dd($pedidos,$pedidos['data']['length'],$pedidos->count());
       if(!$pedidos['data']['length']){
-        return response()->json(['page' => $page, 'orders' => [], 'order' => null,'billing' => $pedidos['data']['billing'] ]); 
+        return response()->json(['page' => $page, 'orders' => [], 'order' => null,'billing' => $pedidos['data']['billing'] ]);
 
       }
       $orders = collect($pedidos['data']['orders']);
@@ -56,12 +57,14 @@ class VentasController extends Controller
       $marcas = $stores->consultaStoresRosa([
         'in' => $orders->pluck('store_id')->unique()
       ]);
-        
+
+      Carbon::setLocale('es');
       $f = $orders->sortByDesc('date')->groupBy('date')->map(function($g, $k) use($marcas, $orders){
         return [
           'date' => $k,
+          'beautifiedDate' => Carbon::parse($k)->isoFormat('LL'),
           'data' => $g->map(function($pedido) use ($marcas,$orders){
-            
+
             // dd($pedido['details']);
             $pedido['details'] = collect($pedido['details'])
             ->groupBy('model_id')
@@ -80,7 +83,7 @@ class VentasController extends Controller
             // dd($pedido['details']);
 
             $pedido['estado_calculado'] = $this->getEstadoCalculado($pedido);
-           
+
             if(isset($pedido['store_brand'])){
               $pedido['store_brand'] = env('URL_IMAGE').'/common/img/logo/'. $pedido['store_brand'];
             }else{
@@ -100,11 +103,11 @@ class VentasController extends Controller
           }
         }
       }
-      
+
       return response()->json([
         'page' => $page,
         'order' => isset($request->id) ? $order : null,
-        'orders' => !isset($request->id) ? $f->values()->toArray():null,  
+        'orders' => !isset($request->id) ? $f->values()->toArray():null,
         'billing' => $pedidos['data']['billing']
       ]);
       // dd();
@@ -123,7 +126,7 @@ class VentasController extends Controller
           'canceled_by_store'=> ['descrip' => 'Cancelado', 'color' => 'red'],
           'canceled_by_customer'=> ['descrip' => 'Cancelado', 'color' => 'red']
 		    ];
-    
+
     private $envios = [
       'RD'    => ['descrip' => 'Pick up by depot'],
       'CA'    => ['descrip' => 'Correo Argentino a'],
@@ -141,7 +144,7 @@ class VentasController extends Controller
     ];
 
     private function completeNameEnvios($pedido)
-    { 
+    {
       $type = $pedido['deliv_price_data']['type'];
 
       if(in_array($type, ['CA','OCA'])){
@@ -157,12 +160,12 @@ class VentasController extends Controller
 
     private function getEstadoCalculado($pedido)
     {
-      
+
       // dd($this->estado, $pedido['status_map']);
 
       $status = $pedido['status_map'];
       // $this->estado['key'] = $status['key'];
-      
+
       // $this->estado['name'] = $status['name'];
       // $this->estado['color'] = $this->status_steps[$this->estado['key']]['color'];
 
@@ -174,18 +177,22 @@ class VentasController extends Controller
 
 
       if(isset($status['message_parsed'])){
-       
-      
+
+
       $this->estado['textos'] = collect($status['message_parsed'])
                                 ->map(function($texto){
                                   if($texto['type'] == 'button'){
-                                    $texto['redirect'] =  [ 'route' => 'link', 'params' => $texto['route'], 'beforeConfirm' => true ];
+                                    $isWebview = false;
+                                    if($texto['text'] == ' Realizar pago' || $texto['text'] == 'Realizar pago'){
+                                      $isWebview = true;
+                                    }
+                                    $texto['redirect'] =  [ 'route' => 'link', 'params' => $texto['route'], 'beforeConfirm' => true, 'isWebview' => $isWebview ];
                                   }
                                   return $texto;
                                 });
                               }
 
-      
+
 
 
       return $this->estado;
@@ -193,15 +200,15 @@ class VentasController extends Controller
 
     private function getDeliveryPriceIn($ventas_ids){
 
-      $consultas = Http::pool(fn (Pool $pool) => 
-        $ventas_ids->map(fn ($id) => 
+      $consultas = Http::pool(fn (Pool $pool) =>
+        $ventas_ids->map(fn ($id) =>
           $pool->as($id)->asForm()->post($this->url, [
             'menu' => 'prev_venta_new',
             'venta_num' => $id,
           ])
         )
       );
-      
+
       return $consultas;
 
     }

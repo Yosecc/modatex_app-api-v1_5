@@ -12,6 +12,8 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Http;
 
 
+
+
 class NotificationsUserAppController extends Controller
 {
     private $token;
@@ -34,7 +36,9 @@ class NotificationsUserAppController extends Controller
         }
 
 
-        // dd(Auth::user()->num);
+
+
+        dd(Auth::user()->num);
         $notification = new NotificationsPush($request->all());
         $notificacion = $notification->sendUserNotification(Auth::user()->num);
 
