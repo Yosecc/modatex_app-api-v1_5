@@ -125,8 +125,13 @@ class CheckoutController extends Controller
                 'active'     => false
             ]];
 
+    public function getMetodoPagoLocal($methodAbbr)
+    {
+        return collect($this->metdosPagos)->where('payment_type', $methodAbbr)->first() ?? null;
+    }
 
-    public function getEnvios(Request $request)
+
+            public function getEnvios(Request $request)
     {
 
        try {
@@ -905,7 +910,7 @@ class CheckoutController extends Controller
             ->asForm()
             ->post($this->generateUrl(['controller' => 'Checkout','method' => 'buy']), $data);
 
-            // dd('$response->json()',$response->json());
+             //dd('$response->json()',$response->json());
 
             if(isset($response->json()['status']) && ($response->json()['status'] != 'success' || $response->json()['status'] != 'modapago_success')){
               //  throw new \Exception("No se encontraron resultados");
@@ -1072,5 +1077,61 @@ class CheckoutController extends Controller
     private function generateUrl($data)
     {
         return $this->url.$data['controller'].'::'.$data['method'];
+    }
+
+    public function upload(Request $request)
+    {
+        $this->validate($request, [
+            'filename' => 'required',
+            'purchase_id' => 'required',
+            // 'extension' => ''
+        ]);
+
+        $this->token = Auth::user()->api_token;
+
+        try {
+            if ($request->hasFile('filename')) {
+
+                $file = $request->file('filename');
+
+                $fileInfo = pathinfo($file->getClientOriginalName());
+
+                $extension = isset($fileInfo['extension']) ? $fileInfo['extension'] : (isset($request->extension) ? $request->extension : '');
+
+                $filename = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+
+                $newFilename = time() . '_' . $filename . '.' . $extension;
+
+                $archivoNuevo = $file->move('comprobante', $newFilename);
+
+                if (!$archivoNuevo) {
+                    throw new \Exception("File could not be moved.");
+                }
+
+                $response = Http::attach('filename', file_get_contents($archivoNuevo->getRealPath()), $archivoNuevo->getFilename())
+                                ->withHeaders([
+                                    'x-api-key' => $this->token,
+                                    'x-api-device' => 'APP',
+                                ])
+                                ->post($this->generateUrl(['controller' => 'Profile','method' => 'upload_receipt']).'&purchase_id='.$request->purchase_id);
+
+                if($response->json()['status'] != 'success'){
+                    throw new \Exception("No se encontraron resultados");
+                }
+
+                $url = '';
+
+                $response = $response->json();
+
+                if($response['status'] == 'success'){
+                    $url = $response['data'][0]['url'];
+                }
+
+                return response()->json(['message' => 'Gracias por cargar el comprobante, en breve nos pondremos en contacto con vos.' ,
+                'url' => $url  ], 200);
+            }
+        } catch (\Exception $e) {
+            return response()->json(['message'=>$e->getMessage()],422);
+        }
     }
 }

@@ -29,6 +29,7 @@ use Illuminate\Support\Facades\Log;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Tymon\JWTAuth\Facades\JWTFactory;
 use Tymon\JWTAuth\Exceptions\JWTException;
+use Illuminate\Support\Facades\Storage;
 
 class HomeController extends Controller
 {
@@ -36,6 +37,48 @@ class HomeController extends Controller
 
 
   private $url = 'https://www.modatex.com.ar/';
+
+  public function pruebaWebview(Request $request){
+    \Log::info('================LLEGA================');
+    \Log::info($request->all());
+
+    // $validated = $request->validate([
+    //     'propiedad_campo' => 'file|size:1000000',
+    //     'extension' => 'required',
+    // ]);
+
+    // if ($validated->fails()) {
+    //     return response()->json($validated->errors()  ,422);
+
+    // }
+              // try {
+        if ($request->hasFile('propiedad_campo')) {
+            $file = $request->file('propiedad_campo');
+            $fileInfo = pathinfo($file->getClientOriginalName());
+
+            \Log::info($fileInfo);
+
+            $extension = isset($fileInfo['extension']) ? $fileInfo['extension'] : (isset($request->extension) ? $request->extension : '');
+
+
+            $filename = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+
+
+            $newFilename = time() . '_' . $filename . '.' . $extension;
+            $file->move('comprobante', $newFilename);
+
+            return response()->json(['file' => $newFilename, 'extension' => $extension], 200);
+        }
+    // } catch (\Throwable $th) {
+    //     \Log::info($th->getMessage());
+    //     return response()->json($th->getMessage()  ,422);
+
+    // }
+
+
+
+   // dd($request->all());
+  }
 
   /**
    * DEPRECADO
@@ -762,8 +805,8 @@ class HomeController extends Controller
         "name" => 'Mis pedidos',
         "disabled" => false,
         "redirect"=> [
-          // "route"=> "/profileOrdersList",
-          "route"=> "/profile",
+          "route"=> "/profileOrdersList",
+          //"route"=> "/profile",
           "params"=> []
         ]
       ],
@@ -1166,7 +1209,7 @@ class HomeController extends Controller
                                   "color" => "#FFFFFF"
                               ],
                               "body" => [
-                                  "text" => "Liquidación hasta 15%",
+                                  "text" => "Sale hasta 30%",
                                   "size" => 11,
                                   "color" => "#FFFFFF"
                               ],

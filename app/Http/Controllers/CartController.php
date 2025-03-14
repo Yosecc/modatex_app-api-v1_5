@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 use Illuminate\Http\Client\Pool;
 use App\Http\Controllers\Objects\Producto;
+use Illuminate\Support\Facades\Cache;
 
 
 class CartController extends Controller
@@ -32,8 +33,8 @@ class CartController extends Controller
 
       $url = $this->url.'?c=Cart::product_update';
 
-      $this->token = Auth::user()->api_token; 
-      
+      $this->token = Auth::user()->api_token;
+
       $response = Http::withHeaders([
           'x-api-key' => $this->token,
           // 'Content-Type' => 'application/x-www-form-urlencoded'
@@ -61,8 +62,8 @@ class CartController extends Controller
       $url = $this->url.'?c=Cart::get&store_id='.$store_id;
 
       // dd($url);
-      $this->token = Auth::user()->api_token; 
-     
+      $this->token = Auth::user()->api_token;
+
       $response = Http::withHeaders([
           'x-api-key' => $this->token,
           'Content-Type' => 'application/json'
@@ -73,7 +74,10 @@ class CartController extends Controller
         'store_id' => $store_id,
       ]);
 
-      
+      $storesCache = Cache::get('stores');
+
+
+
       $carrito = $response->json();
 
       if(!$carrito){
@@ -87,22 +91,22 @@ class CartController extends Controller
         return 'https://www.modatex.com.ar/?c=Products::get&product_id='.$agregado['product_id'];
       });
 
-      $consultas = Http::pool(fn (Pool $pool) => 
-          $Urlagregados->map(fn ($url) => 
+      $consultas = Http::pool(fn (Pool $pool) =>
+          $Urlagregados->map(fn ($url) =>
             $pool->acceptJson()->get($url)
           )
       );
 
       $productos = collect($consultas)->map(function($respuesta) use($carrito){
         return $respuesta->collect()->map(function($product) use($carrito){
-          
+
           // dd($carrito, $product);
           $cartUrl = 'https://www.modatex.com.ar/?c=Cart::product&'.Arr::query([
             'store_id' => $product['store'],
             'company_id' => $product['company'],
             'product_id' => $product['id'],
           ]);
-    
+
           $responseCart = Http::withHeaders([
             'x-api-key' => Auth::user()->api_token,
             'Content-Type' => 'application/json'
@@ -112,7 +116,7 @@ class CartController extends Controller
           $producto->setModelos($responseCart->collect()->all());
           $producto = $producto->getProducto();
 
-          
+
           $producto['carro'] = collect($carrito['added'])->where('product_id', $product['id'])->values();
           $producto['cantidad_add'] = $producto['carro']->sum('amount');
           $producto['total_add'] = $producto['carro']->sum('total');
@@ -121,14 +125,17 @@ class CartController extends Controller
         });
       })->collapse();
 
+      $marca = $storesCache->where('local_cd',$store_id )->first();
+
       return response()->json([
         'total' => $carrito['total'],
         'cantidadModelos' => $productos->sum('cantidad_add'),
-        'productos' => $productos
+        'productos' => $productos,
+        'store' => $marca
       ]);
 
       // return response()->json(['message' => 'No se encontraron carros abiertos para esta marca' ], 422);
-      
+
     }
 
     //BORRA UN PRODUCTO SEGUN EL ID DEL MODELO
@@ -153,8 +160,8 @@ class CartController extends Controller
 
       $url = $this->url.'?c=Cart::product_update';
 
-      $this->token = Auth::user()->api_token; 
-      
+      $this->token = Auth::user()->api_token;
+
       $response = Http::withHeaders([
           'x-api-key' => $this->token,
           // 'Content-Type' => 'application/x-www-form-urlencoded'
@@ -173,7 +180,7 @@ class CartController extends Controller
 
       return response()->json(['status'=> true, 'data' => $response->json() ]);
 
-      
+
     }
 
 
@@ -197,7 +204,7 @@ class CartController extends Controller
                 ]);
 
       } catch (\Exception $e) {
-        return response()->json(['status'=> false,'message'=> $e->getMessage()], 422); 
+        return response()->json(['status'=> false,'message'=> $e->getMessage()], 422);
       }
       return response()->json(['status'=> true ,]);
     }
@@ -206,7 +213,7 @@ class CartController extends Controller
     public $selectCar = ['CART.NUM','CART.STAT_CD','CART.CLIENT_NUM','CART.GROUP_CD','CART.LOCAL_CD','CART.MODELO_NUM','CART.MODELO_DETALE_NUM','CART.SIZE_NUM','CART.COLOR_NUM','CART.PRICE','CART.CANTIDAD','CART.TOTAL_PRICE','LOCAL.LOCAL_NAME','LOCAL.LIMIT_PRICE'];
 
     // TRAE TODOS LOS STORE/CARRITOS
-    public function getCarts(Request $request){ 
+    public function getCarts(Request $request){
 
         $carts = Cart::
                   select($this->selectCar)
@@ -237,18 +244,18 @@ class CartController extends Controller
             //   "text" => '<p style="font-weight: 600; text-align:center" >Hoy tu compra suma una chance para el sorteo de <br> <br> <span style="background-color: #4CAF50;color: white;padding: 2px 7px;border-radius: 8px;margin: 0 3px;font-size: 16px;">$1.000.000</span> <br> <br> <span style="font-size: 12px">Los pedidos de más de $30.000 tienen doble chance! </span></p>'
             // ]
           ];
-          // dd($stores);  
+          // dd($stores);
           return response()->json(['stores' => $stores->values()->toArray(), 'blocks' => $blocks ]);
         }
 
         return response()->json(['message' => 'No se encontraron carros abiertos' ], 422);
     }
 
-    
-    
+
+
     private function arregloCart($store, $carts)
     {
-      
+
       $products = $carts->where('LOCAL_CD',$store['local_cd']);
       $suma = 0;
       $cart_ids = [];
@@ -259,24 +266,24 @@ class CartController extends Controller
         $conteo+=$value['CANTIDAD'];
         $cart_ids[] = $value['NUM'];
       }
-      
+
       return [
         "id"             => $store['local_cd'],
         "company"        => null,
         "name"           => $store['name'],
         "limit_price"    => intval($store['min']),
         "logo"           => $store['logo'],
-        "products_count" => $conteo, 
-        "total"          => $suma, 
+        "products_count" => $conteo,
+        "total"          => $suma,
         "is_limit"       => $suma >= $store['min'],
         'cart_ids'       => $cart_ids,
         'rep'            => $store['rep'],
         "vc"             => $store['vc'],
-        "categorie"      => $store['categorie'], 
+        "categorie"      => $store['categorie'],
         "category_default" => $store['category_default'],
         "categories_store" => $store['categories_store'],
-        "paquete"          => $store['paquete'], 
-        "cleaned"          => $store['cleaned'], 
+        "paquete"          => $store['paquete'],
+        "cleaned"          => $store['cleaned'],
       ];
 
     }
@@ -319,7 +326,7 @@ class CartController extends Controller
               });
 
               [$keysSize, $valuesSize] = Arr::divide(collect($filteredSize)->all());
-              
+
               $filteredColor = Arr::where($product['colors'], function ($value, $key) use ($cart) {
                 return $value['id'] == $cart['COLOR_NUM'];
               });
@@ -328,9 +335,9 @@ class CartController extends Controller
 
               // dd($cart);
               $combinaciones[] = [
-                
+
                 "sizes"           => $product['sizes'],
-                
+
                 "colors"          => $product['colors'],
                 "colorActive"     => count($valuesColor) ? $valuesColor[0]['code']:null,
                 "talleActive"     => count($valuesSize) ? $valuesSize[0]['size']:null,
@@ -364,14 +371,14 @@ class CartController extends Controller
           "models"        => $product['models'],
           "code"           => $product['code'],
         ];
-      
+
       };
 
 
       $productos = array_map($arregloProduct, $productos);
 
       return response()->json(['products' => $productos]);
-   
+
     }
 
     // BORRA UN PRODUCTO DEL CARRITO SEGUN ID porducto y el id modelo
@@ -393,7 +400,7 @@ class CartController extends Controller
           throw new \Exception("Modelo no encontrado");
         }
       } catch (\Exception $e) {
-        return response()->json(['message' => $e->getMessage() ], 422); 
+        return response()->json(['message' => $e->getMessage() ], 422);
       }
     }
 
@@ -417,11 +424,11 @@ class CartController extends Controller
           throw new \Exception("Modelos no encontrados");
         }
       } catch (\Exception $e) {
-        return response()->json(['status'=> false, 'message' => $e->getMessage() ], 422); 
+        return response()->json(['status'=> false, 'message' => $e->getMessage() ], 422);
       }
     }
 
-    
+
 
     //PROCESA EL CARRITO
     //VALIDA SI POSEE TODOS LOS DATOS
@@ -432,10 +439,10 @@ class CartController extends Controller
       $this->validate($request, [
         'local_cd' => 'required',
       ]);
-      
+
       $url = $this->url.'?c=Cart::send_to_checkout&store_id='.$request->local_cd;
 
-      $this->token = Auth::user()->api_token; 
+      $this->token = Auth::user()->api_token;
 
       $response = Http::withHeaders([
           'x-api-key' => $this->token,

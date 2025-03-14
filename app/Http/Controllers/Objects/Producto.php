@@ -61,7 +61,7 @@ class Producto extends Controller
         $this->data['colors']       = isset($producto['colors']) ? $producto['colors']: null;
         $this->data['is_desc']      = $producto['discount'];
         $this->data['has_stock']    = $producto['has_stock'];
-        $this->data['store']        = $this->storesCache->where('id', $producto['store'] )->first();
+        $this->data['store']        = $this->storesCache ? $this->storesCache->where('id', $producto['store'] )->first() : [];
     }
 
     public function setModelos($producto)

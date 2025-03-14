@@ -181,6 +181,8 @@ class StoresController extends Controller
                 }
               }
 
+              $pastilla['title'] = '';
+
               $pastilla['text'] = $textWithoutLinks;
 
               $pastilla['buttons'] =  collect($botones)->map(function($boton){

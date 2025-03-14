@@ -6,6 +6,8 @@ use App\Models\ClientLocal;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Http\Client\Pool;
+
 
 class AddressController extends Controller
 {
@@ -21,18 +23,26 @@ class AddressController extends Controller
      */
     public function index()
     {
-
-        // try {
-            // dd('kiki');
-           $data = $this->getDirecciones();
-            return response()->json($data->all());
-
-        // } catch (\Exception $e) {
-        //     return $e->getMessage();
-        // }
+        $data = $this->getDirecciones();
+        return response()->json($data->all());
     }
 
-    private function getDirecciones()
+    public function edit($id, Request $request)
+    {
+        $this->token = Auth::user()->api_token;
+
+        $response = Http::withHeaders([
+            'x-api-key' => $this->token,
+            'Content-Type' => 'application/json'
+        ])
+        ->get($this->urlAddress.'Profile::getAddress&address_id='.$id);
+
+        $data = $response->json();
+
+        return response()->json($data['status'] == 'success'  ? $data['data'] : []);
+    }
+
+    private function getDirecciones($id = null)
     {
         $this->token = Auth::user()->api_token;
 
@@ -46,38 +56,19 @@ class AddressController extends Controller
             throw new \Exception("No se encontraron resultados");
         }
 
-        // Primero, obtén todos los IDs únicos de direcciones para reducir las consultas a la base de datos
-        $direccionesIds = collect($response->json()['DIRECCIONES'])
-                            ->pluck('ID')
-                            ->unique()
-                            ->reject(function($id) { return empty($id); });
+        $DIRECCIONES = $response->json()['DIRECCIONES'];
 
-        // Luego, obtén todos los ClientLocal necesarios en una sola consulta
-        $clientLocals = ClientLocal::whereIn('NUM', $direccionesIds)->get()->keyBy('NUM');
-
-        // Ahora, procesa las direcciones
-        $data = collect($response->json()['DIRECCIONES'])->map(function($direccion) use ($clientLocals) {
-            // Salta las direcciones sin ID
-            if (empty($direccion['ID'])) {
-                return [];
-            }
-
-            // Acceso directo a ClientLocal, evitando múltiples consultas
-            $detalle = isset($clientLocals[$direccion['ID']]) ? $clientLocals[$direccion['ID']] : null;
-
-            // Construye y retorna la estructura deseada
+        return collect($DIRECCIONES)->map(function($direccion) {
             return [
                 "direccion" => $direccion['GENERAL'] ?? '',
                 "localidad" => $direccion['GENERAL_TIT'] ?? '',
                 "codigo_postal" => $direccion['ZIPCODE'],
                 "name" => $direccion['ALIAS'] == 0 ? '' : $direccion['ALIAS'],
                 "id" => $direccion['ID'],
-                "default" => !empty($direccion['SELECCIONADO']),
-                "detalle" => $detalle,
+                "default" => isset($direccion['SELECCIONADO']) ? ($direccion['SELECCIONADO'] == 1 ? true : false ) : false,
             ];
-        })->filter()->values(); // Filtra cualquier elemento vacío y reindexa
+        });
 
-        return $data;
     }
 
     // /**
@@ -86,49 +77,38 @@ class AddressController extends Controller
     public function create(Request $request)
     {
         try {
-            // dd($request->all());
 
             $this->token = Auth::user()->api_token;
-            // dd($this->token);
-            $response = Http::withHeaders([
+
+            $data = Http::withHeaders([
                             'x-api-key' => $this->token,
-                            // 'Content-Type' => 'application/json'
                         ])
                         ->asForm()
                         ->post($this->urlAddress.'Profile::addrSave&app=1', [
-                            "addrname" => $request->ADDRESS_NAME,
-                            "street" => $request->CALLE_NAME,
-                            "streetNumber" => $request->CALLE_NUM,
-                            "floor" => $request->CALLE_PISO,
-                            "dto" => $request->CALLE_DTO,
-                            "zipcode" => $request->ADDRESS_ZIP,
-                            "state" => $request->STAT_NUM,
-                            "city" => $request->CITY,
-                            "comments" => $request->COMMENTS,
-                            "deliveryHour" => $request->DELIVERY_HOUR,
-                            "method" => 'home_delivery',
-                            "id" => '',
-                            'alias' => $request->ADDRESS_NAME,
-                            "first_name" => 'first name',
-                            "last_name" => 'last name',
-                            "group_id" => 1000,
-                            "dni" => '96085695',
-                            "street_name" => $request->CALLE_NAME,
-                            "street_number" => $request->CALLE_NUM ,
-                            "apartment" => '',
-                            "area_code" => '11',
-                            "mobile_phone"=> 43523445,
-                            "location" =>' La Paternal',
-                            "location_custom" =>  "",
-                            "drop_off_time"=> 8,
-                            "comments" => ''
+                            'group_id' => 1000,
+                            'method' => 'home_delivery',
+                            'alias' => $request->alias,
+                            'first_name' => $request->first_name,
+                            'last_name' => $request->last_name,
+                            'dni' => $request->dni,
+                            'street_name' => $request->street_name,
+                            'street_number' => $request->street_number,
+                            'floor' => $request->floor,
+                            'apartment' => $request->apartment,
+                            'zipcode' => $request->zipcode,
+                            'area_code' => $request->area_code,
+                            'mobile_phone' => $request->mobile_phone,
+                            'state' => $request->state,
+                            'location' => $request->location,
+                            'location_custom' => $request->location_custom,
+                            'drop_off_time' => $request->drop_off_time,
+                            'comments' => $request->comments,
                         ]);
 
-                dd($response->body());
-            $data = $this->getDirecciones();
-            return response()->json($data->all());
+            return response()->json($data->json());
 
         } catch (\Throwable $th) {
+
             return response()->json($th->getMessage());
         }
     }
@@ -136,35 +116,40 @@ class AddressController extends Controller
     public function update($adress, Request $request)
     {
 
-
         $response = Http::withHeaders([
                         'x-api-key' =>  Auth::user()->api_token,
                         'Content-Type' => 'application/x-www-form-urlencoded'
                     ])
                     ->asForm()
                     ->post($this->urlAddress.'Profile::addrSave&app=1', [
-                        "addrname" => $request->ADDRESS_NAME,
-                        "street" => $request->CALLE_NAME,
-                        "streetNumber" => $request->CALLE_NUM,
-                        "floor" => $request->CALLE_PISO,
-                        "dto" => $request->CALLE_DTO,
-                        "zipCode" => $request->ADDRESS_ZIP,
-                        "state" => $request->STAT_NUM,
-                        "city" => $request->CITY,
-                        "comments" => $request->COMMENTS,
-                        "deliveryHour" => $request->DELIVERY_HOUR,
-                        "num" => $adress
+                        'group_id' => 1000,
+                        'method' => 'home_delivery',
+                        'id' => $adress,
+                        'alias' => $request->alias,
+                        'first_name' => $request->first_name,
+                        'last_name' => $request->last_name,
+                        'dni' => $request->dni,
+                        'street_name' => $request->street_name,
+                        'street_number' => $request->street_number,
+                        'floor' => $request->floor,
+                        'apartment' => $request->apartment,
+                        'zipcode' => $request->zipcode,
+                        'area_code' => $request->area_code,
+                        'mobile_phone' => $request->mobile_phone,
+                        'state' => $request->state,
+                        'location' => $request->location,
+                        'location_custom' => $request->location_custom,
+                        'drop_off_time' => $request->drop_off_time,
+                        'comments' => $request->comments,
                     ]);
 
-                    dd($response->body());
-        $response = $response->collect();
+        $response = $response->json();
+
         if($response['status'] == 'error'){
             return response()->json($response->all());
         }
 
-                //  dd($response->body());
-        $data = $this->getDirecciones();
-        return response()->json($data->all());
+        return response()->json($response);
 
     }
 
@@ -209,6 +194,14 @@ class AddressController extends Controller
         ];
     }
 
+    public function getComboDireccionesProfile(Request $request)
+    {
+        $this->token = Auth::user()->api_token;
+
+        return $this->getComboDirecciones($request);
+
+    }
+
     public function getComboDirecciones(Request $request)
     {
         $this->token = Auth::user()->api_token;
@@ -223,24 +216,59 @@ class AddressController extends Controller
 
         $transportes = $this->getTransportes($request->group_id);
 
-        $horarios = new CheckoutController();
-        $horarios = $horarios->getHorarios();
+        $horarios = $this->horarios($request->group_id);
+
 
         return [
             'states'      => $states,
-            'gba'         => $gba,
+            'gba'         => collect($gba)->map(function($item) {
+                $item['id'] = (string) $item['id'];
+                return $item;
+            })->toArray(),
             'caba'        => $caba,
             'integral'    => $integral ,
             'transportes' => $transportes,
-            "horarios" => json_decode($horarios->getContent())
+            "horarios" =>  $horarios
         ];
+    }
+
+    public function horarios($group_id)
+    {
+        if($group_id){
+            $horarios = new CheckoutController();
+            $horarios = $horarios->getHorarios();
+
+            return json_decode($horarios->getContent());
+        }else{
+            try {
+
+                $response = Http::withHeaders([ 'x-api-key' => $this->token ])->acceptJson()->get($this->urlAddress.'DropOffTime::get');
+
+                if($response->json()['status'] != 'success'){
+                    throw new \Exception("No se encontraron resultados");
+                }
+
+                $data = $response->json()['data'];
+
+                return $data;
+
+            } catch (\Exception $e) {
+                return null;
+            }
+        }
+
+
     }
 
     public function locationesStates($group_id)
     {
+
         try {
-            $response = Http::withHeaders([ 'x-api-key' => $this->token ])->asForm()
-                            ->post($this->url.'states', ['group_id' => $group_id ]);
+            if($group_id){
+                $response = Http::withHeaders([ 'x-api-key' => $this->token ])->asForm()->post($this->url.'states', ['group_id' => $group_id ]);
+            }else{
+                $response = Http::withHeaders([ 'x-api-key' => $this->token ])->acceptJson()->get($this->urlAddress.'State::get');
+            }
 
             if($response->json()['status'] != 'success'){
                 throw new \Exception("No se encontraron resultados");
@@ -258,8 +286,11 @@ class AddressController extends Controller
     public function locationesGBA($group_id)
     {
         try {
-            $response = Http::withHeaders([ 'x-api-key' => $this->token ])->asForm()
-                            ->post($this->url.'locations_gba', ['group_id' => $group_id ]);
+            if($group_id){
+                $response = Http::withHeaders([ 'x-api-key' => $this->token ])->asForm()->post($this->url.'locations_gba', ['group_id' => $group_id ]);
+            }else{
+                $response = Http::withHeaders([ 'x-api-key' => $this->token ])->acceptJson()->get($this->urlAddress.'LocationsGba::get');
+            }
 
             if($response->json()['status'] != 'success'){
                 throw new \Exception("No se encontraron resultados");
@@ -279,9 +310,11 @@ class AddressController extends Controller
     public function locationesCABA($group_id)
     {
         try {
-            $response = Http::withHeaders([ 'x-api-key' => $this->token ])->asForm()
-                            ->post($this->url.'locations_caba', ['group_id' => $group_id ]);
-
+            if($group_id){
+                $response = Http::withHeaders([ 'x-api-key' => $this->token ])->asForm()->post($this->url.'locations_caba', ['group_id' => $group_id ]);
+            }else{
+                $response = Http::withHeaders([ 'x-api-key' => $this->token ])->acceptJson()->get($this->urlAddress.'LocationsCaba::get');
+            }
             $arreglo = function($item){
                 return [
                     'id' => $item,

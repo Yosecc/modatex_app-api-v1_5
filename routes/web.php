@@ -14,7 +14,7 @@
 */
 
 $router->post('generateTokenApi','HomeController@generateTokenApi');
-
+$router->post('pruebaWebview','HomeController@pruebaWebview');
 
 $router->get('/', function () use ($router) {
     return $router->app->version();
@@ -132,8 +132,12 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
     $router->group(['prefix' => 'profile'], function () use ($router) {
 
         $router->group(['prefix' => 'direcciones'], function () use ($router) {
+
             $router->get('/','AddressController@index');
+            $router->get('/getComboDireccionesProfile','AddressController@getComboDireccionesProfile');
+
             $router->post('create','AddressController@create');
+            $router->get('edit/{id}','AddressController@edit');
             $router->post('deleteDireccion','AddressController@deleteDireccion');
             $router->post('update/{adress}','AddressController@update');
             $router->post('change_principal_address','AddressController@changePrincipalAddress');
@@ -197,6 +201,7 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
         $router->post('shippingSelectAddress','CheckoutController@shippingSelectAddress');
         $router->post('getMetodosPagos','CheckoutController@getMetodosPagos');
         $router->post('getHorarios','CheckoutController@getHorarios');
+        $router->post('upload','CheckoutController@upload');
 
 
     });

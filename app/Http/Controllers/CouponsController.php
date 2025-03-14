@@ -22,21 +22,21 @@ class CouponsController extends Controller
     public function index()
     {
       $this->token = Auth::user()->api_token;
-      
-      $response = Http::withHeaders([ 
+
+      $response = Http::withHeaders([
           'x-api-key' => $this->token,
           'Content-Type' => 'application/json'
       ])
       ->get($this->urlProfile.'Profile::coupons&app=1');
-    
+
       if(!$response->json()){
         return response()->json([]);
       }
-      
+
       $data = $response->collect()['data'];
 
       $data = $this->getCupon($data);
-    
+
 
       return response()->json($data);
     }
@@ -79,7 +79,7 @@ class CouponsController extends Controller
         }
 
         return null;
-        
+
     }
 
     public function storeCupon($cupon)
@@ -120,7 +120,7 @@ class CouponsController extends Controller
     {
 
       $this->token = Auth::user()->api_token;
-      $response = Http::withHeaders([ 
+      $response = Http::withHeaders([
           'x-api-key' => $this->token,
           // 'Content-Type' => 'application/json'
       ])
@@ -134,7 +134,7 @@ class CouponsController extends Controller
       }
 
       $data = $response->collect();
-      
+
       if($data['status'] == 'error'){
         // dd($data['errors']);/
         return response()->json($data['errors'],422);
@@ -144,7 +144,7 @@ class CouponsController extends Controller
 
 
       // try {
-        
+
       //   $this->validate($request, [
       //     'code' => 'required',
       //   ]);
@@ -158,10 +158,10 @@ class CouponsController extends Controller
       //   // dd($cupon);
 
       //   if(!$cupon){
-      //     throw new \Exception('Código de cupón inválido.'); 
+      //     throw new \Exception('Código de cupón inválido.');
       //     return response()->json('Código de cupón inválido.', 422);
       //   }
-        
+
 
       //   if($cupon->expire_days){
       //     $fechaVencimiento = Carbon::now()->addDays($cupon->expire_days);
@@ -172,7 +172,7 @@ class CouponsController extends Controller
       //   }
 
       //   if(Carbon::create($hoy->year,$hoy->month, $hoy->day,0,0,0) > Carbon::parse($fechaVencimiento)){
-      //     throw new \Exception('cupón expirado'); 
+      //     throw new \Exception('cupón expirado');
       //     return response()->json('cupón expirado', 422);
       //   }
 
@@ -194,14 +194,14 @@ class CouponsController extends Controller
 
       //   $LOCAL_CD_VALID = '';
 
-        
+
 
       //   if(!$cupon->local_cd || $cupon->local_cd == ''){
       //     if ($cupon->positioning){
       //       $positioning		= explode( '|', $cupon->positioning );
       //       $stores = new StoresController();
       //       $stores = $stores->searchStoresSegunPlanes($positioning);
-            
+
       //       $LOCAL_CD_VALID = implode( '|', $stores->pluck('local_cd')->all() );
       //     }
       //   }else{
@@ -220,7 +220,7 @@ class CouponsController extends Controller
       //   $cuponNew->save();
 
       //   return response()->json('Felicitaciones, tu cupón fue agregado exitosamente.');
-      
+
       // } catch (\Exception $e) {
       //   return response()->json($e->getMessage(), 422);
       // }
@@ -237,7 +237,7 @@ class CouponsController extends Controller
 
         $grouped = $descuentos->groupBy('category');
 
-        $storesIds = $descuentos->pluck('local_cd')->reject(function($id){ 
+        $storesIds = $descuentos->pluck('local_cd')->reject(function($id){
          return $id == '';
         });
 
@@ -259,10 +259,10 @@ class CouponsController extends Controller
             'min'  => $store['LIMIT_PRICE'],
             "id"   => $store['LOCAL_CD'],
             "company"     => $store['GROUP_CD'],
-          ]; 
+          ];
 
           $cupon['isAdd'] = $cuponesClient->where('coupon_str', $cupon->type)->count();
-          
+
           return $cupon;
         });
 
@@ -281,11 +281,18 @@ class CouponsController extends Controller
         'categorie' => 'all'
       ]);
 
+    //   dd($cTienda, $data);
       return collect($data)->map(function($cupon) use($cTienda) {
+
+        $cupon['validStores'] = collect($cupon['validStores'])->filter()->values()->toArray();
+
+        // dd($cTienda, $cupon['validStores']);
         $t = [];
         foreach ($cTienda->whereIn('local_cd', $cupon['validStores']) as $key => $value) {
          $t[] = $value;
         }
+
+        // dd($t);
 
         $cupon['tiendas'] = $t;
         $cupon['coupon_name'] = $cupon['name'];
