@@ -32,7 +32,10 @@ class CouponsController extends Controller
       if(!$response->json()){
         return response()->json([]);
       }
-
+     
+      if(!isset( $response->collect()['data'])){
+        return response()->json([]);
+      }
       $data = $response->collect()['data'];
 
       $data = $this->getCupon($data);

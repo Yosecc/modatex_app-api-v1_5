@@ -125,15 +125,279 @@ class CheckoutController extends Controller
                 'active'     => false
             ]];
 
+    /**
+     * 1. Editar cliente
+     */
+    public function editClient(Request $request)
+    {
+        $this->validate($request, [
+            'first_name' => 'required',
+            'last_name'  => 'required',
+            'cuit_dni'   => 'required',
+        ]);
+
+        $this->token = Auth::user()->api_token;
+
+        try {
+
+        Client::where('num',Auth::user()->num)->update([
+                            'first_name'   => $request->first_name,
+                            'last_name'    => $request->last_name,
+                            'cuit_dni'     => $request->cuit_dni]);
+         return response()->json('OK');
+
+        } catch (\Exception $e) {
+            return response()->json($e->getMessage(),422);
+        }
+
+    }
+
+    /**
+     * 2. Seleccionar cupon
+     */
+    public function couponSelect(Request $request)
+    {
+
+        // dd($request->all());
+        $this->validate($request, [
+            'group_id' => 'required',
+            'coupon_id'  => 'required',
+            'store_id'   => 'required',
+        ]);
+
+        $this->token = Auth::user()->api_token;
+
+        try {
+
+            $response = Http::withHeaders([
+              'x-api-key' => $this->token,
+              'x-api-device' => 'APP'
+            ])
+            // ->acceptJson()
+            ->asForm()
+            ->post($this->generateUrl(['controller' => 'Coupons','method' => 'select']), $request->all());
+
+            // dd($response->body());
+            if(isset($response->json()['status']) && $response->json()['status'] != 'success'){
+                throw new \Exception(isset($response->json()['message']) ? $response->json()['message'] : 'Error');
+            }
+
+            return response()->json($response->json());
+
+        } catch (\Exception $e) {
+            return response()->json(['message'=>$e->getMessage()],422);
+        }
+    }
+
+    /**
+     * 2.1. Deseleccionar cupon
+     */
+    public function couponUnselectAll(Request $request)
+    {
+
+        $this->validate($request, [
+            'group_id' => 'required',
+        ]);
+
+        $this->token = Auth::user()->api_token;
+
+        try {
+
+            $response = Http::withHeaders([
+              'x-api-key' => $this->token,
+              'x-api-device' => 'APP'
+            ])
+            ->asForm()
+            ->post($this->generateUrl(['controller' => 'Coupons','method' => 'unselect_all']),
+                $request->all());
+
+            if($response->json()['status'] != 'success'){
+                throw new \Exception("Error");
+            }
+
+            return response()->json($response->json());
+
+        } catch (\Exception $e) {
+            return response()->json(['message'=>$e->getMessage()],422);
+        }
+    }
+
+    /**
+     * 3. Metodos de envios
+     */
+    public function getMetodos(Request $request)
+    {
+
+        $this->validate($request, [
+            'local_cd' => 'required',
+            'group_id' => 'required'
+        ]);
+
+        try {
+            $localCd = $request->input('local_cd');
+
+            $this->token = Auth::user()->api_token;
+            $response = Http::withHeaders([
+                'x-api-key' => $this->token,
+                'x-api-device' => 'APP'
+            ])
+            ->asForm()
+            ->post($this->generateUrl(['controller' => 'Shipping','method' => 'all_methods']).'&store_id='.$localCd);
+
+            $response2 = Http::withHeaders([
+                'x-api-key' => $this->token,
+                'x-api-device' => 'APP'
+            ])
+            ->asForm()
+            ->post($this->generateUrl(['controller' => 'Checkout','method' => 'shipping_method']), $request->all());
+
+            if($response->json()['status'] != 'success'){
+                throw new \Exception("No se encontraron resultados");
+            }
+
+            $respuesta = $response->collect();
+
+            $respuesta['data'] = collect($respuesta['data'])->map(function($dato, $key) use ($response2){
+                if(isset($response2->json()['data']['shipping_method'])){
+                    if($key == $response2->json()['data']['shipping_method']){
+                        $dato['active'] = true;
+                    }else{
+                        $dato['active'] = false;
+                    }
+                }
+                 return $dato;
+            });
+
+            return response()->json($respuesta);
+        } catch (\Throwable $th) {
+            return response()->json($th->getMessage(),422);
+        }
+    }
+
+    /**
+     * 3.1 Seleccionar metodo de envio
+     */
+    public function selectMethodEnvio(Request $request)
+    {
+        $this->validate($request, [
+            'group_id' => 'required',
+            'method'  => 'required',
+        ]);
+
+        $this->token = Auth::user()->api_token;
+
+        try {
+            $response = Http::withHeaders([
+              'x-api-key' => $this->token,
+              'x-api-device' => 'APP'
+            ])
+            ->asForm()
+            ->post($this->generateUrl(['controller' => 'Checkout','method' => 'shipping_select_method']), $request->all());
+
+              return response()->json($response->json());
+
+        } catch (\Exception $e) {
+            return response()->json($e->getMessage(),422);
+        }
+    }
+
+    /**
+     *  4.0 get Dato segun del tipo de envio
+     */
+
+     public function datosEnvio(Request $request)
+     {
+         $this->validate($request, [
+             'group_id' => 'required',
+             'method'     => 'required',
+         ]);
+ 
+         $this->token = Auth::user()->api_token;
+ 
+         try {
+             $response = Http::withHeaders([
+               'x-api-key' => $this->token,
+               'x-api-device' => 'APP'
+             ])
+                 ->asForm()
+                 ->post($this->generateUrl(['controller' => 'Checkout','method' => 'shipping_linked_data']),
+                 $request->all());
+ 
+             $response = $response->json();
+ 
+             if($response['status'] != 'success'){
+                 throw new \Exception("No se encontraron resultados");
+                 // throw new \Exception($response->json());
+             }
+ 
+               return response()->json($response['data']);
+ 
+         } catch (\Exception $e) {
+             return response()->json(['message'=>$e->getMessage()],422);
+         }
+     }
+
+    /**
+     * 4.1. crear o editar detalle metodo de envio
+     */
+    public function envioDetail(Request $request)
+    {
+        $this->validate($request, [
+            'group_id' => 'required',
+            'method'     => 'required',
+        ]);
+
+        $this->token = Auth::user()->api_token;
+
+        // dd($request->all());
+
+        try {
+            $response = Http::withHeaders([
+              'x-api-key' => $this->token,
+              'x-api-device' => 'APP'
+            ])
+            ->asForm()
+            ->post($this->generateUrl(['controller' => 'Checkout','method' => 'shipping_edit']),
+                $request->all());
+
+                // dd($response->body());
+            $response = $response->json();
+                // dd();
+            if($response['status'] != 'success' || empty($response['status'])){
+                throw new \Exception(json_encode($response));
+                // throw new \Exception($response->json());
+            }
+
+              return response()->json($response['data']);
+
+        } catch (\Exception $e) {
+            return response()->json($e->getMessage(),422);
+        }
+    }
+
+    /**
+     * ***********************************************************
+     */
+
+    /**
+     * 6. Metodos de pagos
+     */
+    public function getMetodosPagos(Request $request)
+    {
+        return response()->json($this->metdosPagos);
+    }
+
     public function getMetodoPagoLocal($methodAbbr)
     {
         return collect($this->metdosPagos)->where('payment_type', $methodAbbr)->first() ?? null;
     }
 
-
-            public function getEnvios(Request $request)
+    /**
+     * Deprecado
+     */
+    public function getEnvios(Request $request)
     {
-
+        // dd($request->all());
        try {
             $this->token = Auth::user()->api_token;
 
@@ -152,10 +416,11 @@ class CheckoutController extends Controller
 
             // dd($this->generateUrl(['controller' => 'Checkout','method' => 'shipping_prices']), $response->json());
 
-            $reques = Request::create('/dummy', 'GET', ['local_cd' => $request->local_cd]);
+            $reques = Request::create('/dummy', 'GET', ['local_cd' => $request->local_cd, 'group_id' => $request->group_id]);
+
             $d = $this->getMetodos($reques);
             $metodos = json_decode($d->getContent(),true);
-
+            // dd($metodos);
             $metodosAll = collect($metodos['data']);
 
             $envios = $this->envios;
@@ -558,53 +823,7 @@ class CheckoutController extends Controller
         }
     }
 
-    public function editClient(Request $request)
-    {
-        $this->validate($request, [
-            'first_name' => 'required',
-            'last_name'  => 'required',
-            'cuit_dni'   => 'required',
-        ]);
-
-        $this->token = Auth::user()->api_token;
-
-        try {
-
-        Client::where('num',Auth::user()->num)->update([
-                            'first_name'   => $request->first_name,
-                            'last_name'    => $request->last_name,
-                            'cuit_dni'     => $request->cuit_dni]);
-         return response()->json('OK');
-
-        } catch (\Exception $e) {
-            return response()->json($e->getMessage(),422);
-        }
-
-    }
-
-    public function selectMethodEnvio(Request $request)
-    {
-        $this->validate($request, [
-            'group_id' => 'required',
-            'method'  => 'required',
-        ]);
-
-        $this->token = Auth::user()->api_token;
-
-        try {
-            $response = Http::withHeaders([
-              'x-api-key' => $this->token,
-              'x-api-device' => 'APP'
-            ])
-            ->asForm()
-            ->post($this->generateUrl(['controller' => 'Checkout','method' => 'shipping_select_method']), $request->all());
-
-              return response()->json($response->json());
-
-        } catch (\Exception $e) {
-            return response()->json($e->getMessage(),422);
-        }
-    }
+    
 
     public function searchSucursales(Request $request)
     {
@@ -636,71 +855,9 @@ class CheckoutController extends Controller
             return response()->json(['message'=>$e->getMessage()],422);
         }
     }
+    
 
-    public function datosEnvio(Request $request)
-    {
-        $this->validate($request, [
-            'group_id' => 'required',
-            'method'     => 'required',
-        ]);
-
-        $this->token = Auth::user()->api_token;
-
-        try {
-            $response = Http::withHeaders([
-              'x-api-key' => $this->token,
-              'x-api-device' => 'APP'
-            ])
-            ->asForm()
-            ->post($this->generateUrl(['controller' => 'Checkout','method' => 'shipping_linked_data']),
-                $request->all());
-
-            $response = $response->json();
-
-            if($response['status'] != 'success'){
-                throw new \Exception("No se encontraron resultados");
-                // throw new \Exception($response->json());
-            }
-
-              return response()->json($response['data']);
-
-        } catch (\Exception $e) {
-            return response()->json(['message'=>$e->getMessage()],422);
-        }
-    }
-
-    public function envioDetail(Request $request)
-    {
-        $this->validate($request, [
-            'group_id' => 'required',
-            'method'     => 'required',
-        ]);
-
-        $this->token = Auth::user()->api_token;
-
-        try {
-            $response = Http::withHeaders([
-              'x-api-key' => $this->token,
-              'x-api-device' => 'APP'
-            ])
-            ->asForm()
-            ->post($this->generateUrl(['controller' => 'Checkout','method' => 'shipping_edit']),
-                $request->all());
-
-                // dd($response->body());
-            $response = $response->json();
-                // dd();
-            if($response['status'] != 'success'){
-                throw new \Exception(json_encode($response));
-                // throw new \Exception($response->json());
-            }
-
-              return response()->json($response['data']);
-
-        } catch (\Exception $e) {
-            return response()->json($e->getMessage(),422);
-        }
-    }
+   
 
     public function deleteShipping(Request $request)
     {
@@ -947,7 +1104,9 @@ class CheckoutController extends Controller
               }
 
             if(isset($response->json()['data'])){
-              return response()->json($response->json()['data']);
+                $data = $response->json()['data'];
+                $data['modapago_coupon'] = false;
+                return response()->json($data);
             }
             return response()->json($response->json()['data']);
 
@@ -956,78 +1115,9 @@ class CheckoutController extends Controller
         }
     }
 
-    public function couponUnselectAll(Request $request)
-    {
-        try {
 
-            $this->token = Auth::user()->api_token;
-             $response = Http::withHeaders([
-              'x-api-key' => $this->token,
-              'x-api-device' => 'APP'
-            ])
-            ->asForm()
-            ->post($this->generateUrl(['controller' => 'Coupons','method' => 'unselect_all']),
-                $request->all());
 
-            if($response->json()['status'] != 'success'){
-                throw new \Exception("Error");
-            }
-
-            return response()->json($response->json());
-
-        } catch (\Exception $e) {
-            return response()->json(['message'=>$e->getMessage()],422);
-        }
-    }
-
-    public function couponSelect(Request $request)
-    {
-        try {
-
-            $this->token = Auth::user()->api_token;
-             $response = Http::withHeaders([
-              'x-api-key' => $this->token,
-              'x-api-device' => 'APP'
-            ])
-            ->asForm()
-            ->post($this->generateUrl(['controller' => 'Coupons','method' => 'select']),
-                $request->all());
-
-            if($response->json()['status'] != 'success'){
-                throw new \Exception("Error");
-            }
-
-            return response()->json($response->json());
-
-        } catch (\Exception $e) {
-            return response()->json(['message'=>$e->getMessage()],422);
-        }
-    }
-
-    public function getMetodos(Request $request)
-    {
-        try {
-             $localCd = $request->input('local_cd');
-
-            $this->token = Auth::user()->api_token;
-            $response = Http::withHeaders([
-             'x-api-key' => $this->token,
-             'x-api-device' => 'APP'
-           ])
-           ->asForm()
-           ->post($this->generateUrl(['controller' => 'Shipping','method' => 'all_methods']).'&store_id='.$localCd);
-
-        //    dd($response->json());
-           return response()->json($response->json());
-        } catch (\Throwable $th) {
-            return response()->json($th->getMessage(),422);
-        }
-    }
-
-    public function getMetodosPagos(Request $request)
-    {
-        return response()->json($this->metdosPagos);
-    }
+   
 
     public function shippingSelectAddress(Request $request)
     {

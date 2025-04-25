@@ -40,7 +40,7 @@ class AuthController extends Controller
         // try{
 
           $client = Client::select($this->campos)->where('client_id',$request->email)->where('stat_cd', 1000)->first();
-// dd($client);
+            // dd($client);
             if ($client) {
 
               $payload = [
@@ -52,7 +52,7 @@ class AuthController extends Controller
               $login = $this->ApiRosa($payload, 'login');
 
               if(!$login){
-                return response()->json(['status'=>false,'response'=>'Ha ocurrido un error. Verifique e intente nuevamente'],401);
+                return response()->json(['status'=>false,'errors'=> ['unknown' => ['Ha ocurrido un error. Verifique e intente nuevamente'] ]],422);
               }
               // dd($login);
               if($login->status != 200){
@@ -63,7 +63,7 @@ class AuthController extends Controller
               }
 
               if (intval($login->response->stat_cd) != 1000) {
-                return response()->json(['status'=>false,'response'=>'Usuario inactivo'],401);
+                return response()->json(['status'=>false,'errors'=>['user' => ['Usuario inactivo']] ],422);
               }
 
               if($client->verification_status=="1" || $client->verification_status == 1){
@@ -73,16 +73,16 @@ class AuthController extends Controller
                           ->first();
 
                 if($client->api_token != $login->response->token){
-                  return response()->json(['status'=>false,'response'=>'Ha ocurrido un error. La clave token no coincide, comuniquese con el administrador.'],401);
+                  return response()->json(['status'=>false,'errors'=> [ 'token' => ['Ha ocurrido un error. La clave token no coincide, comuniquese con el administrador.'] ]],422);
                 }
 
                 return response()->json(['status'=>true,'client'=> $client],200);
               }else{
                 return response()->json(['status'=> 'code_validation','response'=>'Cliente no validado','client'=> $client],200);
               }
-
+              
             }else{
-              return response()->json(['status'=>false,'response'=>'No se encontraron registros'],401);
+              return response()->json(['status'=>false,'errors'=> ['email' => ['No se encontraron registros']]],422);
             }
 
 
@@ -190,16 +190,6 @@ class AuthController extends Controller
         }
       }
 
-      // $this->validate($request, [
-      //     'first_name' => 'required|max:50',
-      //     // 'last_name'  => 'required|max:50',
-      //     'cod_area'   => 'required|max:4',
-      //     // 'phone'      => 'required|max:20|unique:oracle.T_SHOP_CLIENT,mobile',
-      //     // 'email'      => 'required|email|unique:oracle.T_SHOP_CLIENT,client_id',
-      //     'password'   => 'required|max:20'
-      // ]);
-
-
       $payload = [
           "name"     => $request->first_name,
           "lastname" => isset($request->last_name) ? $request->last_name : '',
@@ -208,7 +198,6 @@ class AuthController extends Controller
           "codarea"  => $request->cod_area,
           "mobile"   => $request->phone
       ];
-
 
       $register = $this->ApiRosa($payload, 'newuser', true);
 
@@ -357,9 +346,6 @@ class AuthController extends Controller
         //     return response()->json(['status'=>false,'message'=>'Email no se encuentra registrado'],422);
         // }
     }
-
-
-
     public function createCoupon($client, $definitions)
     {
         $consulta = Coupons::where('coupon_str','201710')

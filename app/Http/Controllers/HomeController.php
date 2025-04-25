@@ -1045,10 +1045,9 @@ class HomeController extends Controller
 
    $f = $this->generarCacheMarcas();
 
-// dd($f);
     $products = new ProductsController();
 
-    $pagesMenuCMS = PagesCms::whereIn('id',[460,458,459, 470, 481])->get();
+    $pagesMenuCMS = PagesCms::whereIn('id',[479,458,459, 470, 481])->get();
 
     $productoMujer = $products->onGetSearch([
                       'start' => 0,
@@ -1161,97 +1160,99 @@ class HomeController extends Controller
                       [
                           "textos" => [
                               "head" => [
-                                  "text" => "Descuento exclusivo",
+                                  "text" => "Nueva Temporada",
                                   "size" => 9,
-                                  "color" => "#000000"
+                                  "color" => "#FFFFFF"
                               ],
                               "body" => [
-                                  "text" => "Cupón de $3.000",
+                                  "text" => "Cupón $3.500",
                                   "size" => 12,
-                                  "color" => "#000000"
+                                  "color" => "#FFFFFF"
                               ],
                               "footer" => [
                                   "text" => "Ver tienda",
                                   "size" => 9.0,
-                                  "color" => "#000000"
+                                  "color" => "#FFFFFF"
                               ]
                           ],
-                          "color" => "#FFFFFF",
-                          "portada" => "https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/app-premium-3.jpg",
+                          "color" => "#000000",
+                          "portada" => "https://netivooregon.s3.us-west-2.amazonaws.com/modatexrosa2/img/logo/hesed-app-premium.png",
                           "store" => [
-                              "logo" => "https://netivooregon.s3.amazonaws.com/common/img/logo/paccaindumentaria_1599057245.webp",
-                              "name" => "PACCA INDUMENTARIA",
-                              "id" => 2126,
-                              "local_cd" => "2126",
-                              "company_id" => "2035",
-                              "company" => "2035",
-                              "min" => 15000,
-                              "rep" => 91,
-                              "vc" => 77,
+                              "logo" => "https://netivooregon.s3.amazonaws.com/common/img/logo/hesed_1597363016.webp",
+                              "name" => "HESED",
+                              "id" => 1601,
+                              "local_cd" => "1601",
+                              "company_id" => "1514",
+                              "company" => "1514",
+                              "min" => 20000,
+                              "rep" => 88,
+                              "vc" => 82,
                               "categorie" => "woman",
                               "category_default" => 1,
                               "categories_store" => [
-                                  "man",
                                   "woman"
                               ],
                               "paquete" => "premium",
-                              "cleaned" => "paccaindumentaria",
+                              "cleaned" => "hesed",
                               "favorite" => false,
                               "status" => "1000",
-                              "max_discount" => 0
+                              "max_discount" => 29,
+                              "portada" => ""
                           ]
                       ],
                       [
                           "textos" => [
                               "head" => [
-                                  "text" => "Variedad en sastrería",
+                                  "text" => "Sin mínimo",
                                   "size" => 9,
-                                  "color" => "#FFFFFF"
+                                  "color" => "#000000"
                               ],
                               "body" => [
-                                  "text" => "Sale hasta 30%",
+                                  "text" => "2x1 y hasta 50% off",
                                   "size" => 11,
-                                  "color" => "#FFFFFF"
+                                  "color" => "#000000"
                               ],
                               "footer" => [
                                   "text" => "Ver ofertas",
                                   "size" => 9,
-                                  "color" => "#FFFFFF"
+                                  "color" => "#000000"
                               ]
                           ],
-                          "color" => "#ff0000",
-                          "portada" => "https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/app-premium-1.jpg",
+                          "color" => "#FFFFFF",
+                          "portada" => "https://netivooregon.s3.us-west-2.amazonaws.com/modatexrosa2/img/logo/octane-app-premium.png",
                           "store" => [
-                              "logo" => "https://netivooregon.s3.amazonaws.com/common/img/logo/e-motivo_1664223159.webp",
-                              "name" => "e-motivo",
-                              "id" => 1008,
-                              "local_cd" => "1008",
-                              "company_id" => "1007",
-                              "company" => "1007",
-                              "min" => 5000,
-                              "rep" => 87,
-                              "vc" => 78,
+                              "logo" => "https://netivooregon.s3.amazonaws.com/common/img/logo/octane_1611259242.webp",
+                              "name" => "OCTANE",
+                              "id" => 1868,
+                              "local_cd" => "1868",
+                              "company_id" => "1776",
+                              "company" => "1776",
+                              "min" => 1,
+                              "rep" => 86,
+                              "vc" => 61,
                               "categorie" => "woman",
                               "category_default" => 1,
                               "categories_store" => [
-                                  "woman"
+                                  "woman",
+                                  "man"
                               ],
-                              "paquete" => "premium",
-                              "cleaned" => "e-motivo",
+                              "paquete" => "blue",
+                              "cleaned" => "octane",
                               "favorite" => false,
                               "status" => "1000",
-                              "max_discount" => 58
+                              "max_discount" => 51,
+                              "portada" => ""
                           ]
                       ],
                       [
                           "textos" => [
                               "head" => [
-                                  "text" => "Remeras desde $3.500",
+                                  "text" => "Nueva Temporada",
                                   "size" => 9,
                                   "color" => "#FFFFFF"
                               ],
                               "body" => [
-                                  "text" => "Vestidos desde $7.500",
+                                  "text" => "Comprá desde $3000",
                                   "size" => 11,
                                   "color" => "#FFFFFF"
                               ],
@@ -1261,7 +1262,7 @@ class HomeController extends Controller
                                   "color" => "#FFFFFF"
                               ]
                           ],
-                          "portada" => "https://netivooregon.s3.amazonaws.com/modatexrosa2/img/logo/app-premium-2.jpg",
+                          "portada" => "https://netivooregon.s3.us-west-2.amazonaws.com/modatexrosa2/img/logo/blackolive-app-premium.png",
                           "color" => "#000000",
                           "store" => [
                               "logo" => "https://netivooregon.s3.amazonaws.com/common/img/logo/blackolive_1547561960.webp",
@@ -1428,10 +1429,10 @@ class HomeController extends Controller
                     ],
                     [
                       'name' => 'Formas de pago',
-                      'editor' => $this->coding($pagesMenuCMS->where('id',460)->first()->data_json),
+                      'editor' => $this->coding($pagesMenuCMS->where('id',479)->first()->data_json),
                       'redirect' => [
                         'route' => '/page',
-                        'params' => [ 'id' => 460 , 'editor' => $this->coding($pagesMenuCMS->where('id',460)->first()->data_json), 'name' => $pagesMenuCMS->where('id',460)->first()['title_app'] ? $pagesMenuCMS->where('id',460)->first()['title_app'] : $pagesMenuCMS->where('id',460)->first()['title']]
+                        'params' => [ 'id' => 479 , 'editor' => $this->coding($pagesMenuCMS->where('id',479)->first()->data_json), 'name' => $pagesMenuCMS->where('id',479)->first()['title_app'] ? $pagesMenuCMS->where('id',479)->first()['title_app'] : $pagesMenuCMS->where('id',479)->first()['title']]
                       ]
                     ],
                     [

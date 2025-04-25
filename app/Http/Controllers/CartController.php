@@ -131,7 +131,8 @@ class CartController extends Controller
         'total' => $carrito['total'],
         'cantidadModelos' => $productos->sum('cantidad_add'),
         'productos' => $productos,
-        'store' => $marca
+        'store' => $marca,
+        'isMin' => $carrito['total'] >= $marca['min']
       ]);
 
       // return response()->json(['message' => 'No se encontraron carros abiertos para esta marca' ], 422);
@@ -144,6 +145,10 @@ class CartController extends Controller
 
       $producto = new ProductsController();
       $productoData = $producto->oneProduct($request->product_id);
+
+        if(!$productoData){
+            return response()->json(['status'=> false, 'data' => 'Producto no encontrado' ], 422);
+        }
 
       $modelos = collect($productoData['models'])->map(function($modelo){
         return [
@@ -452,7 +457,7 @@ class CartController extends Controller
 
       $datos = [ 'cart' => $response->json() ];
 
-
+// dd( $datos);
       $response = Http::withHeaders([
           'x-api-key' => $this->token,
           'Content-Type' => 'application/json'
@@ -485,7 +490,7 @@ class CartController extends Controller
       if(!$datos['cupon']->count()){
         $datos['cupon'] = null;
       }
-
+      // dd($datos);
       return response()->json($datos);
 
     }
