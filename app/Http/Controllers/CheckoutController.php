@@ -158,7 +158,7 @@ class CheckoutController extends Controller
     public function couponSelect(Request $request)
     {
 
-        // dd($request->all());
+        //var_dump($request->all());
         $this->validate($request, [
             'group_id' => 'required',
             'coupon_id'  => 'required',
@@ -182,6 +182,7 @@ class CheckoutController extends Controller
                 throw new \Exception(isset($response->json()['message']) ? $response->json()['message'] : 'Error');
             }
 
+           
             return response()->json($response->json());
 
         } catch (\Exception $e) {
@@ -244,6 +245,8 @@ class CheckoutController extends Controller
             ->asForm()
             ->post($this->generateUrl(['controller' => 'Shipping','method' => 'all_methods']).'&store_id='.$localCd);
 
+            // dd($response->body());
+            
             $response2 = Http::withHeaders([
                 'x-api-key' => $this->token,
                 'x-api-device' => 'APP'
@@ -333,7 +336,7 @@ class CheckoutController extends Controller
                return response()->json($response['data']);
  
          } catch (\Exception $e) {
-             return response()->json(['message'=>$e->getMessage()],422);
+             return response()->json([],200);
          }
      }
 
@@ -372,6 +375,81 @@ class CheckoutController extends Controller
 
         } catch (\Exception $e) {
             return response()->json($e->getMessage(),422);
+        }
+    }
+
+    /**
+     * 4.2. Buscar sucursales (oca)
+     */
+    public function searchSucursales(Request $request)
+    {
+        $this->validate($request, [
+            'group_id' => 'required',
+            'zipcode'  => 'required',
+        ]);
+
+        $this->token = Auth::user()->api_token;
+
+        try {
+            $response = Http::withHeaders([
+              'x-api-key' => $this->token,
+              'x-api-device' => 'APP'
+            ])
+            ->asForm()
+            ->post($this->generateUrl(['controller' => 'Checkout','method' => 'shipping_branches']),
+                $request->all());
+
+            $response = $response->json();
+
+            if($response['status'] != 'success'){
+                throw new \Exception("No se encontraron resultados");
+            }
+
+              return response()->json($response['data']);
+
+        } catch (\Exception $e) {
+            return response()->json(['message'=>$e->getMessage()],422);
+        }
+    }
+
+    /**
+     * 4.3. Borrar sucurales
+     */
+    public function deleteShipping(Request $request)
+    {
+
+        \Log::info($request->all());
+
+        $this->validate($request, [
+            'group_id' => 'required',
+            'id'         => 'required',
+            'method'     => 'required',
+        ]);
+
+        $this->token = Auth::user()->api_token;
+
+        try {
+            $response = Http::withHeaders([
+              'x-api-key' => $this->token,
+              'x-api-device' => 'APP'
+            ])
+            ->asForm()
+            ->post($this->generateUrl(['controller' => 'Checkout','method' => 'shipping_remove']),
+                $request->all());
+
+            $response = $response->json();
+
+            \Log::info([$response]);
+
+            if($response['status'] != 'success'){
+                throw new \Exception("No se encontraron resultados");
+            }
+            if(isset($response['data'])){
+              return response()->json($response['data']);
+            }
+            return response()->json($response);
+        } catch (\Exception $e) {
+            return response()->json(['message'=>$e->getMessage()],422);
         }
     }
 
@@ -825,72 +903,12 @@ class CheckoutController extends Controller
 
     
 
-    public function searchSucursales(Request $request)
-    {
-        $this->validate($request, [
-            'group_id' => 'required',
-            'zipcode'  => 'required',
-        ]);
-
-        $this->token = Auth::user()->api_token;
-
-        try {
-            $response = Http::withHeaders([
-              'x-api-key' => $this->token,
-              'x-api-device' => 'APP'
-            ])
-            ->asForm()
-            ->post($this->generateUrl(['controller' => 'Checkout','method' => 'shipping_branches']),
-                $request->all());
-
-            $response = $response->json();
-
-            if($response['status'] != 'success'){
-                throw new \Exception("No se encontraron resultados");
-            }
-
-              return response()->json($response['data']);
-
-        } catch (\Exception $e) {
-            return response()->json(['message'=>$e->getMessage()],422);
-        }
-    }
+   
     
 
    
 
-    public function deleteShipping(Request $request)
-    {
-        $this->validate($request, [
-            'group_id' => 'required',
-            'id'         => 'required',
-            'method'     => 'required',
-        ]);
-
-        $this->token = Auth::user()->api_token;
-
-        try {
-            $response = Http::withHeaders([
-              'x-api-key' => $this->token,
-              'x-api-device' => 'APP'
-            ])
-            ->asForm()
-            ->post($this->generateUrl(['controller' => 'Checkout','method' => 'shipping_remove']),
-                $request->all());
-
-            $response = $response->json();
-
-            if($response['status'] != 'success'){
-                throw new \Exception("No se encontraron resultados");
-            }
-            if(isset($response['data'])){
-              return response()->json($response['data']);
-            }
-            return response()->json($response);
-        } catch (\Exception $e) {
-            return response()->json(['message'=>$e->getMessage()],422);
-        }
-    }
+    
 
     public function homeDeliveryProviders(Request $request)
     {
@@ -966,7 +984,7 @@ class CheckoutController extends Controller
             return response()->json($response->json()['data']);
 
         } catch (\Exception $e) {
-                return response()->json(['message'=>$e->getMessage()],422);
+                return response()->json(['status'=> false, 'message'=>$e->getMessage()],422);
         }
     }
 
@@ -986,13 +1004,18 @@ class CheckoutController extends Controller
             if($response->json()['status'] != 'success'){
                 throw new \Exception("No se encontraron resultados");
             }
-            if(isset($response->json()['data'])){
+
+            // dd($response->json());
+            if(isset($response->json()['data']) && $response->json()['data'] != null && isset($response->json()['status']) && $response->json()['status'] == true){
+                // dd($response->json()['data']);
+                // return response()->json($response->json()['data']);
               return response()->json($response->json()['data']);
             }
-            return response()->json($response->json()['data']);
+
+            return response()->json($response->json()['data'], 422);
 
         } catch (\Exception $e) {
-                return response()->json(['message'=>$e->getMessage()],422);
+                return response()->json(['message'=>$e->getMessage(), 'data' => $response->json(), 'status'=> false ,],422);
         }
     }
 

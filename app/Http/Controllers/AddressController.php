@@ -58,16 +58,17 @@ class AddressController extends Controller
 
         $DIRECCIONES = $response->json()['DIRECCIONES'];
 
+
         return collect($DIRECCIONES)->map(function($direccion) {
             return [
                 "direccion" => $direccion['GENERAL'] ?? '',
                 "localidad" => $direccion['GENERAL_TIT'] ?? '',
-                "codigo_postal" => $direccion['ZIPCODE'],
-                "name" => $direccion['ALIAS'] == 0 ? '' : $direccion['ALIAS'],
-                "id" => $direccion['ID'],
+                "codigo_postal" => $direccion['ZIPCODE'] ?? '',
+                "name" => isset($direccion['ALIAS']) && $direccion['ALIAS'] == 0 ? '' : $direccion['ALIAS'] ?? '',
+                "id" => $direccion['ID'] ?? '',
                 "default" => isset($direccion['SELECCIONADO']) ? ($direccion['SELECCIONADO'] == 1 ? true : false ) : false,
             ];
-        });
+        })->where('id','!=','');
 
     }
 

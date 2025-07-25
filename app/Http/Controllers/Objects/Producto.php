@@ -29,6 +29,7 @@ class Producto extends Controller
         "models"      => [],
         "store"       => [],
         "is_promo_2x1"=> false,
+        'is_promo_imp' => false
     ];
 
     public function __construct($producto)
@@ -44,13 +45,18 @@ class Producto extends Controller
         $this->data['local_cd']     = $producto['store'];
         $this->data['company']      = $producto['company'];
         
-        $buscar = "2x1";
+        $buscar = "2x1 |";
         $name = $producto['name'];
-        if(strpos($producto['name'], $buscar) !== false){
+        if(strpos($producto['name'], '2x1 |') !== false){
             $this->data['is_promo_2x1'] = true;
-            // $name = str_replace($buscar, '', $producto['name']);
+            $name = str_replace('2x1 |', '', $name);
         }
-        $this->data['name']         = $name;
+        if(strpos($producto['name'], 'Imp |') !== false){
+            $this->data['is_promo_imp'] = true;
+            $name = str_replace('Imp |', '', $name);
+            // $name = ltrim($name);
+        }
+        $this->data['name'] = $name;
         
         $this->data['category']     = isset($producto['category']) ? $producto['category'] : '';
         $this->data['category_id']  = $producto['category_id'];

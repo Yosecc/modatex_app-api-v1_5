@@ -292,55 +292,6 @@ class StoresController extends Controller
         ];
       });
 
-      // $store = Store::LOCAL_CD($request->local_cd)->first();
-
-      // $categorias = $this->categoriesCollection($store, null);
-
-      // $categories = [];
-
-      // $predefSection = $this->categorieDefaultId($store);
-
-
-      //
-
-      // dd($response->json());
-
-      // foreach ($categorias as $c => $categoria) {
-
-
-
-      //   $d = $this->urlProduct.'store='.$request->local_cd.'&sections='.$categoria['clave'].'&start=0&length=9999';
-
-      //   $response = Http::acceptJson()->get($d);
-
-      //   $idsSubscategories = [];
-      //   foreach ($response->collect()->all()['data'] as $key => $value) {
-      //     if(!in_array($value['category_id'], $idsSubscategories)){
-      //       $idsSubscategories[] = $value['category_id'];
-      //     }
-      //   }
-
-      //   $subcategories = [];
-      //   foreach ($categoria['subcategories'] as $key => $sub) {
-      //     if(in_array($sub['id'], $idsSubscategories)){
-      //       $subcategories[] = $sub;
-      //     }
-      //   }
-
-      //   $categories[] = [
-      //     'categoria' => [
-      //       'id' => $categoria['id'],
-      //       'name' => $categoria['name'],
-      //       'clave' => $categoria['clave'],
-      //       'is_default' => $predefSection == $categoria['id'] ? true: false
-      //     ],
-      //     'subcategorias' => $subcategories,
-      //   ];
-
-      // }
-
-      // return $categories;
-
     }
 
     public function productsHome(Request $request)

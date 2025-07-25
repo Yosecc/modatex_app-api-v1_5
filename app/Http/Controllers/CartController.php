@@ -17,7 +17,7 @@ use Illuminate\Support\Str;
 use Illuminate\Http\Client\Pool;
 use App\Http\Controllers\Objects\Producto;
 use Illuminate\Support\Facades\Cache;
-
+use App\Models\PagesCms;
 
 class CartController extends Controller
 {
@@ -55,11 +55,14 @@ class CartController extends Controller
 
     }
 
+   
+
     //TRAE UN SOLO CARRO SEGUN LA MARCA
     public function getCart($store_id)
     {
 
       $url = $this->url.'?c=Cart::get&store_id='.$store_id;
+      $pagesMenuCMS = PagesCms::whereIn('id',[479])->get();
 
       // dd($url);
       $this->token = Auth::user()->api_token;
@@ -76,15 +79,14 @@ class CartController extends Controller
 
       $storesCache = Cache::get('stores');
 
-
-
       $carrito = $response->json();
 
       if(!$carrito){
         return response()->json([
           'total' => 0,
           'cantidadModelos' => 0,
-          'productos' => []
+          'productos' => [],
+          'metodos_pago_page' => $pagesMenuCMS->where('id',479)->first()->data_json,
         ], 422);
       }
       $Urlagregados = collect($carrito['added'])->map(function($agregado){
@@ -126,14 +128,18 @@ class CartController extends Controller
       })->collapse();
 
       $marca = $storesCache->where('local_cd',$store_id )->first();
-
+      if(!$marca){
+        return response()->json([], 422);
+      }
       return response()->json([
         'total' => $carrito['total'],
         'cantidadModelos' => $productos->sum('cantidad_add'),
         'productos' => $productos,
         'store' => $marca,
-        'isMin' => $carrito['total'] >= $marca['min']
+        'isMin' => $carrito['total'] >= $marca['min'],
+        'metodos_pago_page' => $pagesMenuCMS->where('id',479)->first()->data_json,
       ]);
+
 
       // return response()->json(['message' => 'No se encontraron carros abiertos para esta marca' ], 422);
 
@@ -162,6 +168,8 @@ class CartController extends Controller
           })
         ];
       });
+
+//      var_dump($modelos->all());
 
       $url = $this->url.'?c=Cart::product_update';
 

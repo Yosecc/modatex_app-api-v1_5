@@ -43,10 +43,13 @@ $router->post('saveToken','HomeController@saveToken');
         $router->post('resendcode','AuthController@resendcode');
     });
 // });
-
+$router->get('app/version-check','HomeController@versionCheck');
 $router->group(['middleware' => 'auth'], function () use ($router) {
 
     $router->get('test','HomeController@test');
+    
+
+    
 
     $router->post('validatoken','HomeController@validatoken');
 

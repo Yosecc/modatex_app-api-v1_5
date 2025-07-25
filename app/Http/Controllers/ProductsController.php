@@ -55,6 +55,33 @@ class ProductsController extends Controller
       // \Log::debug($request);
       
       $rr = $request;
+
+     if(isset($rr['promo2x1'])){
+        if(isset($rr['promo2x1']) && $rr['promo2x1'] == false || $rr['promo2x1'] == 'false'){
+          $rr['promo2x1'] = 0;
+        }else if(isset($rr['promo2x1']) && $rr['promo2x1'] == true || $rr['promo2x1'] == 'true'){
+          $rr['promo2x1'] = 1;
+        }
+      }
+
+      if(isset($rr['inStock']))
+      {
+        if($rr['inStock'] == 0 || $rr['inStock'] == '0'){
+           unset($rr['inStock']);
+        }
+      }
+
+      if(isset($rr['sizes'])){
+        if($rr['sizes'] == ''){
+          unset($rr['sizes']);
+        }
+      }
+
+      if(isset($rr['colors'])){
+        if($rr['colors'] == ''){
+          unset($rr['colors']);
+        }
+      }
       
       $url = $this->url.Arr::query($rr);
       
@@ -297,8 +324,6 @@ class ProductsController extends Controller
     }
 
     
-    
-
     public function inProducts(Request $request)
     {
 

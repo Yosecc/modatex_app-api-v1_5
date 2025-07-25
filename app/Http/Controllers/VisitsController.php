@@ -55,9 +55,6 @@ class VisitsController extends Controller
                 $visits->MODELOS_NUM   = $request->MODELOS_NUM;
                 $visits->CLIENT_NUM = Auth::user()->num;
                 $visits->save();
-
-                
-
             }else{
                 $visits->updated_at = \Carbon\Carbon::now();
                 $visits->save();

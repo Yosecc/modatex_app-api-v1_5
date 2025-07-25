@@ -32,7 +32,7 @@ class VentasController extends Controller
         $url = $this->url.'page='.$page;
 
         //si recibe un id, agrega el id a la url
-        if(isset($request->id)){
+        if(isset($request->id) && $request->id != null){
             $url = $this->url.'id='.$request->id;
         }
 
@@ -112,7 +112,7 @@ class VentasController extends Controller
         });
 
       $order = null;
-      if(isset($request->id)){
+      if(isset($request->id) && $request->id != null){
         if($f->first()){
           $order = $f->first();
           if($order && isset($order['data']) && count($order['data'])){
@@ -123,8 +123,8 @@ class VentasController extends Controller
 
       return response()->json([
         'page' => $page,
-        'order' => isset($request->id) ? $order : null,
-        'orders' => !isset($request->id) ? $f->values()->toArray():null,
+        'order' => (isset($request->id) && $request->id != null) ? $order : null,
+        'orders' => $f->values()->toArray(),
         'billing' => $pedidos['data']['billing']
       ]);
       // dd();

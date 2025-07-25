@@ -36,7 +36,7 @@ class ClientController extends Controller
         $response = $response->collect();
 
         // dd();
-        return response()->json($response['data']);
+        return response()->json(isset($response['data']) ? $response['data'] : ['status'=> true, 'message' => 'No billing data found', 'data' => []]);
     }
 
     private function ApiRosa($payload, $action, $isdecode = true)

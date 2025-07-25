@@ -313,7 +313,6 @@ class HomeController extends Controller
 
       $data = $response->collect();
 
-
       $data = $data->map( function($seccion){
         $seccion['sections'] = explode(',',$seccion['section_id']);
 
@@ -760,12 +759,14 @@ class HomeController extends Controller
   /**
    * GET MENU
    */
-  public function menuList()
+  public function menuList(Request $request)
   {
+
+    $isMenuTemporal = isset($request->menu) && $request->menu == 'temporal' ? true : false;
 
     $pagesMenuCMS = PagesCms::where('isMenuApp','!=','0000-00-00 00:00:00')->whereNotNull('isMenuApp')->orderBy('last_updated')->get();
 
-    $pagesMenu = $pagesMenuCMS->map(function($item){
+    $pagesMenu = $pagesMenuCMS->map(function($item) use($isMenuTemporal){
       try {
         $editor = $this->coding($item['data_json']);
       } catch (\Throwable $th) {
@@ -776,42 +777,47 @@ class HomeController extends Controller
         "icon" => $item['url_icono'], #'~/assets/icons/icon_menu_3.png',
         "name" => $item['title_app'] ?  $item['title_app'] : $item['title'],
         "disabled" => $item['status'] == 1 ? false: true ,
-        'editor' => $editor
+        'editor' => $editor,
+        "redirect"=> $isMenuTemporal ? [
+          "route"=> "/page",
+          "params"=> [
+            'name' =>  $item['title_app'] ?  $item['title_app'] : $item['title'],
+            'editor' =>  $editor,
+          ]
+        ] : null
       ];
     });
 
-
     $itemsMenu = [
       [
-        "icon" => '~/assets/icons/home.png',
+        "icon" => $isMenuTemporal ? 'home' : '~/assets/icons/home.png',
         "name" => 'Inicio',
         "disabled" => false,
         "redirect"=> [
-          "route"=> "/home",
+          "route"=> $isMenuTemporal ? '/' : "/home",
           "params"=> []
         ]
       ],
       [
-        "icon" => '~/assets/icons/icon_menu_0.png',
+        "icon" => $isMenuTemporal ? 'store' : '~/assets/icons/icon_menu_0.png',
         "name" => 'Tiendas',
         "disabled" => false,
         "redirect"=> [
-          "route"=> "/all_stores",
+          "route"=> $isMenuTemporal ? '/stores' : "/all_stores",
           "params"=> []
         ]
       ],
       [
-        "icon" => '~/assets/icons/icon_menu_099.png',
+        "icon" =>  $isMenuTemporal ? 'shopping_bag' :'~/assets/icons/icon_menu_099.png',
         "name" => 'Mis pedidos',
         "disabled" => false,
         "redirect"=> [
-          "route"=> "/profileOrdersList",
-          //"route"=> "/profile",
+          "route"=> $isMenuTemporal ? '/pedidos' :  "/profileOrdersList",
           "params"=> []
         ]
       ],
       [
-        "icon" => '~/assets/icons/icon_menu_5.png',
+        "icon" => $isMenuTemporal ? 'notifications' :'~/assets/icons/icon_menu_5.png',
         "name" => 'Notificaciones',
         "disabled" => false,
         "redirect"=> [
@@ -820,12 +826,12 @@ class HomeController extends Controller
         ]
       ],
       [
-        "icon" => '~/assets/icons/new.png',
+        "icon" => $isMenuTemporal ? 'new_releases' : '~/assets/icons/new.png',
         "name" => 'Nuevos Ingresos',
         "disabled" => false,
         "childrens" => [
           [
-            "icon" => '~/assets/icons/past.png',
+            "icon" => $isMenuTemporal ? 'access_time' : '~/assets/icons/past.png',
             "name" => "Hoy",
             "redirect" => [
               "route" => "/search",
@@ -837,7 +843,7 @@ class HomeController extends Controller
             ]
           ],
           [
-            "icon" => '~/assets/icons/past.png',
+            "icon" => $isMenuTemporal ? 'access_time' :  '~/assets/icons/past.png',
             "name" => "Ayer",
             "redirect" => [
               "route" => "/search",
@@ -849,7 +855,7 @@ class HomeController extends Controller
             ]
           ],
           [
-            "icon" => '~/assets/icons/past.png',
+            "icon" => $isMenuTemporal ? 'access_time' :  '~/assets/icons/past.png',
             "name" => "Antes de Ayer",
             "redirect" => [
               "route" => "/search",
@@ -862,7 +868,7 @@ class HomeController extends Controller
             ]
           ],
           [
-            "icon" => '~/assets/icons/past.png',
+            "icon" =>  $isMenuTemporal ? 'access_time' : '~/assets/icons/past.png',
             "name" => "Hace 3 dias",
             "redirect" => [
               "route" => "/search",
@@ -875,7 +881,7 @@ class HomeController extends Controller
             ]
           ],
           [
-            "icon" => '~/assets/icons/past.png',
+            "icon" => $isMenuTemporal ? 'access_time' : '~/assets/icons/past.png',
             "name" => "Hace 4 dias",
             "redirect" => [
               "route" => "/search",
@@ -890,13 +896,20 @@ class HomeController extends Controller
         ]
       ],
       [
-        "icon" => 'res://heart_gray',
+        "icon" => $isMenuTemporal ? 'favorite' : 'res://heart_gray',
         "name" => 'Mis marcas favoritas',
         "disabled" => false,
-        "editor" => $this->getMarcasFavoritas()
+        "editor" => $this->getMarcasFavoritas(), 
+        "redirect"=> $isMenuTemporal ? [
+          "route"=> "/page",
+          "params"=> [
+            'editor' => $this->getMarcasFavoritas(),
+            'name' => 'Marcas favoritas',
+          ]
+        ] : null
       ],
       [
-        "icon" => 'res://history',
+        "icon" => $isMenuTemporal ? 'history' : 'res://history',
         "name" => 'Historial',
         "disabled" => false,
         "redirect"=> [
@@ -908,8 +921,20 @@ class HomeController extends Controller
       ],
     ];
 
+      $itemProfileTemporal = [
+        "icon" => 'user',
+        "name" => 'Perfil',
+        "disabled" => false,
+        "redirect"=> [
+          "route"=> "/profile",
+          "params"=> []
+        ]
+      ];
+
     // return $itemsMenu;
-    return array_merge($itemsMenu, $pagesMenu->toArray());
+    $result = array_merge($itemsMenu, $pagesMenu->toArray());
+    array_splice($result, 1, 0, [$itemProfileTemporal]);
+    return $result;
 
   }
 
@@ -988,7 +1013,7 @@ class HomeController extends Controller
   {
     $response = Http::accept('application/json')->get($this->url.'?c=Store::all');
 
-    // dd($response->collect()));
+    // dd($response->collect()['data'][0]);
 
     if(isset($response->json()['data'])){
       Cache::put('stores',$response->json()['data']);
@@ -1165,7 +1190,7 @@ class HomeController extends Controller
                                   "color" => "#FFFFFF"
                               ],
                               "body" => [
-                                  "text" => "Cupón $3.500",
+                                  "text" => "Sweaters $13.500",
                                   "size" => 12,
                                   "color" => "#FFFFFF"
                               ],
@@ -1347,7 +1372,7 @@ class HomeController extends Controller
                   'products' => $productoaccessories,
                   'redirect' => [
                     'route' => '/categories',
-                    'params' => [ 'accesories' ]
+                    'params' => [ 'accessories' ]
                   ],
 
                 ],
@@ -1512,5 +1537,68 @@ class HomeController extends Controller
 
     return response()->json($response->collect());
   }
+
+  public function versionCheck(Request $request)
+    {
+        // Información de la versión actual desde la configuración
+        $latestVersion =  '1.0.63';
+        $latestBuildNumber = '63';
+        
+        // Obtener información de la versión actual del cliente (opcional)
+        $currentVersion = $request->get('current_version', '');
+        $currentBuildNumber = $request->get('current_build_number', '');
+        
+        // Determinar si hay actualización disponible
+        $isUpdateAvailable = (int)$latestBuildNumber > (int)$currentBuildNumber;
+        
+        // Determinar si la actualización es obligatoria
+        $isRequired = $this->isUpdateRequired($currentBuildNumber, $latestBuildNumber);
+        
+        // Mensaje personalizado
+        $message = $isUpdateAvailable 
+            ? ($isRequired 
+                ? 'Esta actualización es obligatoria para continuar usando la aplicación.' 
+                : 'Nueva versión disponible con mejoras de rendimiento y corrección de errores.')
+            : 'Tu aplicación está actualizada.';
+        
+        return response()->json([
+            'status' => true,
+            'latest_version' => $latestVersion,
+            'latest_build_number' => $latestBuildNumber,
+            'current_version' => $currentVersion,
+            'current_build_number' => $currentBuildNumber,
+            'is_required' => $isRequired,
+            'message' => $message,
+            'download_url' => $isUpdateAvailable ? 'https://play.google.com/store/apps/details?id=com.modatex.app' : null,
+            'release_notes' => $isUpdateAvailable ? $this->getReleaseNotes($latestVersion) : []
+        ]);
+    }
+    
+    private function isUpdateRequired($currentBuild, $latestBuild)
+    {
+        // Definir versiones críticas que requieren actualización obligatoria
+        $criticalBuilds = [55, 60, 65]; // Números de build críticos
+        
+        return in_array((int)$latestBuild, $criticalBuilds) && (int)$currentBuild < (int)$latestBuild;
+    }
+    
+    private function getReleaseNotes($version)
+    {
+        // Notas de la versión
+        $releaseNotes = [
+            '1.0.3' => [
+                'Mejoras en el rendimiento de carga',
+                'Corrección de errores en el checkout',
+                'Nuevas funcionalidades de notificaciones'
+            ],
+            '2.0.0' => [
+                'Actualización de seguridad crítica',
+                'Cambios importantes en la estructura de datos',
+                'Mejoras obligatorias del sistema'
+            ]
+        ];
+        
+        return $releaseNotes[$version] ?? [];
+    }
 
 }

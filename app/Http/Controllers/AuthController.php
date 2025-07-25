@@ -204,6 +204,7 @@ class AuthController extends Controller
 
       if(gettype($register) == 'object' && !empty($register->status) && $register->status == 200){
         $client = Client::where('client_id',$request->email)->first();
+        $client['user'] = $client->email;
         return response()->json(['status'=> true , 'response'=>'Registro realizado.','client'=>$client], 200);
       }
 //  dd($register);
@@ -247,19 +248,19 @@ class AuthController extends Controller
         }
         // if ($this->isEmail($email)) {
 
-          $resend = $this->ApiRosa(['email'=> $email, 'asunto' => 'Código de validación' ], 'resendcodigo');
+         // $resend = $this->ApiRosa(['email'=> $email, 'asunto' => 'Código de validación' ], 'resendcodigo');
 
-          if($resend->status != 200){
+          //if($resend->status != 200){
             // Obtener los valores del objeto
-            $valores = array_values((array)$resend->response);
+            //$valores = array_values((array)$resend->response);
 
             // Convertir los valores en una cadena separada por comas
-            $cadena = implode(', ', $valores);
+            //$cadena = implode(', ', $valores);
 
-            return response()->json(['status'=> false, 'message'=> $cadena], 422);
-          }
+            //return response()->json(['status'=> false, 'message'=> $cadena], 422);
+          //}
 
-          return response()->json(['status'=> true, 'message'=>  $resend->response->status_mail ]);
+          //return response()->json(['status'=> true, 'message'=>  $resend->response->status_mail ]);
 
         // }else{
         //     return response()->json(['status'=>false,'message'=> ['email' => 'Email no se encuentra registrado']],422);
